@@ -2,30 +2,48 @@
 
 ## Requirements
 
-- node (v14 and above)
+- node (>=16.13.2)
+- yarn (>=1.22.15)
 - docker
 - docker-compose
 
 ## Installation
 
 Setup everything:
+
 ```bash
-npm run setup
+yarn setup
 ```
 
 ## Development
 
 Full stack:
+
 ```bash
-npm run dev
+yarn dev
 ```
 
 Frontend:
+
 ```bash
-npm run devFront
+yarn devFront
 ```
 
 Backend:
+
 ```bash
-npm run devBack
+yarn devBack
+```
+
+Start and stop mongo:
+
+```bash
+yarn startMongo
+yarn stopMongo
+```
+
+Mongo CLI:
+
+```bash
+yarn devMongo
 ```
