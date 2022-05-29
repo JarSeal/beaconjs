@@ -2,7 +2,6 @@ import { getText } from '../../helpers/lang';
 import { Component } from '../../LIGHTER';
 import FormCreator from '../forms/FormCreator';
 import ViewTitle from '../widgets/ViewTitle';
-import './Login.scss';
 
 class LoginTwoFA extends Component {
   constructor(data) {

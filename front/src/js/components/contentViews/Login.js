@@ -3,11 +3,13 @@ import { Component, LocalStorage } from '../../LIGHTER';
 import Button from '../buttons/Button';
 import FormCreator from '../forms/FormCreator';
 import ViewTitle from '../widgets/ViewTitle';
-import './Login.scss';
+import './Login.module.scss';
+import styles from './Login.module.scss';
 
 class Login extends Component {
   constructor(data) {
     super(data);
+    console.log('STYLES', styles);
     this.appState = this.Router.commonData.appState;
     this.ls = new LocalStorage('bjs_');
 
@@ -74,7 +76,7 @@ class Login extends Component {
       this.loginForm.draw();
       this.addChildDraw({
         id: 'extra-links-wrapper',
-        class: 'login-extra-links',
+        class: styles['login-extra-links'],
       });
       if (this.appState.get('serviceSettings.forgotPass')) {
         this.addChildDraw(
@@ -82,7 +84,7 @@ class Login extends Component {
             id: 'forgot-password-button',
             text: getText('forgot_password') + '?',
             attach: 'extra-links-wrapper',
-            class: ['login-extra-link', 'link'],
+            class: [styles['login-extra-link'], 'link'],
             click: () => {
               this.Dialog.appear({
                 component: FormCreator,
