@@ -1,0 +1,9 @@
+.dialog-tools-wrapper {
+  margin-bottom: 2rem;
+  > button {
+    padding: 0.8rem 2.4rem;
+    + button {
+      margin-left: 1.8rem;
+    }
+  }
+}

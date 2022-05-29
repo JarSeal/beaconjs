@@ -1,0 +1,9 @@
+@import '../../../styles/colors';
+
+.login-extra-links {
+  text-align: right;
+  font-size: 1.2rem;
+  .login-extra-link {
+    color: $font-color-grey;
+  }
+}

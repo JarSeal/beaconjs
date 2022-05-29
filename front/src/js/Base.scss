@@ -1,0 +1,18 @@
+#base-id {
+  transition: 
+    margin-top 200ms ease-in-out,
+    margin-left 200ms ease-in-out
+}
+
+#overlays {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+#content-area {
+  display: inline-block;
+  width: 100%;
+  padding: 5rem;
+}

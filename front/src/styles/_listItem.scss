@@ -1,0 +1,60 @@
+$itemSize: 16rem;
+
+.list-item {
+  display: inline-block;
+  background: rgb(201,201,201);
+  background: linear-gradient(150deg, rgba(201,201,201,1) 0%, rgba(152,152,152,1) 100%);
+  width: $itemSize;
+  height: $itemSize;
+  cursor: pointer;
+  vertical-align: top;
+  position: relative;
+  transition: none;
+  &:before {
+    display: block;
+    content: "";
+    width: $itemSize;
+    height: $itemSize;
+    background-color: rgba(0, 0, 0, 0.2);
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out
+  }
+
+  h3 {
+    margin: 0 1.2rem;
+    width: 13.6rem;
+    padding: 0;
+    font-size: 1.4rem;
+    line-height: 1.2;
+    text-align: left;
+    color: #444;
+    display: block;
+  }
+
+  &:hover {
+    &:before {
+      opacity: 1;
+    }
+  }
+}
+
+.list-add-button {
+  font-weight: 700;
+  font-size: 10rem;
+  color: #999;
+  position: absolute;
+  left: 0;
+  top: 0;
+  + .item-list {
+    .list-item:first-child {
+      margin-left: 16rem;
+    }
+  }
+}
+
+.list-wrapper {
+  position: relative;
+}

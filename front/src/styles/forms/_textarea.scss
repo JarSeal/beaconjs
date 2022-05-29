@@ -1,0 +1,19 @@
+.form-elem__textarea {
+  padding: 1rem 1rem 0.7rem;
+  font-size: 1.2rem;
+  min-width: 24rem;
+  min-height: 10rem;
+  width: 24rem;
+  border: none;
+  border-radius: 0.3rem;
+  border-bottom: 0.3rem solid rgba(#fff, 0);
+  background-color: #fff;
+  vertical-align: top;
+  transition: border-bottom-color 0.2s ease-in-out;
+}
+
+.form-elem--error {
+  .form-elem__textarea {
+    border-bottom-color: rgba($form-field-error-color, 1);
+  }
+}

@@ -1,0 +1,13 @@
+button {
+  display: inline-block;
+  border-radius: 0;
+  background-color: #cbcbcb;
+  color: #333;
+  border: none;
+  cursor: pointer;
+  font-weight: 400;
+  transition: background-color 0.2s ease-in-out;
+  &:hover {
+    background-color: #ababab;
+  }
+}

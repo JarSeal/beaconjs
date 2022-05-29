@@ -1,0 +1,64 @@
+
+.settings-group {
+  border: 0.1rem solid rgba(#fff, 0.15);
+  background-color: rgba(#fff, 0.05);
+  border-radius: 0.4rem;
+  position: relative;
+  + .settings-group {
+    margin-top: 3rem;
+  }
+  .group-title {
+    font-size: 1.8rem;
+    margin: 0;
+    padding: 1rem 3rem;
+    color: #999;
+    background-color: rgba(#fff, 0.1);
+  }
+  > p {
+    margin: 0;
+    padding: 0 3rem 1rem;
+    color: #777;
+    background-color: rgba(#fff, 0.1);
+  }
+  .settings-field {
+    padding: 2rem 3rem;
+    border-top: 0.1rem solid rgba(#fff, 0.15);
+    position: relative;
+    &__label {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      margin-right: 1rem;
+      display: inline-block;
+    }
+    &__value {
+      display: inline-block;
+      font-size: 2rem;
+    }
+    &__description {
+      color: #777;
+    }
+  }
+  .edit-setting-button {
+    border: 0.1rem solid #999;  
+    color: #999;
+    background: none;
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    border-radius: 0.8rem;
+    width: 12rem;
+    height: 3.2rem;
+    text-align: center;
+    padding: 0;
+    font-size: 1.2rem;
+    transition: background-color 0.2s ease-in-out,
+                color 0.2s ease-in-out,
+                border-color 0.2s ease-in-out;
+    &:hover {
+      background-color: rgba(#fff, 0.15);
+      color: #aaa;
+      border-color: #aaa;
+    }
+  }
+}

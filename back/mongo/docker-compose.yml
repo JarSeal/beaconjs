@@ -1,0 +1,15 @@
+version: '3.5'
+
+services:
+  
+  mongodb:
+    image : mongo:4.4.10
+    container_name: beacondb
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./database:/data/db
+    ports:
+      - 27017:27017
+    restart: unless-stopped

@@ -1,0 +1,124 @@
+
+.main-menu {
+  height: inherit;
+  button {
+    display: inline-block;
+    border: none;
+    background-color: #333;
+    font-size: 1.2rem;
+    color: #fff;
+    padding: 1.2rem 0 1rem;
+    &:hover {
+      background-color: #444;
+    }
+  }
+}
+
+.landscape .main-menu button {
+  width: 100%;
+  border-top: 0.1rem solid #444;
+  border-bottom: 0.1rem solid #111;
+}
+.portrait .main-menu button {
+  width: 6.4rem;
+  height: inherit;
+  border-left: 0.1rem solid #444;
+  border-right: 0.1rem solid #111;
+}
+
+#nav-menu {
+  display: inline-block;
+  position: relative;
+  .home-button {
+    position: relative;
+    z-index: 20;
+  }
+  .main-back-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 3rem;
+    font-weight: 700;
+    padding-top: 1.5rem;
+    padding-bottom: 2.2rem;
+    border: none;
+    background: none;
+    line-height: 0;
+    z-index: 10;
+    pointer-events: none;
+    transition-timing-function: ease-in-out;
+    transition-property: all;
+    &:hover {
+      font-size: 4rem;
+    }
+  }
+  &.show-back-button .main-back-button {
+    pointer-events: all;
+    .landscape & {
+      left: 100%;
+    }
+    .portrait & {
+      top: 100%;
+    }
+  }
+  .landscape & {
+    width: 100%;
+  }
+  .portrait & {
+    height: inherit;
+    vertical-align: top;
+  }
+}
+
+#tool-menu {
+  display: inline-block;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+  .landscape & {
+      width: 100%;
+      padding: 2rem 0;
+      transform: translate3d(-100%, 0, 0);
+      button {
+          border-top-color: #aaa;
+          border-bottom-color: #666;
+      }
+  }
+  .portrait & {
+    padding: 0 1rem;
+    height: inherit;
+    vertical-align: top;
+    transform: translate3d(0, -100%, 0);
+    button {
+      border-left-color: #aaa;
+      border-right-color: #666;
+    }
+  }
+  &.show-tool-menu {
+    .landscape &,
+    .portrait & {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  button {
+    background-color: #999;
+    color: #111;
+    &:hover {
+      background-color: #bbb;
+    }
+  }
+}
+
+#sticky-menu {
+  position: absolute;
+  .landscape & {
+    width: 100%;
+    bottom: 2rem;
+    left: 0;
+  }
+  .portrait & {
+    height: inherit;
+    bottom: 0;
+    right: 2rem;
+    vertical-align: top;
+  }
+}

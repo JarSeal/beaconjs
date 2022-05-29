@@ -1,0 +1,37 @@
+.form-elem--submit,
+.form-elem--button,
+.confirm-button,
+.cancel-button {
+  font-size: 1.8rem;
+  font-weight: 400;
+  padding: 1rem 4rem 0.6rem;
+  width: 100%;
+  text-align: center;
+  width: auto;
+  display: inline-block;
+  color: $form-button-text-color;
+  background-color: $form-button-color;
+  border: none;
+  border-radius: 0.3rem;
+  border-bottom: 0.3rem solid rgba(#fff, 0);
+  transition: border-bottom-color 0.2s ease-in-out,
+              background-color 0.2s ease-in-out,
+              color 0.2s ease-in-out,
+              opacity 0.2s ease-in-out;
+}
+.confirm-button--delete {
+  background-color: $form-button-delete-color;
+  color: #fff;
+  &:hover {
+    background-color: darken($form-button-delete-color, 10%);
+  }
+}
+.form-elem--button.extra-button { float: left; }
+
+.form-creator {
+  &.form--errors.form--sent {
+    .form-elem--submit {
+      border-bottom-color: rgba($form-field-error-color, 1);
+    }
+  }
+}

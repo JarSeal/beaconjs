@@ -1,0 +1,38 @@
+.form-elem--checkboxlist {
+  position: relative;
+  .form-elem__label {
+    padding: 0;
+    margin-bottom: 1.8rem;
+  }
+  .form-elem__error-msg {
+    position: absolute;
+    right: 0;
+    margin-top: -1.8rem;
+  }
+}
+.checkboxlist-item {
+  display: inline-block;
+  background-color: $form-button-color;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.7rem 0.7rem 0.5rem 1rem;
+  border-radius: 0.3rem;
+  transition: background-color 0.2s ease-in-out;
+  user-select: none;
+  &:hover {
+    background-color: $form-button-color-hover;
+  }
+  + .checkboxlist-item {
+    margin-left: 1rem;
+  }
+  &__label {
+    display: inline-block;
+    padding-top: 0.2rem;
+    vertical-align: top;
+  }
+  &--selected {
+    background-color: $form-button-color-selected;
+    color: #fff;
+  }
+}
