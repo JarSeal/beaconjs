@@ -4,15 +4,16 @@ import Bbar from './components/bbar/Bbar';
 import MainLoader from './components/loaders/MainLoader';
 import { _CONFIG } from './_CONFIG';
 import baseHTML from './base.html?raw';
-import './Base.scss';
 import { loadAssets } from './helpers/lang';
 import Dialog from './components/widgets/Dialog';
+import baseStyles from './Base.module.scss';
 import './components/widgets/Dialog.scss';
 
 class Base extends Component {
   constructor(data) {
     super(data);
-    this.template = baseHTML;
+    this.template = this._importHtml(baseHTML, [baseStyles]);
+    this._addToCSSClass(baseStyles['base']);
     this.appState = this._initAppState();
     loadAssets();
     this._initResizer();
@@ -27,6 +28,11 @@ class Base extends Component {
     );
     this.appState.set('Dialog', this.dialog);
     this.loadData();
+  }
+
+  addListeners() {
+    this.appState.set('resizers.base', this.onResize);
+    this.onResize();
   }
 
   paint = () => {
@@ -91,6 +97,25 @@ class Base extends Component {
         }
       }, 0);
     });
+  };
+
+  onResize = () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const elem = this.elem;
+    if (w > h) {
+      elem.classList.add('landscape');
+      elem.classList.remove('portrait');
+      elem.style.marginTop = 0;
+      elem.style.marginLeft = _CONFIG.bbarSize + 'px';
+      this.appState.set('orientationLand', true);
+    } else {
+      elem.classList.remove('landscape');
+      elem.classList.add('portrait');
+      elem.style.marginTop = _CONFIG.bbarSize + 'px';
+      elem.style.marginLeft = 0;
+      this.appState.set('orientationLand', false);
+    }
   };
 }
 

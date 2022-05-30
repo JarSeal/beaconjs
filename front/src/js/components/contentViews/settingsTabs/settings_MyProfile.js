@@ -3,16 +3,17 @@ import { Component } from '../../../LIGHTER';
 import ReadApi from '../../forms/ReadApi';
 import ViewTitle from '../../widgets/ViewTitle';
 import Button from '../../buttons/Button';
-import './settings_MyProfile.scss';
 import DialogForms from '../../widgets/dialogs/dialog_Forms';
 import Logs from '../Logs';
 import FormCreator from '../../forms/FormCreator';
 import { createDate } from '../../../helpers/date';
+import styles from './settings_MyProfile.module.scss';
+import userDataStyles from '../OneUser.module.scss';
 
 class MyProfile extends Component {
   constructor(data) {
     super(data);
-    this.template = '<div class="settings-tab-view"></div>';
+    this.template = '<div class="settingsTabView"></div>';
     this.appState = this.Router.commonData.appState;
     this.Dialog = this.appState.get('Dialog');
     this.viewTitle = this.addChild(
@@ -105,17 +106,17 @@ class MyProfile extends Component {
       }
       this.addChildDraw({
         id: 'user-data-' + item.id,
-        template: `<div class="user-data-item">
-                    <span class="user-data-item__label">
+        template: `<div class="${userDataStyles.userDataItem}">
+                    <span class="${userDataStyles.userDataItem__label}">
                         ${item.label}
-                        <span class="user-data-item__label--smaller">
+                        <span class="${userDataStyles.userDataItem__labelSmaller}">
                             ${this._showExposure(exposureKey)}${verificationStatus}
                         </span>
                     </span>
-                    <div class="user-data-item__value">${value || '&nbsp;'}</div>
+                    <div class="${userDataStyles.userDataItem__value}">${value || '&nbsp;'}</div>
                     ${
                       afterValue
-                        ? `<span class="user-data-item__label--smaller">${afterValue}</span>`
+                        ? `<span class="${userDataStyles.userDataItem__labelSmaller}">${afterValue}</span>`
                         : ''
                     }
                 </div>`,
@@ -149,7 +150,7 @@ class MyProfile extends Component {
   _createDialogButtons = () => {
     this.addChildDraw({
       id: 'dialog-tools-wrapper',
-      class: 'dialog-tools-wrapper',
+      class: styles.dialogToolsWrapper,
     });
     this.addChildDraw(
       new Button({

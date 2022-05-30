@@ -1,13 +1,14 @@
 import bbar from './bbar.html?raw';
 import { _CONFIG } from '../../_CONFIG';
 import MainMenu from './MainMenu';
-import './Bbar.scss';
+import styles from './Bbar.module.scss';
 import Component from '../../LIGHTER/Component';
 
 class Bbar extends Component {
   constructor(data) {
     super(data);
     this.template = bbar;
+    this._addToCSSClass(styles.bbar);
 
     this.appState = data.appState;
 
@@ -26,24 +27,12 @@ class Bbar extends Component {
   onResize = () => {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    this.elem = document.getElementById('bbar');
-    this.baseElem = document.getElementById('base-id');
     if (w > h) {
       this.elem.style.width = _CONFIG.bbarSize + 'px';
       this.elem.style.height = h + 'px';
-      this.baseElem.classList.add('landscape');
-      this.baseElem.classList.remove('portrait');
-      this.baseElem.style.marginTop = 0;
-      this.baseElem.style.marginLeft = _CONFIG.bbarSize + 'px';
-      this.appState.set('orientationLand', true);
     } else {
       this.elem.style.width = w + 'px';
       this.elem.style.height = _CONFIG.bbarSize + 'px';
-      this.baseElem.classList.remove('landscape');
-      this.baseElem.classList.add('portrait');
-      this.baseElem.style.marginTop = _CONFIG.bbarSize + 'px';
-      this.baseElem.style.marginLeft = 0;
-      this.appState.set('orientationLand', false);
     }
   };
 }

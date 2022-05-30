@@ -9,7 +9,6 @@ import styles from './Login.module.scss';
 class Login extends Component {
   constructor(data) {
     super(data);
-    console.log('STYLES', styles);
     this.appState = this.Router.commonData.appState;
     this.ls = new LocalStorage('bjs_');
 

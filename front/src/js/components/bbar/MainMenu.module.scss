@@ -1,0 +1,127 @@
+.mainMenu {
+  height: inherit;
+  button {
+    display: inline-block;
+    border: none;
+    background-color: #333;
+    font-size: 1.2rem;
+    color: #fff;
+    padding: 1.2rem 0 1rem;
+    &:hover {
+      background-color: #444;
+    }
+  }
+}
+
+:global(.landscape) .mainMenu button {
+  width: 100%;
+  border-top: 0.1rem solid #444;
+  border-bottom: 0.1rem solid #111;
+}
+:global(.portrait) .mainMenu button {
+  width: 6.4rem;
+  height: inherit;
+  border-left: 0.1rem solid #444;
+  border-right: 0.1rem solid #111;
+}
+
+.navMenu {
+  display: inline-block;
+  position: relative;
+  .homeButton {
+    position: relative;
+    z-index: 20;
+  }
+  .mainBackButton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 3rem;
+    font-weight: 700;
+    padding-top: 1.5rem;
+    padding-bottom: 2.2rem;
+    background: none;
+    line-height: 0;
+    z-index: 10;
+    pointer-events: none;
+    transition-timing-function: ease-in-out;
+    transition-property: all;
+    &:hover {
+      font-size: 4rem;
+      background-color: transparent;
+    }
+  }
+  &.showBackButton .mainBackButton {
+    pointer-events: all;
+  }
+}
+:global(.landscape) .navMenu.showBackButton .mainBackButton {
+  left: 100%;
+}
+:global(.portrait) .navMenu.showBackButton .mainBackButton {
+  top: 100%;
+}
+:global(.landscape) .navMenu {
+  width: 100%;
+  button.mainBackButton {
+    border: none;
+  }
+}
+:global(.portrait) .navMenu {
+  height: inherit;
+  vertical-align: top;
+  button.mainBackButton {
+    border: none;
+  }
+}
+
+.toolMenu {
+  display: inline-block;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+  button {
+    background-color: #999;
+    color: #111;
+    &:hover {
+      background-color: #bbb;
+    }
+  }
+}
+:global(.landscape) .toolMenu {
+  width: 100%;
+  padding: 2rem 0;
+  transform: translate3d(-100%, 0, 0);
+  button {
+    border-top-color: #aaa;
+    border-bottom-color: #666;
+  }
+}
+:global(.portrait) .toolMenu {
+  padding: 0 1rem;
+  height: inherit;
+  vertical-align: top;
+  transform: translate3d(0, -100%, 0);
+  button {
+    border-left-color: #aaa;
+    border-right-color: #666;
+  }
+}
+:global(.landscape) .toolMenu.showToolMenu,
+:global(.portrait) .toolMenu.showToolMenu {
+  transform: translate3d(0, 0, 0);
+}
+
+.stickyMenu {
+  position: absolute;
+}
+:global(.landscape) .stickyMenu {
+  width: 100%;
+  bottom: 2rem;
+  left: 0;
+}
+:global(.portrait) .stickyMenu {
+  height: inherit;
+  bottom: 0;
+  right: 2rem;
+  vertical-align: top;
+}
