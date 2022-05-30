@@ -271,6 +271,40 @@ class Component {
       return `<div id="${id}"></div>`; // Default
     }
   }
+
+  _addToCSSClass = (c) => {
+    this.data.class = this.data.class ? `${this.data.class} ${c}` : c;
+    return this.data.class;
+  };
+
+  _importHtml = (html, styles) => {
+    let template = document.createElement('div');
+    template.innerHTML = html;
+    template = template.firstChild;
+    let styleKeys = [];
+    let allStyles = {};
+    for (let i = 0; i < styles.length; i++) {
+      styleKeys = [...styleKeys, ...Object.keys(styles[i])];
+      allStyles = { ...allStyles, ...styles[i] };
+    }
+    const replaceClasses = (classList) => {
+      for (let i = 0; i < styleKeys.length; i++) {
+        if (classList.contains(styleKeys[i])) {
+          classList.remove(styleKeys[i]);
+          classList.add(allStyles[styleKeys[i]]);
+        }
+      }
+    };
+    const loopChildren = (elem) => {
+      Array.from(elem.children).map((child) => {
+        replaceClasses(child.classList);
+        if (child.children.length) loopChildren(child);
+      });
+    };
+    replaceClasses(template.classList);
+    loopChildren(template);
+    return template.outerHTML;
+  };
 }
 
 export default Component;
