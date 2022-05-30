@@ -12,6 +12,7 @@
     "devFront": "cd front && yarn dev",
     "devBack": "cd back/mongo && docker-compose up -d && cd .. && yarn run dev",
     "devMongo": "docker exec -it beacondb mongo beacondb",
+    "devMongoTest": "docker exec -it beacondb mongo beacondb-test",
     "lint": "cd front && yarn lint && cd ../back && yarn lint && eslint .",
     "lint:shared": "eslint .",
     "prettify": "prettier --write ./**/*.js"
