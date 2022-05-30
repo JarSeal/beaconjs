@@ -1,7 +1,7 @@
 import { Component } from '../../LIGHTER';
 import { getText } from '../../helpers/lang';
-import './SettingsGroup.scss';
 import DialogForms from './dialogs/dialog_Forms';
+import styles from './SettingsGroup.module.scss';
 
 // Attributes
 // - settingsData: Object{
@@ -16,7 +16,7 @@ import DialogForms from './dialogs/dialog_Forms';
 //  - updateSettings: Function
 class SettingsGroup extends Component {
   constructor(data) {
-    data.class = 'settings-group';
+    data.class = styles.settingsGroup;
     super(data);
     this.settingsData = data.settingsData;
     this.fsInnerWrapperId = this.id + '-fs-inner-wrapper';
@@ -65,14 +65,15 @@ class SettingsGroup extends Component {
   _createComponents = () => {
     this.addChildDraw({
       id: this.id + '-wrapper',
-      template:
-        '<div class="settings-group__inner">' +
-        `<h3 class="group-title">${getText(this.settingsData.fsTitleId)}</h3>` +
-        (this.settingsData.fsDescriptionId
-          ? `<p>${getText(this.settingsData.fsDescriptionId)}</p>`
-          : '') +
-        `<div id="${this.fsInnerWrapperId}"></div>` +
-        '<div>',
+      template: `<div class="settings-group__inner">
+          <h3 class="${styles.groupTitle}">${getText(this.settingsData.fsTitleId)}</h3>
+          ${
+            this.settingsData.fsDescriptionId
+              ? `<p>${getText(this.settingsData.fsDescriptionId)}</p>`
+              : ''
+          }
+          <div id="${this.fsInnerWrapperId}"></div>
+        <div>`,
     });
     this.fields = [];
     for (let i = 0; i < this.settingsData.fields.length; i++) {
@@ -80,17 +81,24 @@ class SettingsGroup extends Component {
       this.addChildDraw({
         id: field.id + '-field-listing',
         attach: this.fsInnerWrapperId,
-        template:
-          '<div class="settings-field">' +
-          `<div class="settings-field__label">${getText(field.labelId)}:</div>` +
-          `<div class="settings-field__value">${this._displayValue(field)}</div>` +
-          (field.descriptionId
-            ? `<div class="settings-field__description">${getText(field.descriptionId)}</div>`
-            : '') +
-          `<button class="edit-setting-button" id="${this.settingsData.fsId}-edit-button" i="${i}">` +
-          getText('edit') +
-          '</button>' +
-          '</div>',
+        template: `<div class="${styles.settingsField}">
+            <div class="${styles.settingsField__label}">${getText(field.labelId)}:</div>
+            <div class="${styles.settingsField__value}">${this._displayValue(field)}</div>
+            ${
+              field.descriptionId
+                ? `<div class="${styles.settingsField__description}">
+                  ${getText(field.descriptionId)}
+                </div>`
+                : ''
+            }
+            <button
+              class="${styles.editSettingButton}"
+              id="${this.settingsData.fsId}-edit-button"
+              i="${i}"
+            >
+              ${getText('edit')}
+            </button>
+          </div>`,
       });
     }
   };
