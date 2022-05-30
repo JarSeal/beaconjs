@@ -1,6 +1,6 @@
 import { Component } from '../../LIGHTER';
 import RouteLink from './RouteLink';
-import './TabSystem.scss';
+import styles from './TabSystem.module.scss';
 
 // Attributes:
 // - tabs = Array[Object]
@@ -17,7 +17,7 @@ class TabSystem extends Component {
   constructor(data) {
     super(data);
     this.tabs = data.tabs;
-    this.template = '<div class="tab-system"></div>';
+    this.template = `<div class="${styles.tabSystem}"></div>`;
 
     // Create tabs buttons
     this.buttons = [];

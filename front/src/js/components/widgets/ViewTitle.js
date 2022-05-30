@@ -1,6 +1,6 @@
 import { Component } from '../../LIGHTER';
 import Spinner from './Spinner';
-import './ViewTitle.scss';
+import styles from './ViewTitle.module.scss';
 
 // Attributes:
 // - heading: String
@@ -10,9 +10,9 @@ class ViewTitle extends Component {
     super(data);
     let tag = 'h2';
     if (data.tag) tag = data.tag;
-    this.template = `<div class="view-title"><${tag} id="${this.id + '-heading'}">${
-      data.heading
-    }</${tag}></div>`;
+    this.template = `<div class="view-title ${styles.viewTitle}">
+      <${tag} id="${this.id + '-heading'}">${data.heading}</${tag}>
+    </div>`;
     this.spinner = this.addChild(
       new Spinner({
         id: this.id + '-spinner',

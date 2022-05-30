@@ -1,7 +1,7 @@
 @import '../../../styles/colors';
 $tab-total-height: 4.5rem;
 
-.tab-system {
+.tabSystem {
   width: 100%;
   height: $tab-total-height;
   // vertical-align: bottom;
@@ -13,17 +13,15 @@ $tab-total-height: 4.5rem;
     background-color: $tab-button-background;
     padding: 1rem 2.5rem;
     margin-top: 0.8rem;
-    transition: padding-top 0.2s ease-in-out,
-                background-color 0.2s ease-in-out,
-                border-top-height 0.2s ease-in-out,
-                box-shadow 0.2s ease-in-out;
+    transition: padding-top 0.2s ease-in-out, background-color 0.2s ease-in-out,
+      border-top-height 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     &:hover {
       background-color: lighten($tab-button-background, 20%);
     }
     + button {
       border-left: 0.1rem solid rgba(#000, 0.2);
     }
-    &.current {
+    &:global(.current) {
       z-index: 20;
       background-color: $tab-button-selected-background;
       padding-top: 1.5rem;

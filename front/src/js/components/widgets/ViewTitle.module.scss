@@ -1,11 +1,11 @@
-.view-title {
+.viewTitle {
   > * {
     display: inline-block;
     position: relative;
     padding-right: 5rem;
     width: auto;
   }
-  .spinner-icon {
+  :global(.spinner-icon) {
     position: absolute;
     top: 0;
     right: 0;

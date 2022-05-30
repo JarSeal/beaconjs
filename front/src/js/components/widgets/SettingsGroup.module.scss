@@ -1,13 +1,13 @@
 
-.settings-group {
+.settingsGroup {
   border: 0.1rem solid rgba(#fff, 0.15);
   background-color: rgba(#fff, 0.05);
   border-radius: 0.4rem;
   position: relative;
-  + .settings-group {
+  + .settingsGroup {
     margin-top: 3rem;
   }
-  .group-title {
+  .groupTitle {
     font-size: 1.8rem;
     margin: 0;
     padding: 1rem 3rem;
@@ -20,7 +20,7 @@
     color: #777;
     background-color: rgba(#fff, 0.1);
   }
-  .settings-field {
+  .settingsField {
     padding: 2rem 3rem;
     border-top: 0.1rem solid rgba(#fff, 0.15);
     position: relative;
@@ -39,7 +39,7 @@
       color: #777;
     }
   }
-  .edit-setting-button {
+  .editSettingButton {
     border: 0.1rem solid #999;  
     color: #999;
     background: none;

@@ -1,16 +1,16 @@
 @import '../../../styles/colors';
 
-.user-data-item {
+.userDataItem {
   border-top: 0.1rem solid rgba(#fff, 0.1);
   &__label {
     color: $user-data-label-color;
     font-size: 1.4rem;
-    &--smaller {
+    &Smaller {
       display: inline-block;
       font-size: 1.1rem;
       color: lighten($user-data-label-color, 15%);
     }
-    > .user-data-item__label--smaller {
+    > .userDataItem__labelSmaller {
       margin-left: 1rem;
     }
   }
@@ -21,7 +21,7 @@
     margin: 0;
     padding: 0;
   }
-  + .user-data-item {
+  + .userDataItem {
     margin-top: 2rem;
   }
 }

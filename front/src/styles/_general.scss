@@ -17,9 +17,6 @@ a, .link {
   line-height: inherit;
   font-size: inherit;
   font-family: inherit;
-  .dialog-box & {
-    color: $font-color-invert;
-  }
   &:before, &:after {
     display: block;
     content: "";

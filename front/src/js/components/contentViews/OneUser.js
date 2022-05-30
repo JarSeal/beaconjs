@@ -2,7 +2,7 @@ import { Component, Logger } from '../../LIGHTER';
 import ReadApi from '../forms/ReadApi';
 import { getText } from '../../helpers/lang';
 import { createDate } from '../../helpers/date';
-import './OneUser.scss';
+import styles from './OneUser.module.scss';
 import FourOOne from './FourOOne';
 import FourOFour from './FourOFour';
 import ViewTitle from './../widgets/ViewTitle';
@@ -12,7 +12,7 @@ import Logs from './Logs';
 class OneUser extends Component {
   constructor(data) {
     super(data);
-    this.template = '<div class="one-user">' + '<div id="back-button-holder"></div>' + '</div>';
+    this.template = '<div class="oneUser">' + '<div id="back-button-holder"></div>' + '</div>';
     this.viewTitle = this.addChild(
       new ViewTitle({
         id: this.id + '-view-title',
@@ -129,14 +129,13 @@ class OneUser extends Component {
       if (!value.length) value = '&nbsp;';
       this.addChildDraw({
         id: 'user-data-' + id,
-        template:
-          '<div class="user-data-item">' +
-          `<span class="user-data-item__label">
-                        ${item.label}
-                        <span class="user-data-item__label--smaller">${verificationStatus}</span>
-                    </span>` +
-          `<${tag} class="user-data-item__value">${value}</${tag}>` +
-          '</div>',
+        template: `<div class="${styles.userDataItem}">
+            <span class="${styles.userDataItem__label}">
+                ${item.label}
+                <span class="${styles.userDataItem__labelSmaller}">${verificationStatus}</span>
+              </span>
+            <${tag} class="${styles.userDataItem__value}">${value}</${tag}>
+          </div>`,
       });
     }
   };

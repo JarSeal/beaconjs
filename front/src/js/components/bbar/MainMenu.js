@@ -1,7 +1,7 @@
 import Component from '../../LIGHTER/Component';
 import RouteLink from '../buttons/RouteLink';
 import Button from '../buttons/Button';
-import './MainMenu.scss';
+import styles from './MainMenu.module.scss';
 
 class MainMenu extends Component {
   constructor(data) {
@@ -11,17 +11,16 @@ class MainMenu extends Component {
     this.nudgeTimer;
     this.drawTimer;
     this.backButtonPressed = false;
-    this.template =
-      '<div class="main-menu">' +
-      `<div id="nav-menu" style="transition-duration:${this.switchTime}ms"></div>` +
-      `<div id="tool-menu" class="show-tool-menu" style="transition-duration:${this.switchTime}ms"></div>` +
-      '<div id="sticky-menu"></div>' +
-      '</div>';
+    this.template = `<div class="${styles.mainMenu}">
+      <div id="nav-menu" class="${styles.navMenu}" style="transition-duration:${this.switchTime}ms"></div>
+      <div id="tool-menu" class="${styles.toolMenu} ${styles.showToolMenu}" style="transition-duration:${this.switchTime}ms"></div>
+      <div id="sticky-menu" class="${styles.stickyMenu}"></div>
+    </div>`;
 
     this.homeButton = this.addChild(
       new RouteLink({
         id: 'home-button',
-        class: 'home-button',
+        class: styles.homeButton,
         link: '/',
         attach: 'nav-menu',
         text: 'Home',
@@ -46,7 +45,7 @@ class MainMenu extends Component {
     this.backButton = this.addChild(
       new Button({
         id: 'main-back-button',
-        class: 'main-back-button',
+        class: styles.mainBackButton,
         html: '&#x2190;',
         attach: 'nav-menu',
         click: this._goBack,
@@ -73,12 +72,12 @@ class MainMenu extends Component {
     this._drawOldTools();
     const toolMenuElem = this.elem.querySelector('#tool-menu');
     const navMenuElem = this.elem.querySelector('#nav-menu');
-    if (this.menuState.backButton) navMenuElem.classList.add('show-back-button');
+    if (this.menuState.backButton) navMenuElem.classList.add(styles.showBackButton);
     clearTimeout(this.nudgeTimer);
     clearTimeout(this.drawTimer);
     this.nudgeTimer = setTimeout(() => {
-      navMenuElem.classList.remove('show-back-button');
-      toolMenuElem.classList.remove('show-tool-menu');
+      navMenuElem.classList.remove(styles.showBackButton);
+      toolMenuElem.classList.remove(styles.showToolMenu);
     }, 20);
     this.drawTimer = setTimeout(() => {
       const tools = this.menuState.toolsMenu;
@@ -111,7 +110,7 @@ class MainMenu extends Component {
       this.menuState.toolsMenu.push(comp);
       comp.draw();
     }
-    toolMenuElem.classList.add('show-tool-menu');
+    toolMenuElem.classList.add(styles.showToolMenu);
   };
 
   _drawStickyMenu = () => {
@@ -138,13 +137,13 @@ class MainMenu extends Component {
 
     if (this.menuState.newMenuState.backButton) {
       // Show backButton
-      navMenuElem.classList.add('show-back-button');
+      navMenuElem.classList.add(styles.showBackButton);
       this.menuState.newMenuState.backButton = false;
       this.menuState.backButton = true;
       this.backButtonPressed = false;
     } else {
       // Hide backButton
-      navMenuElem.classList.remove('show-back-button');
+      navMenuElem.classList.remove(styles.showBackButton);
       this.menuState.backButton = false;
     }
     this.Router.setCurHistoryState({ backButton: this.menuState.backButton });
@@ -166,7 +165,7 @@ class MainMenu extends Component {
       this.backButton = this.addChild(
         new Button({
           id: 'main-back-button',
-          class: 'main-back-button',
+          class: styles.mainBackButton,
           html: '&#x2190;',
           attach: 'nav-menu',
           click: this._goBack,

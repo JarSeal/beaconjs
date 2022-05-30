@@ -71,11 +71,11 @@ class UsersList extends Component {
                 formDesc:
                   getText('delete_many_users_confirmation') + '\n' + this._listUsernames(selected),
                 addToMessage: { users: selected.map((sel) => sel.id) },
-                afterFormSentFn: () => {
-                  this._updateTable();
+                afterFormSentFn: async () => {
+                  await this._loadUsers();
                 },
-                onErrorsFn: () => {
-                  this._updateTable();
+                onErrorsFn: async () => {
+                  await this._loadUsers();
                 },
               });
             },
@@ -83,7 +83,7 @@ class UsersList extends Component {
         ],
       })
     );
-    this._loadUsers(true);
+    this._loadUsers();
   }
 
   init = () => {
@@ -101,11 +101,11 @@ class UsersList extends Component {
               this.dialogForms.createEmptyFormDialog({
                 id: 'new-user-form',
                 title: getText('new_user'),
-                afterFormSentFn: () => {
-                  this._updateTable();
+                afterFormSentFn: async () => {
+                  await this._loadUsers();
                 },
-                onErrorsFn: () => {
-                  this._updateTable();
+                onErrorsFn: async () => {
+                  await this._loadUsers();
                 },
               });
             },
@@ -116,10 +116,10 @@ class UsersList extends Component {
   };
 
   paint = () => {
-    this.usersTable.draw({ tableData: this.users });
+    this.usersTable.draw({ tableData: this.users.length ? this.users : [] });
   };
 
-  _loadUsers = async (rePaint) => {
+  _loadUsers = async () => {
     this.viewTitle.showSpinner(true);
     this.users = await this.usersDataApi.getData();
     if (this.users.redirectToLogin) {
@@ -135,7 +135,7 @@ class UsersList extends Component {
       });
     }
 
-    if (rePaint) this.rePaint();
+    this.usersTable.updateTable(this.users);
     this.viewTitle.showSpinner(false);
   };
 
@@ -186,11 +186,11 @@ class UsersList extends Component {
             title: getText('edit_user') + ': ' + rowData.username,
             editDataId: rowData.id,
             addToMessage: { userId: rowData.id },
-            afterFormSentFn: () => {
-              this._updateTable();
+            afterFormSentFn: async () => {
+              await this._loadUsers();
             },
-            onErrorsFn: () => {
-              this._updateTable();
+            onErrorsFn: async () => {
+              await this._loadUsers();
             },
           });
         },
@@ -206,22 +206,17 @@ class UsersList extends Component {
             title: getText('delete_user') + ': ' + rowData.username,
             formDesc: getText('delete_single_user_confirmation', [rowData.username]),
             addToMessage: { users: [rowData.id] },
-            afterFormSentFn: () => {
-              this._updateTable();
+            afterFormSentFn: async () => {
+              await this._loadUsers();
             },
-            onErrorsFn: () => {
-              this._updateTable();
+            onErrorsFn: async () => {
+              await this._loadUsers();
             },
           });
         },
       },
     ];
     return structure;
-  };
-
-  _updateTable = async () => {
-    await this._loadUsers();
-    this.usersTable.updateTable(this.users);
   };
 
   _listUsernames = (selected) => {
