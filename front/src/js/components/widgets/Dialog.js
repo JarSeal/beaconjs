@@ -1,6 +1,7 @@
 import { getText } from '../../helpers/lang';
 import { Component } from '../../LIGHTER';
 import Button from '../buttons/Button';
+import styles from './Dialog.module.scss';
 
 // Attributes for data:
 //
@@ -11,7 +12,7 @@ class Dialog extends Component {
     this.appState = data.appState;
     this.transitionTime = 140; // in milliseconds
     data.style = { transitionDuration: this.transitionTime + 'ms' };
-    data.class = ['dialog', 'alpha-black'];
+    data.class = [styles.dialog];
     this.isShowing = false;
     this.isTransitioning = false;
     this.isLocked = false;
@@ -24,7 +25,7 @@ class Dialog extends Component {
     this.dialogCompos.push(
       this.addChild({
         id: this.id + '-box-wrapper',
-        class: 'dialog-box',
+        class: styles.dialogBox,
         style: { transitionDuration: this.transitionTime + 'ms' },
       })
     );
@@ -32,7 +33,7 @@ class Dialog extends Component {
       this.addChild(
         new Button({
           id: this.id + '-close-button',
-          class: 'close-button',
+          class: styles.closeButton,
           attach: this.id + '-box-wrapper',
           attributes: { title: getText('close_dialog') },
           click: this._closeDialogClick,
@@ -42,14 +43,14 @@ class Dialog extends Component {
     this.dialogCompos.push(
       this.addChild({
         id: this.id + '-inner-scroller',
-        class: 'inner-scroller',
+        class: styles.innerScroller,
         attach: this.id + '-box-wrapper',
       })
     );
     this.dialogCompos.push(
       this.addChild({
         id: this.id + '-inner-box',
-        class: 'inner-box',
+        class: styles.innerBox,
         attach: this.id + '-inner-scroller',
       })
     );
@@ -71,12 +72,12 @@ class Dialog extends Component {
     }
     if (this.dialogTitle) {
       this.dialogTitle.draw();
-      this.elem.classList.add('has-title');
+      this.elem.classList.add(styles.hasTitle);
     }
     if (this.compoToShow) this.compoToShow.draw();
     if (data.appear) {
       setTimeout(() => {
-        if (this.elem) this.elem.classList.add('appear');
+        if (this.elem) this.elem.classList.add(styles.appear);
       }, 20);
     }
     this._setSizes();
@@ -92,7 +93,7 @@ class Dialog extends Component {
     if (dialogData.title) {
       this.dialogTitle = this.addChild({
         id: this.id + '-main-title',
-        class: 'main-title',
+        class: styles.mainTitle,
         tag: 'h3',
         text: dialogData.title,
         attach: this.id + '-box-wrapper',
@@ -108,7 +109,7 @@ class Dialog extends Component {
   disappear = () => {
     if (!this.elem || this.isTransitioning) return;
     this.isTransitioning = true;
-    this.elem.classList.remove('appear');
+    this.elem.classList.remove(styles.appear);
     this.isShowing = false;
     this.hasChanges = false;
 
@@ -127,13 +128,13 @@ class Dialog extends Component {
 
   lock = () => {
     if (!this.elem) return;
-    this.elem.classList.add('dialog-locked');
+    this.elem.classList.add(styles.dialogLocked);
     this.isLocked = true;
   };
 
   unlock = () => {
     if (!this.elem) return;
-    this.elem.classList.remove('dialog-locked');
+    this.elem.classList.remove(styles.dialogLocked);
     this.isLocked = false;
   };
 

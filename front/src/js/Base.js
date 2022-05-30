@@ -7,7 +7,6 @@ import baseHTML from './base.html?raw';
 import { loadAssets } from './helpers/lang';
 import Dialog from './components/widgets/Dialog';
 import baseStyles from './Base.module.scss';
-import './components/widgets/Dialog.scss';
 
 class Base extends Component {
   constructor(data) {

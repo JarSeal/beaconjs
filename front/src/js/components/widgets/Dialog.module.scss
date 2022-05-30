@@ -11,7 +11,7 @@ $sidePadding: 4rem;
   transition-property: background-color;
   transition-timing-function: ease-in-out;
 
-  .dialog-box {
+  .dialogBox {
     width: 96%;
     max-width: 80rem;
     max-height: 96vh;
@@ -27,16 +27,22 @@ $sidePadding: 4rem;
     transition-timing-function: ease-in-out;
     color: #333;
     padding: 2rem 0 0;
+    a, :global(.link) {
+      color: $font-color-invert;
+      &:before, &:after {
+        border-bottom-color: $font-color-invert;
+      }
+    }
   }
 
-  .inner-scroller {
+  .innerScroller {
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     transform: translateY(-0.2rem);
   }
 
-  .inner-box {
+  .innerBox {
     padding: $sidePadding;
     form {
       width: auto;
@@ -45,40 +51,40 @@ $sidePadding: 4rem;
       left: 50%;
       transform: translate3d(-50%, 0, 0);
       min-width: 50rem;
-      .form-elem__label {
+      :global(.form-elem__label) {
         width: 26rem;
         max-width: none;
       }
       @media only screen and (max-width: 740px) {
         min-width: none;
         width: 100%;
-        .form-elem__label {
+        :global(.form-elem__label) {
           width: auto;
           max-width: 26rem;
         }
       }
     }
-    .form-divider {
+    :global(.form-divider) {
       background-color: #999;
     }
-    .form-elem--submit,
-    .confirm-button,
-    .extra-button,
-    .cancel-button {
+    :global(.form-elem--submit),
+    :global(.confirm-button),
+    :global(.extra-button),
+    :global(.cancel-button) {
       background-color: #999;
       &:hover {
         background-color: #666;
         color: #fff;
       }
     }
-    .save-button {
+    .saveButton {
       background-color: #666;
       color: #fff;
       &:hover {
         background-color: #333;
       }
     }
-    .confirm-button--delete {
+    .confirmButtonDelete {
       background-color: $form-button-delete-color;
       color: #fff;
       &:hover {
@@ -88,27 +94,27 @@ $sidePadding: 4rem;
     p:first-child {
       margin-top: 0;
     }
-    .confirm-button,
-    .cancel-button {
+    .confirmButton,
+    .cancelButton {
       margin-top: 2rem;
     }
-    .confirm-button, 
-    .confirmation-dialog .spinner-icon {
+    .confirmButton, 
+    .confirmationDialog :global(.spinner-icon) {
       float: right;
     }
-    .confirmation-dialog .spinner-icon {
+    .confirmationDialog :global(.spinner-icon) {
       margin-top: 2.4rem;
       margin-right: 2rem;
     }
-    .table-compo {
+    :global(.table-compo) {
       color: $font-color;
     }
   }
-  &.has-title .inner-box {
+  &.hasTitle .innerBox {
     padding-top: 1rem;
   }
 
-  .main-title {
+  .mainTitle {
     width: 100%;
     margin: 0;
     position: absolute;
@@ -118,7 +124,7 @@ $sidePadding: 4rem;
     padding: 2rem ($sidePadding+2rem) 2rem $sidePadding;
   }
 
-  .close-button {
+  .closeButton {
     width: 4rem;
     height: 4rem;
     border: none;
@@ -136,25 +142,25 @@ $sidePadding: 4rem;
 
   &.appear {
     background-color: rgba(0, 0, 0, 0.5);
-    .dialog-box {
+    .dialogBox {
       opacity: 1;
       margin-top: 0;
     }
   }
 }
 
-.dialog-locked {
+.dialogLocked {
   button, a, input, textarea, select, form {
     pointer-events: none;
   }
-  .confirm-button,
-  .cancel-button {
+  .confirmButton,
+  .cancelButton {
     opacity: 0.7;
   }
 }
 
-.confirmation-form {
-  .form-main-description {
+.confirmationForm {
+  :global(.form-main-description) {
     margin-bottom: 7rem;
   }
 }
