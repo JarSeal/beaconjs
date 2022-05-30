@@ -10,7 +10,7 @@ class ViewTitle extends Component {
     super(data);
     let tag = 'h2';
     if (data.tag) tag = data.tag;
-    this.template = `<div class="${styles.viewTitle}">
+    this.template = `<div class="view-title ${styles.viewTitle}">
       <${tag} id="${this.id + '-heading'}">${data.heading}</${tag}>
     </div>`;
     this.spinner = this.addChild(

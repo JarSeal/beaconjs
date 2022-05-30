@@ -27,9 +27,11 @@ $sidePadding: 4rem;
     transition-timing-function: ease-in-out;
     color: #333;
     padding: 2rem 0 0;
-    a, :global(.link) {
+    a,
+    :global(.link) {
       color: $font-color-invert;
-      &:before, &:after {
+      &:before,
+      &:after {
         border-bottom-color: $font-color-invert;
       }
     }
@@ -98,16 +100,13 @@ $sidePadding: 4rem;
     .cancelButton {
       margin-top: 2rem;
     }
-    .confirmButton, 
+    .confirmButton,
     .confirmationDialog :global(.spinner-icon) {
       float: right;
     }
     .confirmationDialog :global(.spinner-icon) {
       margin-top: 2.4rem;
       margin-right: 2rem;
-    }
-    :global(.table-compo) {
-      color: $font-color;
     }
   }
   &.hasTitle .innerBox {
@@ -121,7 +120,7 @@ $sidePadding: 4rem;
     left: 0;
     top: 0;
     z-index: 10;
-    padding: 2rem ($sidePadding+2rem) 2rem $sidePadding;
+    padding: 2rem ($sidePadding + 2rem) 2rem $sidePadding;
   }
 
   .closeButton {
@@ -150,7 +149,12 @@ $sidePadding: 4rem;
 }
 
 .dialogLocked {
-  button, a, input, textarea, select, form {
+  button,
+  a,
+  input,
+  textarea,
+  select,
+  form {
     pointer-events: none;
   }
   .confirmButton,

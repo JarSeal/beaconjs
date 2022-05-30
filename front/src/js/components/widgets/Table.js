@@ -5,7 +5,7 @@ import Button from '../buttons/Button';
 import Checkbox from '../forms/formComponents/Checkbox';
 import CheckboxList from '../forms/formComponents/CheckboxList';
 import TextInput from '../forms/formComponents/TextInput';
-import './Table.scss';
+import styles from './Table.module.scss';
 
 // Attributes for data:
 // - tableData: Array[Object]
@@ -108,7 +108,7 @@ class Table extends Component {
       this.tableData[i]['_tableIndex'] = i;
       this.allData[i]['_tableIndex'] = i;
     }
-    this.template = '<div class="table-wrapper"></div>';
+    this.template = '<div class="tableWrapper"></div>';
     this.selected = [];
     this.toolsComp;
     this.tableComp;
@@ -266,7 +266,7 @@ class Table extends Component {
           if (
             e.target.id.includes(this.id + '-actionFn-') ||
             e.target.id.includes('-inputSelectorBox-') ||
-            e.target.classList.contains('selection-box')
+            e.target.classList.contains(styles.selectionBox)
           )
             return;
           let node = e.target,
@@ -283,7 +283,11 @@ class Table extends Component {
             if (counter > 100) break;
             counter++;
           }
-          if (id && id.split('-')[0] === 'rowindex') {
+          if (
+            id &&
+            id.split('-')[0] === 'rowindex' &&
+            !e.srcElement?.classList.contains(styles.rowSelection)
+          ) {
             this.data.rowClickFn(e, this.tableData[id.split('-')[1]]);
           }
         },
@@ -331,38 +335,40 @@ class Table extends Component {
           if (id && id.split('-')[0] === 'rowindex') {
             const index = this.tableData[id.split('-')[1]]._tableIndex;
             if (this.selected.includes(index)) {
-              node.classList.remove('row-selection--selected');
+              node.classList.remove(styles.rowSelectionSelected);
               this.selected = this.selected.filter((item) => item !== index);
             } else {
-              node.classList.add('row-selection--selected');
+              node.classList.add(styles.rowSelectionSelected);
               this.selected.push(index);
             }
-            const thElem = this.elem.querySelector('th.row-selection .selection-box');
+            const thElem = this.elem.querySelector(
+              `th.${styles.rowSelection} .${styles.selectionBox}`
+            );
             if (this.selected.length === 0) {
-              thElem.classList.remove('selection-box--all');
-              thElem.classList.remove('selection-box--some');
+              thElem.classList.remove(styles.selectionBoxAll);
+              thElem.classList.remove(styles.selectionBoxSome);
               thElem.querySelector('input').checked = false;
             } else if (this.groupMax) {
               if (
                 this.selected.length === this.groupMax ||
                 this.selected.length === this.tableData.length
               ) {
-                thElem.classList.add('selection-box--all');
-                thElem.classList.remove('selection-box--some');
+                thElem.classList.add(styles.selectionBoxAll);
+                thElem.classList.remove(styles.selectionBoxSome);
                 thElem.querySelector('input').checked = true;
               } else {
-                thElem.classList.remove('selection-box--all');
-                thElem.classList.add('selection-box--some');
+                thElem.classList.remove(styles.selectionBoxAll);
+                thElem.classList.add(styles.selectionBoxSome);
                 thElem.querySelector('input').checked = false;
               }
             } else {
               if (this.selected.length === this.tableData.length) {
-                thElem.classList.add('selection-box--all');
-                thElem.classList.remove('selection-box--some');
+                thElem.classList.add(styles.selectionBoxAll);
+                thElem.classList.remove(styles.selectionBoxSome);
                 thElem.querySelector('input').checked = true;
               } else {
-                thElem.classList.remove('selection-box--all');
-                thElem.classList.add('selection-box--some');
+                thElem.classList.remove(styles.selectionBoxAll);
+                thElem.classList.add(styles.selectionBoxSome);
                 thElem.querySelector('input').checked = false;
               }
             }
@@ -444,7 +450,7 @@ class Table extends Component {
   };
 
   _createTable = () =>
-    '<table class="table-compo"' +
+    `<table class="${styles.tableCompo}"` +
     (this.data.fullWidth ? ' style="width:100%;"' : '') +
     '>' +
     this._createTableHeader() +
@@ -455,10 +461,10 @@ class Table extends Component {
   _createShowMore = () => {
     if (!this.groupMax || this.groupMax >= this.tableData.length) return '';
     const showMoreAmount = Math.min(this.data.showGroupSize, this.tableData.length - this.groupMax);
-    return `<tr class="table-show-more-row">
+    return `<tr class="${styles.tableShowMoreRow}">
             <td colspan="${this.tableStructure.length}">
-                <button id="${this.id}-show-more-button" class="table-show-more">Show more (${showMoreAmount})</button>
-                <button id="${this.id}-show-all-button" class="table-show-all">Show all (${this.tableData.length})</button>
+                <button id="${this.id}-show-more-button" class="${styles.tableShowMore}">Show more (${showMoreAmount})</button>
+                <button id="${this.id}-show-all-button" class="${styles.tableShowAll}">Show all (${this.tableData.length})</button>
             </td>
         </tr>`;
   };
@@ -508,16 +514,12 @@ class Table extends Component {
   };
 
   _createDataRowClass = (index) => {
-    let classString;
-    if (this.data.rowClickFn) classString = 'table-row-clickable';
+    const classes = [];
+    if (this.data.rowClickFn) classes.push(styles.tableRowClickable);
     if (this.selected.includes(index)) {
-      if (classString && classString.length) {
-        classString += ' row-selection--selected';
-      } else {
-        classString = 'row-selection--selected';
-      }
+      classes.push(styles.rowSelectionSelected);
     }
-    return classString ? ` class="${classString}"` : '';
+    return classes.length ? ` class="${classes.join(' ')}"` : '';
   };
 
   _getCellData = (tableIndex, structIndex) => {
@@ -556,7 +558,7 @@ class Table extends Component {
         ? this.tableStructure[i].heading
         : this.tableStructure[i].key;
       if (!this.tableStructure[i].unsortable) {
-        header += `<button id="${this.tableStructure[i].key}-accessibility-sort-button-${this.id}" class="table-accessibility-sort">`;
+        header += `<button id="${this.tableStructure[i].key}-accessibility-sort-button-${this.id}" class="${styles.tableAccessibilitySort}">`;
         header += `${getText('sort_by')} ${this.tableStructure[i].heading}`;
         header += '</button>';
       } else if (this.tableStructure[i].key === '_rowSelection') {
@@ -572,11 +574,11 @@ class Table extends Component {
     let classes = structure.classes;
     let classString = '';
     if (typeof classes === 'string' || classes instanceof String) {
-      if (structure.sort) classes += ' sort-column';
+      if (structure.sort) classes += ` ${styles.sortColumn}`;
       classString = classes;
     } else {
       classes = [];
-      if (structure.sort) classes.push('sort-column');
+      if (structure.sort) classes.push(styles.sortColumn);
       let classList = '';
       for (let i = 0; i < classes.length; i++) {
         if (!classList.length) {
@@ -589,32 +591,32 @@ class Table extends Component {
     }
     if (isHeader) {
       if (structure.unsortable) {
-        classString += ' unsortable';
+        classString += ` ${styles.unsortable}`;
       } else {
-        classString += ' sort-available';
+        classString += ` ${styles.sortAvailable}`;
       }
       if (structure.sort) {
         this.tableParams.sortColumn = structure.key;
         if (structure.sort === 'asc') {
-          classString += ' sort-asc';
+          classString += ` ${styles.sortAsc}`;
           this.tableParams.sortOrder = 'asc';
         } else {
-          classString += ' sort-desc';
+          classString += ` ${styles.sortDesc}`;
           this.tableParams.sortOrder = 'desc';
         }
       }
     }
     if (structure.key === '_row-number') {
       classString += classString.length ? ' ' : '';
-      classString += 'row-number-column';
+      classString += styles.rowNumberColumn;
     }
     if (structure.actionFn) {
       classString += classString.length ? ' ' : '';
-      classString += 'row-actionFn';
+      classString += styles.rowActionFn;
     }
     if (structure.key === '_rowSelection') {
       classString += classString.length ? ' ' : '';
-      classString += 'row-selection';
+      classString += styles.rowSelection;
     }
     return ' class="' + classString + '"';
   };
@@ -636,9 +638,12 @@ class Table extends Component {
         return createDate(value);
       } else if (type === 'Action') {
         const struct = this.tableStructure[structIndex];
-        return `<button id="${this.id}-actionFn-${struct.key}" class="table-row-action-button">
-                    ${struct.actionText ? struct.actionText : struct.heading}
-                </button>`;
+        return `<button
+          id="${this.id}-actionFn-${struct.key}"
+          class="${styles.tableRowActionButton}"
+        >
+          ${struct.actionText ? struct.actionText : struct.heading}
+        </button>`;
       }
     }
 
@@ -671,7 +676,7 @@ class Table extends Component {
   }
 
   _emptyState = () => {
-    let oneRow = '<tr class="table-comp-empty-state">';
+    let oneRow = `<tr class="${styles.tableCompEmptyState}">`;
     oneRow += `<td colspan="${this.tableStructure.length}">`;
     oneRow += this.data.emptyStateMsg
       ? this.data.emptyStateMsg
@@ -686,13 +691,15 @@ class Table extends Component {
       structIndex !== 0
     )
       return '';
-    return `<span class="table-${this.data.showRowNumbers}-row-number"># ${rowIndex + 1}</span>`;
+    const rowNumberClass =
+      this.data.showRowNumbers === 'hover' ? styles.tableHoverRowNumber : styles.tableShowRowNumber;
+    return `<span class="${rowNumberClass}"># ${rowIndex + 1}</span>`;
   };
 
   _drawTools = () => {
     if (!this.data.tools || !this.data.tools.length) return;
 
-    this.toolsComp = this.addChild({ id: this.id + '-tools-wrapper', class: 'tools-wrapper' });
+    this.toolsComp = this.addChild({ id: this.id + '-tools-wrapper', class: styles.toolsWrapper });
     for (let i = 0; i < this.data.tools.length; i++) {
       if (!this.data.tools[i].id) {
         this.logger.warn('Table tools should have an id defined', this.data.tools[i]);
@@ -700,7 +707,7 @@ class Table extends Component {
       this.toolsComp.addChild(
         new Button({
           id: this.id + '-' + this.data.tools[i].id,
-          class: 'table-tools-button',
+          class: styles.tableToolsButton,
           text: this.data.tools[i].text,
           attributes: this.data.tools[i].disabled ? { disabled: '' } : {},
           click: (e) => {
@@ -719,11 +726,11 @@ class Table extends Component {
 
     this.statsComp = this.addChild({
       id: this.id + '-stats',
-      class: 'table-stats',
+      class: styles.tableStats,
       text: this._showStatsText(),
     });
     this.statsComp.draw();
-    this.elem.classList.add('table-has-stats');
+    this.elem.classList.add(styles.tableHasStats);
   };
 
   _drawFilter = () => {
@@ -731,13 +738,13 @@ class Table extends Component {
 
     this.filterComp = this.addChild({
       id: this.id + '-filter-wrapper',
-      class: 'table-filter-wrapper',
+      class: styles.tableFilterWrapper,
     });
     if (this.filterString.length || (this.groupMax && this.groupMax > this.data.showGroupSize)) {
       this.filterComp.addChild(
         new Button({
           id: this.id + '-filter-clear',
-          class: 'table-filter-clear',
+          class: styles.tableFilterClear,
           click: () => {
             this.filterString = '';
             this.filterCaretPos = null;
@@ -769,14 +776,14 @@ class Table extends Component {
     if (this.allData.length > this.largeAmountLimit) {
       this.filterComp.addChild({
         id: this.id + '-filter-info',
-        class: 'table-filter-info',
+        class: styles.tableFilterInfo,
         text: getText('press_enter_to_filter'),
       });
     }
     this.filterComp.addChild(
       new Button({
         id: this.id + '-filter-settings-button',
-        class: 'table-filter-settings-button',
+        class: styles.tableFilterSettingsButton,
         text:
           this.filterSelectors.length === this.filterKeys.length
             ? getText('filtering_all_columns')
@@ -784,10 +791,10 @@ class Table extends Component {
         click: () => {
           this.filterSettingsOpen = !this.filterSettingsOpen;
           if (this.filterSettingsOpen) {
-            this.elem.classList.add('filter-settings-open');
+            this.elem.classList.add(styles.filterSettingsOpen);
             window.addEventListener('click', this._closeFilterSettings);
           } else {
-            this.elem.classList.remove('filter-settings-open');
+            this.elem.classList.remove(styles.filterSettingsOpen);
             window.removeEventListener('click', this._closeFilterSettings);
           }
         },
@@ -795,12 +802,12 @@ class Table extends Component {
     );
     this.filterSettingsComp = new Component({
       id: this.id + '-filter-settings',
-      class: 'table-filter-settings',
+      class: styles.tableFilterSettings,
     });
     this.filterSettingsComp.addChild(
       new Checkbox({
         id: this.id + '-filter-settings-case',
-        class: 'filter-case-checkbox',
+        class: styles.filterCaseCheckbox,
         label: getText('match_case'),
         hideMsg: true,
         value: this.filterMatchCase,
@@ -832,17 +839,17 @@ class Table extends Component {
     this.filterComp.draw();
     this.filterComp.drawChildren(true);
 
-    if (this.filterSettingsOpen) this.elem.classList.add('filter-settings-open');
+    if (this.filterSettingsOpen) this.elem.classList.add(styles.filterSettingsOpen);
     if (this.filterCaretPos !== null) input.focus(this.filterCaretPos);
     this.elem.style.minHeight =
       (this.elem.querySelector('#' + this.id + '-filter-settings').offsetHeight + 62) / 10 + 'rem';
-    this.elem.classList.add('table-has-filter');
+    this.elem.classList.add(styles.tableHasFilter);
   };
 
   _closeFilterSettings = (e) => {
     if (!e) {
       this.filterSettingsOpen = false;
-      if (this.elem) this.elem.classList.remove('filter-settings-open');
+      if (this.elem) this.elem.classList.remove(styles.filterSettingsOpen);
       window.removeEventListener('click', this._closeFilterSettings);
       return;
     }
@@ -857,9 +864,9 @@ class Table extends Component {
       if (id === this.id + '-filter-settings' || id === this.id + '-filter-settings-button') {
         return;
       }
-      if (node.localName.toLowerCase() === 'body') {
+      if (node.localName.toLowerCase() === 'html') {
         this.filterSettingsOpen = false;
-        if (this.elem) this.elem.classList.remove('filter-settings-open');
+        if (this.elem) this.elem.classList.remove(styles.filterSettingsOpen);
         window.removeEventListener('click', this._closeFilterSettings);
         return;
       }
@@ -985,23 +992,23 @@ class Table extends Component {
             : '';
         headerClass =
           this.groupMax === this.selected.length || this.selected.length === this.tableData.length
-            ? ' selection-box--all'
+            ? ` ${styles.selectionBoxAll}`
             : this.selected.length
-            ? ' selection-box--some'
+            ? ` ${styles.selectionBoxSome}`
             : '';
       } else {
         checked = this.tableData.length === this.selected.length ? 'checked' : '';
         headerClass =
           this.tableData.length === this.selected.length
-            ? ' selection-box--all'
+            ? ` ${styles.selectionBoxAll}`
             : this.selected.length
-            ? ' selection-box--some'
+            ? ` ${styles.selectionBoxSome}`
             : '';
       }
     } else {
       checked = this.selected.includes(index) ? 'checked' : '';
     }
-    return `<label for="selection-${index}-inputSelectorBox-${this.id}" class="selection-box${headerClass}">
+    return `<label for="selection-${index}-inputSelectorBox-${this.id}" class="${styles.selectionBox}${headerClass}">
             <input
                 type="checkbox"
                 name="selection-box-input-${index}-${this.id}"

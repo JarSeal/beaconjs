@@ -12,7 +12,7 @@ class Dialog extends Component {
     this.appState = data.appState;
     this.transitionTime = 140; // in milliseconds
     data.style = { transitionDuration: this.transitionTime + 'ms' };
-    data.class = [styles.dialog];
+    data.class = [styles.dialog, 'dialog'];
     this.isShowing = false;
     this.isTransitioning = false;
     this.isLocked = false;
@@ -50,7 +50,7 @@ class Dialog extends Component {
     this.dialogCompos.push(
       this.addChild({
         id: this.id + '-inner-box',
-        class: styles.innerBox,
+        class: [styles.innerBox, 'inner-box'],
         attach: this.id + '-inner-scroller',
       })
     );
