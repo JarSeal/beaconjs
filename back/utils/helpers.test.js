@@ -1,36 +1,24 @@
 import mongoose from 'mongoose';
 
-import config from '../utils/config.js';
-import AdminSetting from '../models/adminSetting.js';
-import User from '../models/user.js';
+import connectTestMongo from '../test/mongoSetup';
+import AdminSetting from '../models/adminSetting';
+import User from '../models/user';
 import {
   isValidObjectId,
   createNewEditedArray,
   createNewLoginLogsArray,
   checkIfEmailTaken,
-} from './helpers.js';
-import { getSettings } from './settingsService.js';
+  getUserEmail,
+} from './helpers';
+import { getSettings } from './settingsService';
 
 const ObjectId = mongoose.Types.ObjectId;
 
-beforeAll(async () => {
-  await mongoose
-    .connect(config.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
-    })
-    .catch((error) => {
-      console.error('\n\nerror connection to MongoDB:', error.message, '\n\n');
-    });
-});
-
-afterAll(async () => {
-  await mongoose.connection.close();
-});
+connectTestMongo();
 
 describe('helpers', () => {
+  let savedUser1, savedUser2;
+
   it('should check if a given id is a valid Mongo ObjectId or not', () => {
     const validId = '6293f65e9be6aa0e604218e3';
     const invalidId = 'hjui89';
@@ -134,9 +122,11 @@ describe('helpers', () => {
         date: new Date(),
       },
       security: {
-        token: null,
-        oldEmail: null,
-        verified: true,
+        verifyEmail: {
+          token: null,
+          oldEmail: null,
+          verified: true,
+        },
       },
     });
     const user2 = new User({
@@ -154,12 +144,12 @@ describe('helpers', () => {
         verifyEmail: {
           token: 'sometoken',
           oldEmail: 'some.email@somedomain.org',
-          verified: true,
+          verified: false,
         },
       },
     });
-    const savedUser1 = await user1.save();
-    const savedUser2 = await user2.save();
+    savedUser1 = await user1.save();
+    savedUser2 = await user2.save();
     const check1 = await checkIfEmailTaken('first.last@somedomain.org', savedUser2._id);
     const check2 = await checkIfEmailTaken('   some.otheremail@somedomain.org ', savedUser1._id);
     const check3 = await checkIfEmailTaken('some.email@somedomain.org', savedUser1._id);
@@ -168,5 +158,14 @@ describe('helpers', () => {
     expect(check2).toEqual(true);
     expect(check3).toEqual(true);
     expect(check4).toEqual(false);
+  });
+
+  it('should return the users email either from main email or from oldEmail, depending whether the user is verified or not', async () => {
+    const email1 = getUserEmail(savedUser1);
+    const email2 = getUserEmail(savedUser2);
+    const email3 = getUserEmail({});
+    expect(email1).toEqual('first.last@somedomain.org');
+    expect(email2).toEqual('some.email@somedomain.org');
+    expect(email3).toEqual(undefined);
   });
 });

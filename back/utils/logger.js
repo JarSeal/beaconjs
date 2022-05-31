@@ -1,15 +1,21 @@
+import config from './config';
+
 const info = (...params) => {
-  if (process.env.NODE_ENV !== 'test') {
+  if (config.ENV !== 'test') {
     console.log(...params);
   }
 };
 
 const log = (...params) => {
-  console.log(...params);
+  if (config.ENV !== 'test') {
+    console.log(...params);
+  }
 };
 
 const error = (...params) => {
-  console.error(...params);
+  if (config.ENV !== 'test') {
+    console.error(...params);
+  }
 };
 
 const logger = {

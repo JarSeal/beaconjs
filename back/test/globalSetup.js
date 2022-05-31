@@ -13,7 +13,7 @@ const globalSetup = async () => {
     })
     .then(async (conn) => {
       await createPresetForms(true);
-      console.log('\nPresetForms created\n');
+      console.log('\n\nPresetForms created');
       await conn.connection.close();
     })
     .catch((error) => {
