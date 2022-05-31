@@ -3,10 +3,6 @@ import mongoose from 'mongoose';
 import config from '../utils/config.js';
 
 const globalTeardown = async () => {
-  // const conn = getConn();
-  // await conn.connection.db.dropDatabase(() => {
-  //   conn.connection.close();
-  // });
   await mongoose
     .connect(config.MONGODB_URI, {
       useNewUrlParser: true,
@@ -15,8 +11,8 @@ const globalTeardown = async () => {
       useCreateIndex: true,
     })
     .then(async (conn) => {
-      await conn.connection.db.dropDatabase(() => {
-        conn.connection.close();
+      await conn.connection.db.dropDatabase(async () => {
+        await conn.connection.close();
       });
     })
     .catch((error) => {

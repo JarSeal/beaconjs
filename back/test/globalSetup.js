@@ -14,10 +14,10 @@ const globalSetup = async () => {
     .then(async (conn) => {
       await createPresetForms(true);
       console.log('\nPresetForms created\n');
-      conn.connection.close();
+      await conn.connection.close();
     })
     .catch((error) => {
-      console.error('\n\nerror connection to MongoDB:', error.message, '\n\n');
+      console.error('\n\nError connecting to MongoDB:', error.message, '\n\n');
     });
 };
 
