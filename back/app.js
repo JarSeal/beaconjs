@@ -104,11 +104,6 @@ app.use('/api/universes', universesRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/health', healthRouter);
 
-// if (process.env.NODE_ENV === 'test') {
-//   const testingRouter = require('./controllers/testing');
-//   app.use('/api/testing', testingRouter);
-// }
-
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
 

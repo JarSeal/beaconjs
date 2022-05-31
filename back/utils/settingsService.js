@@ -11,7 +11,7 @@ const reloadSettings = async (request) => {
   const adminSettings = await AdminSetting.find({});
   all = {};
   let userLevel = 0;
-  const loggedIn = checkIfLoggedIn(request.session);
+  const loggedIn = checkIfLoggedIn(request?.session);
   if (loggedIn) userLevel = request.session.userLevel;
   for (let i = 0; i < adminSettings.length; i++) {
     if (userLevel >= adminSettings[i].settingReadRight) {
