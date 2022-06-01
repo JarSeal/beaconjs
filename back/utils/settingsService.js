@@ -14,6 +14,7 @@ const reloadSettings = async (request) => {
   const loggedIn = checkIfLoggedIn(request?.session);
   if (loggedIn) userLevel = request.session.userLevel;
   for (let i = 0; i < adminSettings.length; i++) {
+    // Might not need this (it is now always 0 for all admin settings)
     if (userLevel >= adminSettings[i].settingReadRight) {
       all[adminSettings[i].settingId] = parseValue(adminSettings[i]);
     }
@@ -50,11 +51,13 @@ const getSetting = async (request, id, admin, noReload) => {
   if (!noReload) {
     const loggedIn = checkIfLoggedIn(request.session);
     let setting;
-    admin
-      ? (setting = await AdminSetting.findOne({ settingId: id }))
-      : loggedIn
-      ? (setting = await UserSetting.findOne({ settingId: id, userId: request.session._id }))
-      : null;
+    if (admin) {
+      setting = await AdminSetting.findOne({ settingId: id });
+    } else {
+      setting = loggedIn
+        ? await UserSetting.findOne({ settingId: id, userId: request.session._id })
+        : null;
+    }
     if (!setting) return null;
     let userLevel = 0;
     if (loggedIn) userLevel = request.session.userLevel;

@@ -1,4 +1,5 @@
 import connectTestMongo from '../test/mongoSetup';
+import { requests } from '../test/dummyData';
 import { getSettings } from './settingsService';
 import AdminSetting from '../models/adminSetting';
 import Form from '../models/form';
@@ -6,41 +7,9 @@ import { checkAccess, checkIfLoggedIn } from './checkAccess';
 
 connectTestMongo();
 
-const request1 = {
-  session: {
-    _id: '6293f65e9be6aa0e604218e3',
-    userLevel: 2,
-    username: 'myUsername',
-    loggedIn: true,
-    verified: false,
-  },
-};
-const request2 = {
-  session: {
-    _id: '6293f65e9be6aa0e604218e3',
-    userLevel: 2,
-    username: 'myUsername',
-    loggedIn: true,
-    verified: true,
-  },
-};
-const request3 = {
-  session: {
-    _id: '6293f65e9be6aa0e604218e4',
-    userLevel: 9,
-    username: 'Admin',
-    loggedIn: true,
-    verified: true,
-  },
-};
-const request4 = {
-  session: {
-    loggedIn: false,
-  },
-};
-
 describe('checkAccess', () => {
   it('should check access of a route or a form according to session, form, and settings', async () => {
+    const { request1, request2, request3, request4 } = requests;
     await AdminSetting.findOneAndUpdate(
       { settingId: 'public-user-registration' },
       { value: 'true' }
@@ -94,6 +63,7 @@ describe('checkAccess', () => {
   });
 
   it('should check if session user is logged in or not', () => {
+    const { request1, request2, request3, request4 } = requests;
     expect(checkIfLoggedIn()).toEqual(false);
     expect(checkIfLoggedIn(request1.session)).toEqual(true);
     expect(checkIfLoggedIn(request2.session)).toEqual(true);
