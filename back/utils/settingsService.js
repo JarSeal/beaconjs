@@ -66,7 +66,7 @@ const getSetting = async (request, id, admin, noReload) => {
   }
   let value = all[id];
   if (value === undefined) {
-    let setting = await UserSetting.findOne({ settingId: id, userId: request.session._id });
+    const setting = await UserSetting.findOne({ settingId: id, userId: request.session._id });
     value = setting ? parseValue(setting) : await getDefaultValue(id, request);
   }
   return value;
@@ -170,7 +170,7 @@ const publicSettingsRemapping = {
 
 // Get relevant admin settings that might prevent
 // users from setting some settings
-const getEnabledSettingsData = async (request) => {
+const getEnabledUserSettingsData = async (request) => {
   const enabledSettings = {};
   let value, key;
 
@@ -208,7 +208,7 @@ export {
   getSetting,
   parseValue,
   getPublicSettings,
-  getEnabledSettingsData,
+  getEnabledUserSettingsData,
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 };

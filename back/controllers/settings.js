@@ -10,7 +10,7 @@ import { createNewEditedArray } from './../utils/helpers.js';
 import { getAndValidateForm } from './forms/formEngine.js';
 import {
   getPublicSettings,
-  getEnabledSettingsData,
+  getEnabledUserSettingsData,
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 } from '../utils/settingsService.js';
@@ -26,7 +26,7 @@ settingsRouter.get('/', async (request, response) => {
   }
 
   const result = await UserSetting.find({ userId: request.session._id });
-  const enabledSettings = await getEnabledSettingsData(request);
+  const enabledSettings = await getEnabledUserSettingsData(request);
   const filteredResult = getFilteredSettings(result, enabledSettings);
 
   response.json(filteredResult);
@@ -41,7 +41,7 @@ settingsRouter.put('/', async (request, response) => {
   }
 
   const setting = await UserSetting.findById(body.mongoId);
-  const enabledSettings = await getEnabledSettingsData(request);
+  const enabledSettings = await getEnabledUserSettingsData(request);
 
   if (!setting) {
     logger.error(
