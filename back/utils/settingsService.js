@@ -184,7 +184,7 @@ const getEnabledUserSettingsData = async (request) => {
 const getFilteredSettings = (settings, enabledSettings) => {
   return settings.filter((s) => {
     if (!s.enabledId) return true;
-    return checkIfAdminSettingEnabled(enabledSettings[s.enabledId], s.id);
+    return checkIfAdminSettingEnabled(enabledSettings[s.enabledId], s.settingId);
   });
 };
 
