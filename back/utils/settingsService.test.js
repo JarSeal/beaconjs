@@ -10,6 +10,7 @@ import {
   getEnabledUserSettingsData,
 } from './settingsService';
 import { requests } from '../test/dummyData';
+import { setUserSetting } from '../test/utils';
 
 connectTestMongo();
 
@@ -95,19 +96,3 @@ describe('settingsService', () => {
     expect(sortingSetting.length).toEqual(1);
   });
 });
-
-const setUserSetting = async (id, userId, value) => {
-  const sett = await UserSetting.findOne({ settingId: id, userId: userId });
-  if (sett) {
-    await UserSetting.findOneAndUpdate({ settingId: id, userId }, { value });
-  } else {
-    const newSett = new UserSetting({
-      settingId: id,
-      userId,
-      value,
-      defaultValue: '',
-      type: 'string',
-    });
-    await newSett.save();
-  }
-};

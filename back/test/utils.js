@@ -2,6 +2,7 @@ import axios from 'axios';
 import bcrypt from 'bcrypt';
 
 import User from '../models/user';
+import UserSetting from '../models/userSetting';
 import shared from '../shared/index.js';
 
 export const createUser = async (userData) => {
@@ -60,15 +61,20 @@ export const checklogin = async (givenBrowserId) => {
   };
 };
 
-export const login = async (session, username, password) => {
-  const getCSRF = await axios.post(
+export const getCSRF = async (cookieAndBrowserId) => {
+  const CSRF = await axios.post(
     'http://localhost:3001/api/login/access',
     {
       from: 'getCSRF',
-      browserId: session.browserId,
+      browserId: cookieAndBrowserId.browserId,
     },
-    session.credentials
+    cookieAndBrowserId.credentials
   );
+  return CSRF.data.csrfToken;
+};
+
+export const login = async (session, username, password) => {
+  const CSRF = await getCSRF({ credentials: session.credentials, browserId: session.browserId });
   const login = await axios.post(
     'http://localhost:3001/api/login',
     {
@@ -77,7 +83,7 @@ export const login = async (session, username, password) => {
       password,
       ['remember-me']: false,
       username,
-      _csrf: getCSRF.data.csrfToken,
+      _csrf: CSRF,
     },
     session.credentials
   );
@@ -101,4 +107,20 @@ export const createUserAndLogin = async (userData) => {
     login: loggedIn,
     user,
   };
+};
+
+export const setUserSetting = async (id, userId, value) => {
+  const sett = await UserSetting.findOne({ settingId: id, userId: userId });
+  if (sett) {
+    await UserSetting.findOneAndUpdate({ settingId: id, userId }, { value });
+  } else {
+    const newSett = new UserSetting({
+      settingId: id,
+      userId,
+      value,
+      defaultValue: '',
+      type: 'string',
+    });
+    await newSett.save();
+  }
 };
