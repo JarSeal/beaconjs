@@ -22,20 +22,22 @@ const app = express();
 process.env.TZ = 'Europe/London';
 logger.info('connecting to', config.MONGODB_URI);
 
-mongoose
-  .connect(config.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  })
-  .then(() => {
-    logger.info('connected to MongoDB');
-    createPresetForms();
-  })
-  .catch((error) => {
-    logger.error('error connection to MongoDB:', error.message);
-  });
+if (config.ENV !== 'test') {
+  mongoose
+    .connect(config.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true,
+    })
+    .then(() => {
+      logger.info('connected to MongoDB');
+      createPresetForms();
+    })
+    .catch((error) => {
+      logger.error('error connection to MongoDB:', error.message);
+    });
+}
 
 app.use(cookieParser());
 app.use(
@@ -55,10 +57,15 @@ app.use(
 app.use(
   cors({
     origin: [
+      // TODO: Move this to config and provide these only according to environment
       'http://localhost:8080',
       'https://localhost:8080',
       'http://localhost:3001',
       'https://localhost:3001',
+      'http://127.0.0.1:8080',
+      'https://127.0.0.1:8080',
+      'http://127.0.0.1:3001',
+      'https://127.0.0.1:3001',
     ],
     credentials: true,
     exposedHeaders: ['set-cookie'],

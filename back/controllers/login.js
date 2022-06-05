@@ -77,7 +77,7 @@ loginRouter.post('/access', async (request, response) => {
         request.session,
         request.body
       );
-      return response.status('409').json({
+      return response.status(409).json({
         conflictError: true,
         errorMsg: 'browserId conflict',
         loggedIn: checkIfLoggedIn(request.session),
