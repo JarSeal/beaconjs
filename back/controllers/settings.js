@@ -139,7 +139,15 @@ settingsRouter.put('/admin', async (request, response) => {
     return response.status(error.code).json(error.obj);
   }
 
+  if (!mongoose.isValidObjectId(body.mongoId)) {
+    return response.status(400).json({
+      msg: 'MongoId not valid ID',
+      mongoIdNotValid: true,
+    });
+  }
+
   const setting = await AdminSetting.findById(body.mongoId);
+
   if (!setting) {
     logger.error(
       'Could not find admin setting. Setting was not found (id: ' + body.mongoId + '). (+ body)',

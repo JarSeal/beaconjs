@@ -21,7 +21,9 @@ const loginRouter = Router();
 
 loginRouter.post('/access', async (request, response) => {
   const result = {};
-  let check, browserId;
+  let check,
+    browserId,
+    logout = false;
   if (request.body.from === 'admin') {
     // Get the requester's useRightsLevel and editorRightsLevel matching formIds
     let userLevel = 0;
@@ -85,7 +87,7 @@ loginRouter.post('/access', async (request, response) => {
     }
   } else if (request.body.from === 'logout') {
     if (request.session.username) {
-      request.session.destroy();
+      logout = true;
       if (request.cookies['connect.sid']) {
         response.clearCookie('connect.sid');
       }
@@ -108,6 +110,9 @@ loginRouter.post('/access', async (request, response) => {
 
   result.loggedIn = checkIfLoggedIn(request.session);
 
+  if (logout) {
+    return request.session.destroy(() => response.json(result));
+  }
   return response.json(result);
 });
 

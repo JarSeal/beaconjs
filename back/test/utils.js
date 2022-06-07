@@ -4,11 +4,35 @@ import bcrypt from 'bcrypt';
 import User from '../models/user';
 import UserSetting from '../models/userSetting';
 import shared from '../shared/index.js';
+import config from '../utils/config';
+
+const _chechEnv = () => {
+  if (config.ENV !== 'test') {
+    throw new Error('Wrong environment (not "test")!');
+  }
+};
+
+const defaultUser = {
+  username: 'testUser1',
+  password: 'testuser',
+  email: 'sometestuser@sometestuserdomain.com',
+  name: '',
+  userLevel: 2,
+};
+
+const superAdminUser = {
+  username: 'superAdmin',
+  password: 'testuser',
+  email: 'sometestuseradmin@sometestuserdomain.com',
+  name: '',
+  userLevel: 9,
+};
 
 export const createUser = async (userData) => {
+  _chechEnv();
   const { username, password, email, name, userLevel, verified } = userData;
-  const CONFIG = shared.CONFIG;
-  const passwordHash = await bcrypt.hash(password, CONFIG.USER.password.saltRounds);
+  const userConfig = shared.CONFIG.USER;
+  const passwordHash = await bcrypt.hash(password, userConfig.password.saltRounds);
   const newUser = new User({
     username,
     email,
@@ -40,6 +64,7 @@ export const createUser = async (userData) => {
 };
 
 export const checklogin = async (givenBrowserId) => {
+  _chechEnv();
   const browserId = givenBrowserId || 'e59b1e5fd129008eecbc4ed3e0c206f9';
   const checkLogin = await axios.post(
     'http://localhost:3001/api/login/access',
@@ -62,6 +87,7 @@ export const checklogin = async (givenBrowserId) => {
 };
 
 export const getCSRF = async (cookieAndBrowserId) => {
+  _chechEnv();
   const CSRF = await axios.post(
     'http://localhost:3001/api/login/access',
     {
@@ -73,7 +99,10 @@ export const getCSRF = async (cookieAndBrowserId) => {
   return CSRF.data.csrfToken;
 };
 
-export const login = async (session, username, password) => {
+export const login = async (userData, session) => {
+  _chechEnv();
+  if (!session) session = await checklogin();
+  const { username, password } = userData;
   const CSRF = await getCSRF({ credentials: session.credentials, browserId: session.browserId });
   const login = await axios.post(
     'http://localhost:3001/api/login',
@@ -87,29 +116,35 @@ export const login = async (session, username, password) => {
     },
     session.credentials
   );
-  return login.data;
+  return { user: login.data, session: session };
 };
 
 export const createUserAndLogin = async (userData) => {
-  const username = userData?.username || 'testUser1';
-  const password = userData?.password || 'testuser';
-  const user = await createUser({
+  _chechEnv();
+  let user = defaultUser;
+  if (userData === 'superAdmin') user = superAdminUser;
+  const username = userData?.username || user.username;
+  const password = userData?.password || user.password;
+  const createdUser = await createUser({
     username,
     password,
     verified: userData?.verified || true,
-    email: userData?.email || 'sometestuser@sometestuserdomain.com',
-    userLevel: userData?.userLevel || 2,
+    email: userData?.email || user.email,
+    userLevel: userData?.userLevel || user.userLevel,
   });
   const session = await checklogin();
-  const loggedIn = await login(session, username, password);
+  const loggedIn = await login({ username, password }, session);
   return {
     session,
     login: loggedIn,
-    user,
+    user: createdUser,
+    username,
+    password,
   };
 };
 
 export const setUserSetting = async (id, userId, value) => {
+  _chechEnv();
   const sett = await UserSetting.findOne({ settingId: id, userId: userId });
   if (sett) {
     await UserSetting.findOneAndUpdate({ settingId: id, userId }, { value });
@@ -123,4 +158,16 @@ export const setUserSetting = async (id, userId, value) => {
     });
     await newSett.save();
   }
+};
+
+export const doLogout = async (credentials) => {
+  _chechEnv();
+  const response = await axios.post(
+    'http://localhost:3001/api/login/access',
+    {
+      from: 'logout',
+    },
+    credentials
+  );
+  return response.data;
 };

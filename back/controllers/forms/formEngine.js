@@ -128,7 +128,7 @@ export const checkAllowedFieldTypes = (type) => {
   if (type === 'divider' || type === 'subheading' || type === 'subdescription') {
     return null;
   }
-  return 'Field type not found.';
+  return 'Field type not found';
 };
 
 export const validateKeys = (form, keys) => {
@@ -187,8 +187,7 @@ export const validateFormData = async (formData, request) => {
 };
 
 export const validatePrivileges = async (form, request) => {
-  const settings = await getSettings(request, true);
-  if (form.useRightsLevel && form.useRightsLevel !== 0) {
+  if (form.useRightsLevel && form.useRightsLevel > 0) {
     const sess = request.session;
     if (!checkIfLoggedIn(sess)) {
       logger.log(
@@ -197,7 +196,7 @@ export const validatePrivileges = async (form, request) => {
       return {
         code: 401,
         obj: {
-          msg: 'User not authenticated or session has expired.',
+          msg: 'User not authenticated or session has expired',
           _sess: false,
           loggedIn: false,
         },
@@ -205,13 +204,14 @@ export const validatePrivileges = async (form, request) => {
     }
   }
 
+  const settings = await getSettings(request, true);
   if (!checkAccess(request, form, settings)) {
     logger.error(`User not authorised. Trying to access form with id ${form.formId}.`);
     return {
       code: 401,
       obj: {
         unauthorised: true,
-        msg: 'User not authorised.',
+        msg: 'Unauthorised',
       },
     };
   }
