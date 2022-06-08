@@ -5,10 +5,11 @@ import startBackend from '../test/serverSetup';
 import { createUserAndLogin, setUserSetting, getCSRF, doLogout, login } from '../test/utils';
 import AdminSetting from '../models/adminSetting';
 
-startBackend();
 let loginData, _userId;
 
 describe('settings controller', () => {
+  startBackend();
+
   beforeAll(async () => {
     loginData = await createUserAndLogin();
     _userId = loginData.user._id;

@@ -14,10 +14,9 @@ import { getSettings } from './settingsService';
 
 const ObjectId = mongoose.Types.ObjectId;
 
-connectTestMongo();
-
 describe('helpers', () => {
   let savedUser1, savedUser2;
+  connectTestMongo();
 
   it('should check if a given id is a valid Mongo ObjectId or not', () => {
     const validId = '6293f65e9be6aa0e604218e3';

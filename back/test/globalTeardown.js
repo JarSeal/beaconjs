@@ -13,6 +13,7 @@ const globalTeardown = async () => {
     .then(async (conn) => {
       await conn.connection.db.dropDatabase(async () => {
         await conn.connection.close();
+        if (process.env.TEARDOWN) process.exit(0);
       });
     })
     .catch((error) => {

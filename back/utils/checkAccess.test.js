@@ -5,9 +5,9 @@ import AdminSetting from '../models/adminSetting';
 import Form from '../models/form';
 import { checkAccess, checkIfLoggedIn } from './checkAccess';
 
-connectTestMongo();
-
 describe('checkAccess', () => {
+  connectTestMongo();
+
   it('should check access of a route or a form according to session, form, and settings', async () => {
     const { request1, request2, request3, request4 } = requests;
     await AdminSetting.findOneAndUpdate(

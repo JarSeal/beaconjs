@@ -2,9 +2,11 @@ import mongoose from 'mongoose';
 
 import config from '../utils/config.js';
 
+let mongoConn2;
+
 const connectTestMongo = () => {
   beforeAll(async () => {
-    await mongoose
+    mongoConn2 = await mongoose
       .connect(config.MONGODB_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -17,7 +19,7 @@ const connectTestMongo = () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.close();
+    await mongoConn2.connection.close();
   });
 };
 

@@ -59,23 +59,22 @@ export const createUser = async (userData) => {
       twoFactor: {},
     },
   });
-  const savedNewUser = await newUser.save();
+  let savedNewUser;
+  try {
+    savedNewUser = await newUser.save();
+  } catch (error) {
+    savedNewUser = newUser;
+  }
   return savedNewUser;
 };
 
 export const checklogin = async (givenBrowserId) => {
   _chechEnv();
   const browserId = givenBrowserId || 'e59b1e5fd129008eecbc4ed3e0c206f9';
-  const checkLogin = await axios.post(
-    'http://localhost:3001/api/login/access',
-    {
-      from: 'checklogin',
-      browserId,
-    },
-    {
-      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-    }
-  );
+  const checkLogin = await axios.post('http://localhost:3001/api/login/access', {
+    from: 'checklogin',
+    browserId,
+  });
   return {
     browserId,
     credentials: {

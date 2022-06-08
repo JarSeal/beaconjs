@@ -12,9 +12,9 @@ import {
 import { requests } from '../test/dummyData';
 import { setUserSetting } from '../test/utils';
 
-connectTestMongo();
-
 describe('settingsService', () => {
+  connectTestMongo();
+
   it('should get all settings', async () => {
     const request = requests.request2;
     const settingsFirstLoad = await getSettings(request);

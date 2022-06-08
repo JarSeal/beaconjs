@@ -21,9 +21,7 @@ const loginRouter = Router();
 
 loginRouter.post('/access', async (request, response) => {
   const result = {};
-  let check,
-    browserId,
-    logout = false;
+  let check, browserId;
   if (request.body.from === 'admin') {
     // Get the requester's useRightsLevel and editorRightsLevel matching formIds
     let userLevel = 0;
@@ -48,7 +46,6 @@ loginRouter.post('/access', async (request, response) => {
       if (user) {
         result.username = request.session.username;
         result.userLevel = request.session.userLevel || 0;
-        if (result.userLevel === 0) request.session.userLevel = 0;
         // Check email and account verification
         result.accountVerified = null;
         request.session.verified = null;
@@ -59,12 +56,9 @@ loginRouter.post('/access', async (request, response) => {
           result.accountVerified = true;
           request.session.verified = true;
         }
-      } else {
-        request.session.browserId = browserId;
       }
-    } else {
-      request.session.browserId = browserId;
     }
+    request.session.browserId = browserId;
     result.serviceSettings = settings;
   } else if (request.body.from === 'getCSRF') {
     if (!request.session) {
@@ -86,8 +80,8 @@ loginRouter.post('/access', async (request, response) => {
       });
     }
   } else if (request.body.from === 'logout') {
-    if (request.session.username) {
-      logout = true;
+    if (request.session?.username) {
+      request.session.destroy();
       if (request.cookies['connect.sid']) {
         response.clearCookie('connect.sid');
       }
@@ -107,12 +101,7 @@ loginRouter.post('/access', async (request, response) => {
       result.serviceSettings = await getPublicSettings(request, true);
     }
   }
-
   result.loggedIn = checkIfLoggedIn(request.session);
-
-  if (logout) {
-    return request.session.destroy(() => response.json(result));
-  }
   return response.json(result);
 });
 
