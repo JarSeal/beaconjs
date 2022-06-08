@@ -1,0 +1,6 @@
+{
+  "targets": {
+    "front": "./front/src/.env",
+    "back": "./back/.env"
+  }
+}
