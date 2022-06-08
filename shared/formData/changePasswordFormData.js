@@ -2,7 +2,7 @@ import { USER } from '../../CONFIG.js';
 
 const changePasswordFormData = {
   formId: 'change-password-form',
-  path: '/api/users/own/changepass',
+  path: '/users/own/changepass',
   method: 'POST',
   type: 'form',
   useRightsLevel: 1,

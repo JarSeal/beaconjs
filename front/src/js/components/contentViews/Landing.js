@@ -57,7 +57,7 @@ class Landing extends Component {
     this.universesList = this.addChild(
       new ListLoader({
         id: 'universes-list',
-        api: '/api/universes',
+        api: '/universes',
         attach: 'universe-wrapper',
         component: UniverseItem,
       })

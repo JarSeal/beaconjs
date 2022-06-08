@@ -7,6 +7,7 @@ import baseHTML from './base.html?raw';
 import { loadAssets } from './helpers/lang';
 import Dialog from './components/widgets/Dialog';
 import baseStyles from './Base.module.scss';
+import { getApiBaseUrl } from './helpers/config';
 
 class Base extends Component {
   constructor(data) {
@@ -67,7 +68,7 @@ class Base extends Component {
 
   loadData = async () => {
     const browserId = this.appState.get('browserId');
-    const url = _CONFIG.apiBaseUrl + '/api/login/access';
+    const url = getApiBaseUrl() + '/login/access';
     const payload = { from: 'checklogin', browserId };
     const response = await axios.post(url, payload, { withCredentials: true });
 

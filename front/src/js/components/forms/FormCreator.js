@@ -2,7 +2,6 @@ import axios from 'axios';
 import { getLang, getText } from '../../helpers/lang';
 import shared from '../../shared/index.js';
 import { Component, Logger, State } from '../../LIGHTER';
-import { _CONFIG } from '../../_CONFIG';
 import validationFns from './formData/validationFns';
 import optionsFns from './formData/optionsFns';
 import Spinner from '../widgets/Spinner';
@@ -12,6 +11,7 @@ import SubmitButton from './formComponents/SubmitButton';
 import TextInput from './formComponents/TextInput';
 import TextArea from './formComponents/TextArea';
 import Button from '../buttons/Button';
+import { getApiBaseUrl } from '../../helpers/config';
 
 // Attributes for data:
 // - local = must be set to true if local forms are used (all the form data must then be in in the data) [Boolean]
@@ -783,7 +783,7 @@ class FormCreator extends Component {
     this.formState.set('sending', true);
     try {
       payload.id = this.id;
-      let url = _CONFIG.apiBaseUrl + (this.data.api || '/api/forms/filled');
+      let url = getApiBaseUrl() + (this.data.api || '/forms/filled');
       let response;
 
       if (this.data.addToMessage) {
@@ -795,7 +795,7 @@ class FormCreator extends Component {
 
       // Get the just-in-time CSRF token
       const getCSRFPayload = { from: 'getCSRF', browserId: this.appState.get('browserId') };
-      const urlCSRF = _CONFIG.apiBaseUrl + '/api/login/access';
+      const urlCSRF = getApiBaseUrl() + '/login/access';
       response = await axios.post(urlCSRF, getCSRFPayload, { withCredentials: true });
       if (!response.data || !response.data.csrfToken) {
         this.logger.error('Could not retrieve CSRF token.', response);
@@ -891,7 +891,7 @@ class FormCreator extends Component {
     try {
       let additionalDataId = '';
       if (this.data.editDataId) additionalDataId = '+' + this.data.editDataId;
-      const url = _CONFIG.apiBaseUrl + '/api/forms/' + id + additionalDataId;
+      const url = getApiBaseUrl() + '/forms/' + id + additionalDataId;
       const response = await axios.get(url, { withCredentials: true });
 
       // this.logger.log('API RESPONSE', response);

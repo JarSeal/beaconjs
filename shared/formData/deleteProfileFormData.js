@@ -1,6 +1,6 @@
 const deleteProfileFormData = {
   formId: 'delete-profile-form',
-  path: '/api/users/own/delete',
+  path: '/users/own/delete',
   method: 'POST',
   type: 'form',
   useRightsLevel: 1,

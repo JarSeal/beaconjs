@@ -1,6 +1,6 @@
 const adminSettingsFormData = {
   formId: 'admin-settings-form',
-  path: '/api/settings/admin',
+  path: '/settings/admin',
   method: 'PUT',
   type: 'form',
   useRightsLevel: 8,

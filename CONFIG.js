@@ -18,7 +18,6 @@ export const USER = {
 
 export const UI = {
   langs: ['en'],
-  apiBaseUrl: 'http://localhost:3001',
   baseUrl: 'http://localhost:8080',
   basePath: '/beacon',
   titlePrefix: '',

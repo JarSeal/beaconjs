@@ -25,7 +25,7 @@ class MyProfile extends Component {
       })
     );
     this.data;
-    this.readApi = new ReadApi({ url: '/api/users/own/profile' });
+    this.readApi = new ReadApi({ url: '/users/own/profile' });
     this.dialogForms = new DialogForms({ id: 'dialog-forms-my-profile' });
     this.dataComps = [];
   }

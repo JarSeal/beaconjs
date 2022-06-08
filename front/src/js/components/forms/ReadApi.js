@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { getApiBaseUrl } from '../../helpers/config';
 import { Logger } from '../../LIGHTER';
-import { _CONFIG } from '../../_CONFIG';
 
 // Attributes
 // - url: String
@@ -12,7 +12,7 @@ class ReadApi {
       Logger.error('ReadApi is missing params. At least url is needed.');
       return;
     }
-    this.url = _CONFIG.apiBaseUrl + params.url;
+    this.url = getApiBaseUrl() + params.url;
     this.onError = params.onError;
     this.afterGet = params.afterGet;
   }

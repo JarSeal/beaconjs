@@ -1,6 +1,6 @@
 const emailVerificationFormData = {
   formId: 'new-email-verification',
-  path: '/api/users/newemailverification',
+  path: '/users/newemailverification',
   method: 'POST',
   type: 'form',
   useRightsLevel: 1,

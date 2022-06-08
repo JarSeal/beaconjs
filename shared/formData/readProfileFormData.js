@@ -1,6 +1,6 @@
 const readUsersFormData = {
   formId: 'read-profile',
-  path: '/api/users/own/profile',
+  path: '/users/own/profile',
   method: 'GET',
   type: 'readapi',
   useRightsLevel: 1,

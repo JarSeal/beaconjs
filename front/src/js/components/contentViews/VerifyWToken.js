@@ -28,7 +28,7 @@ class VerifyWToken extends Component {
       this.viewTitle.showSpinner(false);
       return;
     }
-    this.readApi = new ReadApi({ url: '/api/users/verify/' + token });
+    this.readApi = new ReadApi({ url: '/users/verify/' + token });
     this._tryToVerify();
   };
 

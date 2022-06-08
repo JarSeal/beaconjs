@@ -22,8 +22,8 @@ class AdminSettings extends Component {
         spinner: true,
       })
     );
-    this.formDataApi = new ReadApi({ url: '/api/forms/admin-settings-form' });
-    this.settingsDataApi = new ReadApi({ url: '/api/settings/admin' });
+    this.formDataApi = new ReadApi({ url: '/forms/admin-settings-form' });
+    this.settingsDataApi = new ReadApi({ url: '/settings/admin' });
   }
 
   init = () => {

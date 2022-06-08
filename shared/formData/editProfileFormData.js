@@ -2,7 +2,7 @@ import { USER } from '../../CONFIG.js';
 
 const editProfileFormData = {
   formId: 'edit-profile-form',
-  path: '/api/users/own/profile',
+  path: '/users/own/profile',
   method: 'PUT',
   type: 'form',
   useRightsLevel: 1,

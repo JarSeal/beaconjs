@@ -6,7 +6,7 @@ const options = [
 
 const editExposeProfileFormData = {
   formId: 'edit-expose-profile-form',
-  path: '/api/users/user/exposure',
+  path: '/users/user/exposure',
   method: 'PUT',
   type: 'form',
   useRightsLevel: 1,

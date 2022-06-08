@@ -1,6 +1,6 @@
 const newUniverseFormData = {
   formId: 'new-universe-form',
-  path: '/api/universes',
+  path: '/universes',
   method: 'POST',
   type: 'form',
   useRightsLevel: 2,

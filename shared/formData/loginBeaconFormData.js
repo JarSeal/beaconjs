@@ -1,6 +1,6 @@
 const loginBeaconFormData = {
   formId: 'beacon-main-login',
-  path: '/api/login',
+  path: '/login',
   method: 'POST',
   type: 'form',
   useRightsLevel: 0,
