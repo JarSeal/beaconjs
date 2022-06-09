@@ -18,8 +18,7 @@ export const USER = {
 
 export const UI = {
   langs: ['en'],
-  baseUrl: 'http://localhost:8080',
-  basePath: '/beacon',
+  basePath: process?.env?.CLIENT_BASE_PATH || null,
   titlePrefix: '',
   titleSuffix: ' | Beacon',
   bbarSize: 64,

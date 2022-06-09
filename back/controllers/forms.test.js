@@ -2,8 +2,10 @@ import axios from 'axios';
 
 import startBackend from '../test/serverSetup';
 import { createUserAndLogin, doLogout, login } from '../test/utils';
+import config from '../utils/config';
 
 let loginData;
+const apiUrl = config.getApiBaseUrl('http://localhost');
 
 describe('forms controller', () => {
   startBackend();
@@ -16,12 +18,12 @@ describe('forms controller', () => {
     loginData = await doLogout(loginData?.session?.credentials);
 
     // Get beacon main login form as a public user
-    let response = await axios.get('http://localhost:3001/api/forms/beacon-main-login');
+    let response = await axios.get(`${apiUrl}/forms/beacon-main-login`);
     expect(response.data.id).toEqual('beacon-main-login');
 
     // Try to get user settings form as a public user
     try {
-      response = await axios.get('http://localhost:3001/api/forms/user-settings-form');
+      response = await axios.get(`${apiUrl}/forms/user-settings-form`);
     } catch (error) {
       response = error.response;
     }
@@ -34,7 +36,7 @@ describe('forms controller', () => {
 
     // Try to get unknown form
     try {
-      response = await axios.get('http://localhost:3001/api/forms/somefhjkshfdshjkf');
+      response = await axios.get(`${apiUrl}/forms/somefhjkshfdshjkf`);
     } catch (error) {
       response = error.response;
     }
@@ -50,15 +52,12 @@ describe('forms controller', () => {
     });
 
     // Get user settings as a logged in, level 2 user
-    response = await axios.get(
-      'http://localhost:3001/api/forms/user-settings-form',
-      loginData.session.credentials
-    );
+    response = await axios.get(`${apiUrl}/forms/user-settings-form`, loginData.session.credentials);
     expect(response.data.id).toEqual('user-settings-form');
 
     // Try to get an admin level form with level 2 user
     try {
-      response = await axios.get('http://localhost:3001/api/forms/admin-settings-form');
+      response = await axios.get(`${apiUrl}/forms/admin-settings-form`);
     } catch (error) {
       response = error.response;
     }

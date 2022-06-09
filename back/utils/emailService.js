@@ -2,11 +2,11 @@ import CryptoJS from 'crypto-js';
 import nodemailer from 'nodemailer';
 import { marked } from 'marked';
 
-import config from './config.js';
-import logger from './logger.js';
-import Email from '../models/email.js';
-import { getSettings } from './settingsService.js';
-import shared from '../shared/index.js';
+import config from './config';
+import logger from './logger';
+import Email from '../models/email';
+import { getSettings } from './settingsService';
+import shared from '../shared/index';
 
 const confUI = shared.CONFIG.UI;
 
@@ -69,7 +69,7 @@ const sendEmailById = async (id, emailParams, request) => {
     // },
   });
 
-  const mainUrl = confUI?.baseUrl + confUI?.basePath;
+  const mainUrl = config.getClientBaseUrl();
   emailParams.mainBeaconUrl = mainUrl;
   emailParams.newPassRequestUrl = mainUrl + '/u/newpassrequest';
 

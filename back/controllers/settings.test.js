@@ -4,8 +4,10 @@ import axios from 'axios';
 import startBackend from '../test/serverSetup';
 import { createUserAndLogin, setUserSetting, getCSRF, doLogout, login } from '../test/utils';
 import AdminSetting from '../models/adminSetting';
+import config from '../utils/config';
 
 let loginData, _userId;
+const apiUrl = config.getApiBaseUrl('http://localhost');
 
 describe('settings controller', () => {
   startBackend();
@@ -20,10 +22,7 @@ describe('settings controller', () => {
       { settingId: 'use-two-factor-authentication' },
       { value: 'disabled' }
     );
-    let settings = await axios.get(
-      'http://localhost:3001/api/settings',
-      loginData.session.credentials
-    );
+    let settings = await axios.get(`${apiUrl}/settings`, loginData.session.credentials);
     const tableSortingSetting = settings.data.filter(
       (s) => s.settingId === 'table-sorting-setting'
     );
@@ -34,14 +33,14 @@ describe('settings controller', () => {
       { settingId: 'use-two-factor-authentication' },
       { value: 'users_can_choose' }
     );
-    settings = await axios.get('http://localhost:3001/api/settings', loginData.session.credentials);
+    settings = await axios.get(`${apiUrl}/settings`, loginData.session.credentials);
     twoFactorSetting = settings.data.filter((s) => s.settingId === 'enable-user-2fa-setting');
     expect(twoFactorSetting.length).toEqual(1);
 
     loginData = await doLogout(loginData?.session?.credentials);
     const fail = async () => {
       try {
-        settings = await axios.get('http://localhost:3001/api/settings', {});
+        settings = await axios.get(`${apiUrl}/settings`, {});
       } catch (error) {
         return error.response;
       }
@@ -66,10 +65,7 @@ describe('settings controller', () => {
       password: 'testuser',
     });
     setUserSetting('table-sorting-setting', _userId, 'none');
-    let settings = await axios.get(
-      'http://localhost:3001/api/settings',
-      loginData.session.credentials
-    );
+    let settings = await axios.get(`${apiUrl}/settings`, loginData.session.credentials);
     let tableSortingSetting = settings.data.filter(
       (s) => s.settingId === 'table-sorting-setting'
     )[0];
@@ -77,7 +73,7 @@ describe('settings controller', () => {
 
     let CSRF = await getCSRF(loginData.session);
     await axios.put(
-      'http://localhost:3001/api/settings',
+      `${apiUrl}/settings`,
       {
         id: 'user-settings-form',
         mongoId: tableSortingSetting.id,
@@ -86,7 +82,7 @@ describe('settings controller', () => {
       },
       loginData.session.credentials
     );
-    settings = await axios.get('http://localhost:3001/api/settings', loginData.session.credentials);
+    settings = await axios.get(`${apiUrl}/settings`, loginData.session.credentials);
     tableSortingSetting = settings.data.filter((s) => s.settingId === 'table-sorting-setting')[0];
     expect(tableSortingSetting.value).toEqual('session');
 
@@ -94,7 +90,7 @@ describe('settings controller', () => {
       try {
         CSRF = await getCSRF(loginData.session);
         await axios.put(
-          'http://localhost:3001/api/settings',
+          `${apiUrl}/settings`,
           { ...payload, _csrf: CSRF },
           loginData.session.credentials
         );
@@ -149,7 +145,7 @@ describe('settings controller', () => {
     // Trying to get admin settings as a not logged in user
     let fail = async () => {
       try {
-        await axios.get('http://localhost:3001/api/settings/admin', {});
+        await axios.get(`${apiUrl}/settings/admin`, {});
       } catch (error) {
         return error.response;
       }
@@ -171,7 +167,7 @@ describe('settings controller', () => {
     // Still fail, because user is only level 2 user
     fail = async () => {
       try {
-        await axios.get('http://localhost:3001/api/settings/admin', loginData.session.credentials);
+        await axios.get(`${apiUrl}/settings/admin`, loginData.session.credentials);
       } catch (error) {
         return error.response;
       }
@@ -187,7 +183,7 @@ describe('settings controller', () => {
     loginData = await doLogout(loginData?.session?.credentials);
     const adminLogin = await createUserAndLogin('superAdmin');
     const adminSettings = await axios.get(
-      'http://localhost:3001/api/settings/admin',
+      `${apiUrl}/settings/admin`,
       adminLogin.session.credentials
     );
     expect(adminSettings.data.length > 10).toEqual(true);
@@ -200,7 +196,7 @@ describe('settings controller', () => {
       password: 'testuser',
     });
     const adminSettings = (
-      await axios.get('http://localhost:3001/api/settings/admin', loginData.session.credentials)
+      await axios.get(`${apiUrl}/settings/admin`, loginData.session.credentials)
     ).data;
     const exposureSetting = adminSettings.filter(
       (s) => s.settingId === 'users-can-set-exposure-levels'
@@ -213,7 +209,7 @@ describe('settings controller', () => {
     let fail = async () => {
       try {
         const response = await axios.put(
-          'http://localhost:3001/api/settings/admin',
+          `${apiUrl}/settings/admin`,
           {
             id: 'admin-settings-form',
             'users-can-set-exposure-levels': false,
@@ -240,7 +236,7 @@ describe('settings controller', () => {
     fail = async () => {
       try {
         const response = await axios.put(
-          'http://localhost:3001/api/settings/admin',
+          `${apiUrl}/settings/admin`,
           {
             id: 'admin-settings-form',
             'users-can-set-exposure-levels': false,
@@ -271,7 +267,7 @@ describe('settings controller', () => {
     let trying = async () => {
       try {
         const response = await axios.put(
-          'http://localhost:3001/api/settings/admin',
+          `${apiUrl}/settings/admin`,
           {
             id: 'admin-settings-form',
             'users-can-set-exposure-levels': false,
@@ -292,7 +288,7 @@ describe('settings controller', () => {
     trying = async () => {
       try {
         const response = await axios.put(
-          'http://localhost:3001/api/settings/admin',
+          `${apiUrl}/settings/admin`,
           {
             id: 'admin-settings-form',
             'users-can-set-exposure-levels': true,

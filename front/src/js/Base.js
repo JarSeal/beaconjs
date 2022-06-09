@@ -17,6 +17,8 @@ class Base extends Component {
     this.appState = this._initAppState();
     loadAssets();
     this._initResizer();
+    console.log('CONF', _CONFIG);
+    _CONFIG.basePath = import.meta.env.VITE_CLIENT_PATH;
     this.Router = new Router(_CONFIG, this.id, this.paint, {
       appState: this.appState,
       attach: 'content-area',

@@ -71,7 +71,7 @@ export const createUser = async (userData) => {
 export const checklogin = async (givenBrowserId) => {
   _chechEnv();
   const browserId = givenBrowserId || 'e59b1e5fd129008eecbc4ed3e0c206f9';
-  const checkLogin = await axios.post('http://localhost:3001/api/login/access', {
+  const checkLogin = await axios.post(`${config.getApiBaseUrl('http://localhost')}/login/access`, {
     from: 'checklogin',
     browserId,
   });
@@ -88,7 +88,7 @@ export const checklogin = async (givenBrowserId) => {
 export const getCSRF = async (cookieAndBrowserId) => {
   _chechEnv();
   const CSRF = await axios.post(
-    'http://localhost:3001/api/login/access',
+    `${config.getApiBaseUrl('http://localhost')}/login/access`,
     {
       from: 'getCSRF',
       browserId: cookieAndBrowserId.browserId,
@@ -104,7 +104,7 @@ export const login = async (userData, session) => {
   const { username, password } = userData;
   const CSRF = await getCSRF({ credentials: session.credentials, browserId: session.browserId });
   const login = await axios.post(
-    'http://localhost:3001/api/login',
+    `${config.getApiBaseUrl('http://localhost')}/login`,
     {
       browserId: session.browserId,
       id: 'beacon-main-login',
@@ -162,7 +162,7 @@ export const setUserSetting = async (id, userId, value) => {
 export const doLogout = async (credentials) => {
   _chechEnv();
   const response = await axios.post(
-    'http://localhost:3001/api/login/access',
+    `${config.getApiBaseUrl('http://localhost')}/login/access`,
     {
       from: 'logout',
     },

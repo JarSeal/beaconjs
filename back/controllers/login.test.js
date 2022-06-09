@@ -2,8 +2,10 @@ import axios from 'axios';
 
 import startBackend from '../test/serverSetup';
 import { createUserAndLogin, doLogout, login } from '../test/utils';
+import config from '../utils/config';
 
 let loginData;
+const apiUrl = config.getApiBaseUrl('http://localhost');
 
 describe('login controller', () => {
   startBackend();
@@ -16,7 +18,7 @@ describe('login controller', () => {
     loginData = await doLogout(loginData?.session?.credentials);
 
     // admin as a public user
-    let response = await axios.post('http://localhost:3001/api/login/access', {
+    let response = await axios.post(`${apiUrl}/login/access`, {
       from: 'admin',
     });
     expect(response.data.loggedIn).toEqual(false);
@@ -30,7 +32,7 @@ describe('login controller', () => {
 
     // admin as a public user
     response = await axios.post(
-      'http://localhost:3001/api/login/access',
+      `${apiUrl}/login/access`,
       {
         from: 'admin',
       },
@@ -45,7 +47,7 @@ describe('login controller', () => {
 
     // admin as a super admin
     response = await axios.post(
-      'http://localhost:3001/api/login/access',
+      `${apiUrl}/login/access`,
       {
         from: 'admin',
       },
@@ -60,7 +62,7 @@ describe('login controller', () => {
     loginData = await doLogout(loginData?.session?.credentials);
 
     // checklogin as a public user
-    let response = await axios.post('http://localhost:3001/api/login/access', {
+    let response = await axios.post(`${apiUrl}/login/access`, {
       from: 'checklogin',
     });
     expect(response.data.loggedIn).toEqual(false);
@@ -72,7 +74,7 @@ describe('login controller', () => {
 
     // checklogin as a level 2 user
     response = await axios.post(
-      'http://localhost:3001/api/login/access',
+      `${apiUrl}/login/access`,
       {
         from: 'checklogin',
       },
@@ -87,7 +89,7 @@ describe('login controller', () => {
 
     // getCSRF as a public user and with and without browserId
     try {
-      response = await axios.post('http://localhost:3001/api/login/access', {
+      response = await axios.post(`${apiUrl}/login/access`, {
         from: 'getCSRF',
       });
     } catch (error) {
@@ -101,7 +103,7 @@ describe('login controller', () => {
       loggedIn: false,
     });
     try {
-      response = await axios.post('http://localhost:3001/api/login/access', {
+      response = await axios.post(`${apiUrl}/login/access`, {
         from: 'getCSRF',
         browserId: 'e59b1e5fd129008eecbc4ed3e0c206f9',
       });
@@ -123,7 +125,7 @@ describe('login controller', () => {
 
     // getCSRF as a logged in user
     response = await axios.post(
-      'http://localhost:3001/api/login/access',
+      `${apiUrl}/login/access`,
       {
         from: 'getCSRF',
         browserId: loginData.session.browserId,
@@ -135,6 +137,9 @@ describe('login controller', () => {
   });
 
   // Logout
+  if('should logout the user', () => {
+    console.log('LOGOUT');
+  })
 
   // Check access for formId(s)
 

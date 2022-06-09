@@ -6,23 +6,24 @@ import {
   createNewEditedArray,
   checkIfEmailTaken,
   getUserEmail,
-} from '../utils/helpers.js';
-import shared from '../shared/index.js';
-import readUsersFormData from '../../shared/formData/deleteUsersFormData.js';
-import readOneUserFormData from '../../shared/formData/readOneUserFormData.js';
-import readProfileFormData from '../../shared/formData/readProfileFormData.js';
-import editExposeProfileFormData from '../../shared/formData/editExposeProfileFormData.js';
-import verifyAccountWToken from '../../shared/formData/verifyAccountWToken.js';
-import emailVerificationFormData from './../../shared/formData/emailVerificationFormData.js';
-import logger from '../utils/logger.js';
-import User from '../models/user.js';
-import UserSetting from '../models/userSetting.js';
-import Form from '../models/form.js';
-import { getAndValidateForm, getUserExposure } from './forms/formEngine.js';
-import { checkIfLoggedIn } from '../utils/checkAccess.js';
-import { sendEmailById } from '../utils/emailService.js';
-import { createRandomString } from '../../shared/parsers.js';
-import { getSetting } from '../utils/settingsService.js';
+} from '../utils/helpers';
+import shared from '../shared/index';
+import readUsersFormData from '../../shared/formData/deleteUsersFormData';
+import readOneUserFormData from '../../shared/formData/readOneUserFormData';
+import readProfileFormData from '../../shared/formData/readProfileFormData';
+import editExposeProfileFormData from '../../shared/formData/editExposeProfileFormData';
+import verifyAccountWToken from '../../shared/formData/verifyAccountWToken';
+import emailVerificationFormData from './../../shared/formData/emailVerificationFormData';
+import logger from '../utils/logger';
+import User from '../models/user';
+import UserSetting from '../models/userSetting';
+import Form from '../models/form';
+import { getAndValidateForm, getUserExposure } from './forms/formEngine';
+import { checkIfLoggedIn } from '../utils/checkAccess';
+import { sendEmailById } from '../utils/emailService';
+import { createRandomString } from '../../shared/parsers';
+import { getSetting } from '../utils/settingsService';
+import config from '../utils/config';
 
 const usersRouter = Router();
 const CONFIG = shared.CONFIG;
@@ -501,7 +502,7 @@ usersRouter.put('/own/profile', async (request, response) => {
       {
         to: body.email.trim(),
         username: user.username,
-        verifyEmailTokenUrl: CONFIG.UI.baseUrl + CONFIG.UI.basePath + '/u/verify/' + newEmailToken,
+        verifyEmailTokenUrl: `${config.getClientBaseUrl()}/u/verify/${newEmailToken}`,
       },
       request
     );
@@ -756,7 +757,7 @@ usersRouter.post('/newpassrequest', async (request, response) => {
       {
         to: email,
         username: savedUser.username,
-        newPassWTokenUrl: CONFIG.UI.baseUrl + CONFIG.UI.basePath + '/u/newpass/' + newToken,
+        newPassWTokenUrl: `${config.getClientBaseUrl()}/u/newpass/${newToken}`,
         linkLife,
       },
       request
@@ -946,7 +947,7 @@ const _sendVerificationEmail = async (request, response, user) => {
     {
       to: user.email,
       username: user.username,
-      verifyEmailTokenUrl: CONFIG.UI.baseUrl + CONFIG.UI.basePath + '/u/verify/' + newEmailToken,
+      verifyEmailTokenUrl: `${config.getClientBaseUrl()}/u/verify/${newEmailToken}`,
     },
     request
   );

@@ -19,7 +19,7 @@ const createEnvFiles = () => {
     }
   } catch (err) {
     console.log(err);
-    throw new Error(`Error while checking/reading config file (${configFile})`);
+    throw new Error(`Error while checking/reading config file (${configFile}).`);
   }
   if (configFileContent.separator) {
     S = configFileContent.separator;
