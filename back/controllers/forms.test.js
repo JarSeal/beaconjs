@@ -20,7 +20,6 @@ describe('forms controller', () => {
     // Get beacon main login form as a public user
     let response = await axios.get(`${apiUrl}/forms/beacon-main-login`);
     expect(response.data.id).toEqual('beacon-main-login');
-
     // Try to get user settings form as a public user
     try {
       response = await axios.get(`${apiUrl}/forms/user-settings-form`);

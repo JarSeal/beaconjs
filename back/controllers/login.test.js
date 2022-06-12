@@ -1,13 +1,37 @@
 import axios from 'axios';
 
 import startBackend from '../test/serverSetup';
-import { createUserAndLogin, doLogout, login } from '../test/utils';
+import { createUserAndLogin, createUser, doLogout, login, getCSRF } from '../test/utils';
 import config from '../utils/config';
+import AdminSetting from '../models/adminSetting';
+import Form from '../models/form';
 
 let loginData;
 const apiUrl = config.getApiBaseUrl('http://localhost');
 
-describe('login controller', () => {
+const tryLogin = async ({ username, password, remember }) => {
+  let resp;
+  let CSRF = await getCSRF(loginData.session);
+  try {
+    resp = await axios.post(
+      `${apiUrl}/login`,
+      {
+        id: 'beacon-main-login',
+        browserId: loginData.session.browserId,
+        username,
+        password,
+        _csrf: CSRF,
+        ['remember-me']: remember || false,
+      },
+      loginData.session.credentials
+    );
+  } catch (err) {
+    resp = err.response;
+  }
+  return resp;
+};
+
+describe('login controller, access', () => {
   startBackend();
 
   beforeAll(async () => {
@@ -136,16 +160,156 @@ describe('login controller', () => {
     expect(response.data.csrfToken.length).toEqual(36);
   });
 
-  // Logout
-  if('should logout the user', () => {
-    console.log('LOGOUT');
-  })
+  it('should logout the user', async () => {
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await login({
+      username: 'testUser1',
+      password: 'testuser',
+    });
+    expect(loginData.user.loggedIn).toEqual(true);
+    const response = await axios.post(
+      `${apiUrl}/login/access`,
+      {
+        from: 'logout',
+      },
+      loginData.session.credentials
+    );
+    expect(response.data.loggedIn).toEqual(false);
+  });
+});
 
-  // Check access for formId(s)
+describe('login controller, login', () => {
+  startBackend();
 
-  // Actual login
+  beforeAll(async () => {
+    loginData = await createUserAndLogin();
+  });
 
-  // 2FA Login
+  it('should login a user (no 2FA)', async () => {
+    let response;
+    loginData = await doLogout(loginData?.session?.credentials);
+
+    // Try login with wrong password
+    response = await tryLogin({ username: 'testUser1', password: 'test' });
+    expect(response.status).toEqual(401);
+    expect(response.data.loggedIn).toEqual(false);
+    expect(response.data.error).toEqual('invalid username and/or password');
+
+    // Try login with wrong username
+    response = await tryLogin({ username: 'fdsjksdfkj', password: 'testuser' });
+    expect(response.status).toEqual(401);
+    expect(response.data.loggedIn).toEqual(false);
+    expect(response.data.error).toEqual('invalid username and/or password');
+
+    // Successfully login
+    await AdminSetting.findOneAndUpdate({ settingId: 'email-sending' }, { value: 'true' });
+    await AdminSetting.findOneAndUpdate({ settingId: 'use-email-verification' }, { value: 'true' });
+    response = await tryLogin({ username: 'testUser1', password: 'testuser' });
+    expect(response.data.loggedIn).toEqual(true);
+    expect(response.data.accountVerified).toEqual(true);
+
+    loginData = await doLogout(loginData?.session?.credentials);
+    await createUser({
+      username: 'lockUser1',
+      password: 'testuser',
+      userLevel: 2,
+      email: 'someemail@emaildemo.fi',
+      verified: true,
+      name: '',
+    });
+
+    await AdminSetting.findOneAndUpdate({ settingId: 'max-login-attempts' }, { value: '3' });
+
+    // Fail login with user "lockUser1" 4 times, Cooldown test
+    response = await tryLogin({ username: 'lockUser1', password: 'test' });
+    expect(response.status).toEqual(401);
+    response = await tryLogin({ username: 'lockUser1', password: 'test' });
+    expect(response.status).toEqual(401);
+    response = await tryLogin({ username: 'lockUser1', password: 'test' });
+    expect(response.status).toEqual(401);
+    response = await tryLogin({ username: 'lockUser1', password: 'test' });
+    expect(response.status).toEqual(403);
+    expect(response.data.error).toEqual('user must wait a cooldown period before trying again');
+
+    // Test to login with level 1 user (set the beacon-main-login form to accept only level 2 and above user logins)
+    loginData = await doLogout(loginData?.session?.credentials);
+    await createUser({
+      username: 'level1User',
+      password: 'testuser',
+      userLevel: 1,
+      email: 'someemail2@emaildemo.fi',
+      verified: true,
+      name: '',
+    });
+    await Form.findOneAndUpdate(
+      { formId: 'beacon-main-login' },
+      { 'editorOptions.loginAccessLevel.value': 2 }
+    );
+    response = await tryLogin({ username: 'level1User', password: 'testuser' });
+    expect(response.status).toEqual(401);
+    expect(response.data.loggedIn).toEqual(false);
+
+    // Test unverified login
+    loginData = await doLogout(loginData?.session?.credentials);
+    await createUser({
+      username: 'unverifiedUser1',
+      password: 'testuser',
+      userLevel: 2,
+      email: 'someemail3@emaildemo.fi',
+      verified: false,
+      name: '',
+    });
+    response = await tryLogin({ username: 'unverifiedUser1', password: 'testuser' });
+    expect(response.data.loggedIn).toEqual(true);
+    expect(response.data.accountVerified).toEqual(false);
+  });
+
+  it('should login a user with 2FA', async () => {
+    let response;
+    loginData = await doLogout(loginData?.session?.credentials);
+    await AdminSetting.findOneAndUpdate({ settingId: 'email-sending' }, { value: 'true' });
+    await AdminSetting.findOneAndUpdate({ settingId: 'use-email-verification' }, { value: 'true' });
+    await AdminSetting.findOneAndUpdate(
+      { settingId: 'use-two-factor-authentication' },
+      { value: 'enabled_always' }
+    );
+    await createUser({
+      username: 'twoFAUser1',
+      password: 'testuser',
+      userLevel: 2,
+      email: 'someemail4@emaildemo.fi',
+      verified: true,
+      name: '',
+    });
+    response = await tryLogin({ username: 'twoFAUser1', password: 'testuser' });
+    expect(response.data.proceedToTwoFa).toEqual(true);
+    expect(response.data.loggedIn).toEqual(false);
+
+    let payload = {
+      browserId: 'jotain',
+      id: 'beacon-twofa-login',
+      username: 'joku',
+      _csrf: 'jotain',
+    };
+    try {
+      payload = {};
+      response = await axios.post(`${apiUrl}/login/two`, payload, loginData?.session?.credentials);
+    } catch (err) {
+      response = err.response;
+    }
+    // - Try first with wrong code
+    // - Expect to login successfully with right code (123456)
+    // - Logout
+    // - Set max-login-attempts adminSetting to 3
+    // - Login
+    // - Fail the code insert 3 times
+    // - Expect cooldown
+
+    await AdminSetting.findOneAndUpdate(
+      { settingId: 'use-two-factor-authentication' },
+      { value: 'disabled' }
+    );
+  });
 
   // Login functions
   // - _getUserSecurity

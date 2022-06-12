@@ -18,6 +18,9 @@ describe('settings controller', () => {
   });
 
   it('should get all user settings', async () => {
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await createUserAndLogin('superAdmin');
+
     await AdminSetting.findOneAndUpdate(
       { settingId: 'use-two-factor-authentication' },
       { value: 'disabled' }

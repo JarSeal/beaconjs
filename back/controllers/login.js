@@ -2,20 +2,16 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import { Router } from 'express';
 
-import User from '../models/user.js';
-import Form from '../models/form.js';
-import UserSetting from '../models/userSetting.js';
-import logger from '../utils/logger.js';
-import { createNewLoginLogsArray } from '../utils/helpers.js';
-import { checkAccess, checkIfLoggedIn } from '../utils/checkAccess.js';
-import { createRandomString } from '../../shared/parsers.js';
-import {
-  getSetting,
-  getSettings,
-  getPublicSettings,
-  parseValue,
-} from '../utils/settingsService.js';
-import { sendEmailById } from '../utils/emailService.js';
+import User from '../models/user';
+import Form from '../models/form';
+import UserSetting from '../models/userSetting';
+import logger from '../utils/logger';
+import { createNewLoginLogsArray } from '../utils/helpers';
+import { checkIfLoggedIn } from '../utils/checkAccess';
+import { createRandomString } from '../../shared/parsers';
+import { getSetting, getSettings, getPublicSettings, parseValue } from '../utils/settingsService';
+import { sendEmailById } from '../utils/emailService';
+import config from '../utils/config';
 
 const loginRouter = Router();
 
@@ -85,20 +81,6 @@ loginRouter.post('/access', async (request, response) => {
       if (request.cookies['connect.sid']) {
         response.clearCookie('connect.sid');
       }
-    }
-  } else {
-    const ids = request.body.ids;
-    for (let i = 0; i < ids.length; i++) {
-      const id = ids[i];
-      if (id.from === 'universe') {
-        // TODO, do universe here (find by universeId)
-      } else {
-        // Default is Form
-        check = await Form.findOne({ formId: id.id });
-      }
-      const settings = await getSettings(request, true);
-      result[id.id] = checkAccess(request, check, settings);
-      result.serviceSettings = await getPublicSettings(request, true);
     }
   }
   result.loggedIn = checkIfLoggedIn(request.session);
@@ -382,7 +364,10 @@ const _check2Fa = async (user, request, body) => {
   // Create and send a new 2FA code and respond
   const timeNow = new Date();
   const twoFactorLife = await getSetting(request, 'two-factor-code-lifetime', true);
-  const twoFactorCode = createRandomString(6, '0123456789QWERTY');
+  let twoFactorCode = createRandomString(6, '0123456789QWERTY');
+  if (config.ENV === 'test') {
+    twoFactorCode = '123456';
+  }
   userSecurity.twoFactor = {
     code: twoFactorCode,
     expires: new Date(timeNow.getTime() + twoFactorLife * 60000),

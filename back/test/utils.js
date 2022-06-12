@@ -31,6 +31,9 @@ const superAdminUser = {
 export const createUser = async (userData) => {
   _chechEnv();
   const { username, password, email, name, userLevel, verified } = userData;
+  // Check here if user is already created
+  const checkUser = await User.findOne({ username });
+  if (checkUser) return checkUser;
   const userConfig = shared.CONFIG.USER;
   const passwordHash = await bcrypt.hash(password, userConfig.password.saltRounds);
   const newUser = new User({
@@ -63,7 +66,7 @@ export const createUser = async (userData) => {
   try {
     savedNewUser = await newUser.save();
   } catch (error) {
-    savedNewUser = newUser;
+    throw new Error('Error in saving new user');
   }
   return savedNewUser;
 };
@@ -76,6 +79,7 @@ export const checklogin = async (givenBrowserId) => {
     browserId,
   });
   return {
+    loggedIn: checkLogin.data.loggedIn,
     browserId,
     credentials: {
       headers: {
@@ -131,7 +135,11 @@ export const createUserAndLogin = async (userData) => {
     email: userData?.email || user.email,
     userLevel: userData?.userLevel || user.userLevel,
   });
-  const session = await checklogin();
+  let session = await checklogin();
+  if (session.loggedIn) {
+    await doLogout(session.credentials);
+    session = await checklogin();
+  }
   const loggedIn = await login({ username, password }, session);
   return {
     session,
@@ -161,12 +169,19 @@ export const setUserSetting = async (id, userId, value) => {
 
 export const doLogout = async (credentials) => {
   _chechEnv();
-  const response = await axios.post(
+  await axios.post(
     `${config.getApiBaseUrl('http://localhost')}/login/access`,
     {
       from: 'logout',
     },
     credentials
   );
-  return response.data;
+  const session = await checklogin();
+  return {
+    session,
+    login: null,
+    user: null,
+    username: null,
+    password: null,
+  };
 };
