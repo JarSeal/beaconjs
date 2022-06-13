@@ -66,12 +66,14 @@ usersRouter.get('/:userId', async (request, response) => {
     }
   }
 
+  const userNotFoundResponse = {
+    msg: 'User was not found.',
+    userNotFoundError: true,
+  };
+
   if (!userToView) {
     logger.log('Could not find user with this id: ' + userId + ' (+ session)', request.session);
-    return response.status(404).json({
-      msg: 'User was not found.',
-      userNotFoundError: true,
-    });
+    return response.status(404).json(userNotFoundResponse);
   }
 
   // Exposure check
@@ -149,10 +151,7 @@ usersRouter.get('/:userId', async (request, response) => {
       request.session,
       userId
     );
-    return response.status(404).json({
-      msg: 'User was not found.',
-      userNotFoundError: true,
-    });
+    return response.status(404).json(userNotFoundResponse);
   }
 
   response.json(publishUser);
