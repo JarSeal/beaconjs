@@ -21,9 +21,7 @@ const startBackend = () => {
           console.error('\n\nerror connection to MongoDB:', error.message, '\n\n');
         });
       server = http.createServer(app);
-      server.listen(config.PORT, () => {
-        console.log(`Server running on port ${config.PORT} and DB at ${config.MONGODB_URI}`);
-      });
+      server.listen(config.PORT);
       started = true;
     }
   });

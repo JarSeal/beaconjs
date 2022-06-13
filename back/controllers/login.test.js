@@ -331,7 +331,7 @@ describe('login controller, login', () => {
 
     loginData = await doLogout(loginData.session.credentials);
 
-    await AdminSetting.findOneAndUpdate({ settingId: 'max-login-attempts' }, { value: '3' });
+    await AdminSetting.findOneAndUpdate({ settingId: 'max-login-attempts' }, { value: '1' });
 
     response = await tryLogin({ username: 'twoFAUser1', password: 'testuser' });
     expect(response.data.proceedToTwoFa).toEqual(true);
@@ -348,30 +348,41 @@ describe('login controller, login', () => {
     };
     try {
       response = await axios.post(`${apiUrl}/login/two`, payload, loginData.session.credentials);
-      response = await axios.post(`${apiUrl}/login/two`, payload, loginData.session.credentials);
-      response = await axios.post(`${apiUrl}/login/two`, payload, loginData.session.credentials);
+    } catch (err) {
+      response = err.response;
+    }
+    try {
       response = await axios.post(`${apiUrl}/login/two`, payload, loginData.session.credentials);
     } catch (err) {
       response = err.response;
     }
 
-    console.log('TADAA', response.data, response.status);
-
-    // - Expect cooldown
-
+    await AdminSetting.findOneAndUpdate({ settingId: 'max-login-attempts' }, { value: '5' });
     await AdminSetting.findOneAndUpdate(
       { settingId: 'use-two-factor-authentication' },
       { value: 'disabled' }
     );
+    expect(response.status).toEqual(403);
+    expect(response.data.loggedIn).toEqual(false);
+    expect(response.data).toHaveProperty('cooldownTime');
+  });
+});
+
+describe('login controller, helpers', () => {
+  startBackend();
+
+  beforeAll(async () => {
+    loginData = await createUserAndLogin();
   });
 
-  // Login functions
-  // - _getUserSecurity
-  // - _userUnderCooldown
-  // - _checkGivenPassword
-  // - _checkForm
-  // - _check2Fa
-  // - _clearNewPassLinkAndLoginAttempts
-  // - _createSessionAndRespond
-  // - _check2FACode
+  // _getUserSecurity
+  it('_getUserSecurity', async () => {});
+
+  // _userUnderCooldown
+  // _checkGivenPassword
+  // _checkForm
+  // _check2Fa
+  // _clearNewPassLinkAndLoginAttempts
+  // _createSessionAndRespond
+  // _check2FACode
 });
