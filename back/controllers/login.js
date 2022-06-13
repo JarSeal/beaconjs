@@ -174,7 +174,7 @@ loginRouter.post('/two', async (request, response) => {
   await _createSessionAndRespond(request, response, user, body);
 });
 
-const _getUserSecurity = (user) => {
+export const _getUserSecurity = (user) => {
   let userSecurity;
   if (user) {
     userSecurity = user.security ? user.security : {};
@@ -204,6 +204,22 @@ const _getUserSecurity = (user) => {
     ...userSecurity,
   };
 };
+
+export const _invalidUsernameOrPasswordResponse = {
+  statusCode: 401,
+  sendObj: {
+    error: 'invalid username and/or password',
+    loggedIn: false,
+  },
+};
+
+export const _serverErrorResponse = (loggedIn) => ({
+  statusCode: 500,
+  sendObj: {
+    error: 'internal server error',
+    loggedIn: loggedIn || false,
+  },
+});
 
 const _userUnderCooldown = async (request, user) => {
   const timeNow = new Date();
@@ -245,22 +261,6 @@ const _userUnderCooldown = async (request, user) => {
   // All good, no cooldown
   return null;
 };
-
-const _invalidUsernameOrPasswordResponse = {
-  statusCode: 401,
-  sendObj: {
-    error: 'invalid username and/or password',
-    loggedIn: false,
-  },
-};
-
-const _getServerError = (loggedIn) => ({
-  statusCode: 500,
-  sendObj: {
-    error: 'internal server error',
-    loggedIn: loggedIn || false,
-  },
-});
 
 const _checkGivenPassword = async (user, request) => {
   const userSecurity = _getUserSecurity(user);
@@ -381,7 +381,7 @@ const _check2Fa = async (user, request, body) => {
     logger.log(
       'Could not update user security data for 2FA. User was not found (id: ' + user._id + ').'
     );
-    return _getServerError();
+    return _serverErrorResponse();
   }
   const emailResult = await sendEmailById(
     'two-factor-auth-email',
@@ -393,7 +393,7 @@ const _check2Fa = async (user, request, body) => {
     request
   );
   if (!emailResult.emailSent) {
-    return _getServerError();
+    return _serverErrorResponse();
   }
   return {
     statusCode: 200,
@@ -440,7 +440,7 @@ const _clearNewPassLinkAndLoginAttempts = async (user, body) => {
   );
   if (!savedUser) {
     logger.log('Could not clear user attempts. User was not found (id: ' + user._id + ').');
-    return _getServerError();
+    return _serverErrorResponse();
   }
 
   // All good
@@ -503,8 +503,8 @@ const _check2FACode = async (request, user, body) => {
 
   // Check validity of user data
   if (!userSecurity || !userTwoFactor || !userTwoFactor.expires || !userTwoFactor.code) {
-    logger.log('Could not clear user attempts. User was not found (id: ' + user._id + ').');
-    return _getServerError();
+    logger.log(`Could not clear user attempts. User was not found (id: ${user._id}).`);
+    return _serverErrorResponse();
   }
 
   // Check if code hasn't expired
@@ -520,7 +520,7 @@ const _check2FACode = async (request, user, body) => {
       userSecurity.coolDown = true;
       userSecurity.coolDownStarted = new Date();
       logger.log(
-        'User set to cooldown from too many incorrect 2FA codes period (id: ' + user._id + ').'
+        `User set to cooldown from too many incorrect 2FA codes period (id: ${user._id}).`
       );
     } else {
       userSecurity.coolDown = false;
@@ -539,9 +539,7 @@ const _check2FACode = async (request, user, body) => {
     );
     if (!savedUser) {
       logger.log(
-        'Could not update user security data after 2FA code check. User was not found (id: ' +
-          user._id +
-          ').'
+        `Could not update user security data after 2FA code check. User was not found (id: ${user._id}).`
       );
     }
 
@@ -557,8 +555,8 @@ const _check2FACode = async (request, user, body) => {
     { new: true }
   );
   if (!savedUser) {
-    logger.log('Could not clear user twoFactor data. User was not found (id: ' + user._id + ').');
-    return _getServerError();
+    logger.log(`Could not clear user twoFactor data. User was not found (id: ${user._id}).`);
+    return _serverErrorResponse();
   }
 
   // All good, proceed
