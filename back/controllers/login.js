@@ -142,9 +142,7 @@ loginRouter.post('/two', async (request, response) => {
   const body = request.body;
 
   // Get and check user
-  console.log('HÖÄÄÄÄÄT');
   const user = await User.findOne({ username: body.username });
-  console.log('HÖÄÄÄÄÄT2');
 
   // Check form
   const isFormInvalid = await _checkForm(user, body);
