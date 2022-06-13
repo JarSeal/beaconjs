@@ -157,7 +157,7 @@ loginRouter.post('/two', async (request, response) => {
   }
 
   // Check 2FA code
-  const isTwoFACodeInvalid = await _check2FACode(user, body);
+  const isTwoFACodeInvalid = await _check2FACode(request, user, body);
   if (isTwoFACodeInvalid) {
     return response.status(isTwoFACodeInvalid.statusCode).json(isTwoFACodeInvalid.sendObj);
   }
@@ -488,12 +488,12 @@ const _createSessionAndRespond = async (request, response, user, body) => {
   });
 };
 
-const _check2FACode = async (user, body) => {
+const _check2FACode = async (request, user, body) => {
   const userSecurity = _getUserSecurity(user);
   const userTwoFactor = userSecurity.twoFactor;
   const code = body.twofacode;
   const timestampNow = new Date().getTime();
-  const invalidCodeResponse = {
+  let invalidCodeResponse = {
     statusCode: 401,
     sendObj: {
       loggedIn: false,
@@ -514,6 +514,37 @@ const _check2FACode = async (user, body) => {
 
   // Check if the code is correct
   if (code !== userTwoFactor.code) {
+    const maxLoginAttempts = await getSetting(request, 'max-login-attempts', true);
+    userSecurity.loginAttempts = userSecurity.loginAttempts + 1 || 1;
+    if (userSecurity.loginAttempts >= maxLoginAttempts) {
+      userSecurity.coolDown = true;
+      userSecurity.coolDownStarted = new Date();
+      logger.log(
+        'User set to cooldown from too many incorrect 2FA codes period (id: ' + user._id + ').'
+      );
+    } else {
+      userSecurity.coolDown = false;
+      userSecurity.coolDownStarted = null;
+    }
+
+    userSecurity.lastAttempts = userSecurity.lastAttempts || [];
+    userSecurity.lastAttempts.push({
+      date: new Date(),
+    });
+
+    const savedUser = await User.findByIdAndUpdate(
+      user.id,
+      { security: userSecurity },
+      { new: true }
+    );
+    if (!savedUser) {
+      logger.log(
+        'Could not update user security data after 2FA code check. User was not found (id: ' +
+          user._id +
+          ').'
+      );
+    }
+
     return invalidCodeResponse;
   }
 
