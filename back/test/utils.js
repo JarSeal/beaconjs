@@ -119,7 +119,8 @@ export const login = async (userData, session) => {
     },
     session.credentials
   );
-  return { user: login.data, session: session };
+  session.loggedIn = login.data.loggedIn;
+  return { user: login.data, session };
 };
 
 export const createUserAndLogin = async (userData) => {
