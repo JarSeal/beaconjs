@@ -5,6 +5,11 @@ import { createUserAndLogin, createUser, doLogout, login, getCSRF } from '../tes
 import config from '../utils/config';
 import AdminSetting from '../models/adminSetting';
 import Form from '../models/form';
+import {
+  _getUserSecurity,
+  _invalidUsernameOrPasswordResponse,
+  _serverErrorResponse,
+} from '../controllers/login';
 
 let loginData;
 const apiUrl = config.getApiBaseUrl('http://localhost');
@@ -376,13 +381,75 @@ describe('login controller, helpers', () => {
   });
 
   // _getUserSecurity
-  it('_getUserSecurity', async () => {});
+  it('_getUserSecurity', async () => {
+    const userSecurity = _getUserSecurity({
+      username: 'myUsername',
+      userLevel: 2,
+      email: 'some.email@demogorgonemail.com',
+      security: {
+        verifyEmail: {
+          token: null,
+          oldEmail: null,
+          verified: true,
+        },
+      },
+    });
+    expect(userSecurity).toEqual({
+      loginAttempts: 0,
+      coolDown: false,
+      coolDownStarted: null,
+      lastLogins: [],
+      lastAttempts: [],
+      newPassLink: {
+        token: null,
+        sent: null,
+        expires: null,
+      },
+      verifyEmail: {
+        token: null,
+        oldEmail: null,
+        verified: true,
+      },
+      twoFactor: {
+        expires: null,
+        nextCode: null,
+      },
+    });
+  });
 
-  // _userUnderCooldown
-  // _checkGivenPassword
-  // _checkForm
-  // _check2Fa
-  // _clearNewPassLinkAndLoginAttempts
-  // _createSessionAndRespond
-  // _check2FACode
+  // _invalidUsernameOrPasswordResponse
+  it('_invalidUsernameOrPasswordResponse', async () => {
+    expect(_invalidUsernameOrPasswordResponse).toEqual({
+      statusCode: 401,
+      sendObj: {
+        error: 'invalid username and/or password',
+        loggedIn: false,
+      },
+    });
+  });
+
+  // _serverErrorResponse
+  it('_serverErrorResponse', async () => {
+    expect(_serverErrorResponse(true)).toEqual({
+      statusCode: 500,
+      sendObj: {
+        error: 'internal server error',
+        loggedIn: true,
+      },
+    });
+    expect(_serverErrorResponse(false)).toEqual({
+      statusCode: 500,
+      sendObj: {
+        error: 'internal server error',
+        loggedIn: false,
+      },
+    });
+    expect(_serverErrorResponse()).toEqual({
+      statusCode: 500,
+      sendObj: {
+        error: 'internal server error',
+        loggedIn: false,
+      },
+    });
+  });
 });
