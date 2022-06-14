@@ -67,7 +67,7 @@ usersRouter.get('/:userId', async (request, response) => {
   }
 
   const userNotFoundResponse = {
-    msg: 'User was not found.',
+    msg: 'User was not found',
     userNotFoundError: true,
   };
 
@@ -186,7 +186,7 @@ usersRouter.put('/', async (request, response) => {
     );
     return response.status(401).json({
       unauthorised: true,
-      msg: 'User not authorised.',
+      msg: 'User not authorised',
     });
   } else if (body.userLevel < 1) {
     logger.log(
@@ -196,11 +196,21 @@ usersRouter.put('/', async (request, response) => {
     );
     return response.status(400).json({
       badRequest: true,
-      msg: 'Bad request.',
+      msg: 'Bad request',
     });
   }
 
   const user = await User.findById(body.userId);
+  if (user.username === request.session.username) {
+    logger.log(
+      'Unauthorised. User tried to edit own profile via edit profile api. (+ session)',
+      request.session
+    );
+    return response.status(401).json({
+      unauthorised: true,
+      msg: 'User not authorised',
+    });
+  }
   const verifyEmail = await _createOldEmail(request, user, body.email);
   const edited = await createNewEditedArray(user.edited, request.session._id);
   const updatedUser = Object.assign(
@@ -314,6 +324,19 @@ usersRouter.post('/delete', async (request, response) => {
 // Register user
 usersRouter.post('/', async (request, response) => {
   const body = request.body;
+  const loggedIn = checkIfLoggedIn(request.session);
+
+  if (!loggedIn) {
+    const publicCanRegister = await getSetting(request, 'public-user-registration', true);
+    // Check if public registration is possible
+    if (!publicCanRegister) {
+      return response.status(401).json({
+        unauthorised: true,
+        msg: 'Unauthorised',
+      });
+    }
+  }
+
   const error = await getAndValidateForm(body.id, 'POST', request);
   if (error) {
     return response.status(error.code).json(error.obj);
@@ -348,7 +371,7 @@ usersRouter.post('/', async (request, response) => {
       : 1;
 
   let createdBy = null;
-  if (checkIfLoggedIn(request.session)) createdBy = request.session._id;
+  if (loggedIn) createdBy = request.session._id;
 
   if (userCount.length === 0) {
     // First registration is always for a super admin (level 9)

@@ -361,15 +361,15 @@ describe('login controller, login', () => {
     } catch (err) {
       response = err.response;
     }
+    expect(response.status).toEqual(403);
+    expect(response.data.loggedIn).toEqual(false);
+    expect(response.data).toHaveProperty('cooldownTime');
 
     await AdminSetting.findOneAndUpdate({ settingId: 'max-login-attempts' }, { value: '5' });
     await AdminSetting.findOneAndUpdate(
       { settingId: 'use-two-factor-authentication' },
       { value: 'disabled' }
     );
-    expect(response.status).toEqual(403);
-    expect(response.data.loggedIn).toEqual(false);
-    expect(response.data).toHaveProperty('cooldownTime');
   });
 });
 
