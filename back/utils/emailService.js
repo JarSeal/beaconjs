@@ -11,7 +11,7 @@ import shared from '../shared/index';
 const confUI = shared.CONFIG.UI;
 
 const sendEmailById = async (id, emailParams, request) => {
-  if (config.ENV === 'test') return;
+  if (config.ENV === 'test') return { emailSent: true };
   const settings = await getSettings(request);
   if (!settings['email-sending']) return;
 

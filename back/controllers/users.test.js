@@ -2,23 +2,20 @@ import axios from 'axios';
 
 import User from '../models/user';
 import AdminSetting from '../models/adminSetting';
-import { startBackendBefore, startBackendAfter } from '../test/serverSetup';
+import startBackend from '../test/serverSetup';
 import { createUserAndLogin, createUser, doLogout, getCSRF, login } from '../test/utils';
 import config from '../utils/config';
 
 let loginData;
 const apiUrl = config.getApiBaseUrl('http://localhost');
 
-beforeAll(async () => {
-  await startBackendBefore();
-  loginData = await createUserAndLogin();
-});
-
-afterAll(async () => {
-  await startBackendAfter();
-});
-
 describe('users 1', () => {
+  startBackend();
+
+  beforeAll(async () => {
+    loginData = await createUserAndLogin();
+  });
+
   // GET ALL USERS
   it('should get all users (only admins)', async () => {
     let response;
@@ -291,6 +288,12 @@ describe('users 1', () => {
 });
 
 describe('users 2', () => {
+  startBackend();
+
+  beforeAll(async () => {
+    loginData = await createUserAndLogin();
+  });
+
   // DELETE USERS
   it('should delete one and/or many users', async () => {
     let response, CSRF;
@@ -389,6 +392,12 @@ describe('users 2', () => {
 });
 
 describe('users 3', () => {
+  startBackend();
+
+  beforeAll(async () => {
+    loginData = await createUserAndLogin();
+  });
+
   // REGISTER USER
   it('should register a new user', async () => {
     let response, CSRF;
