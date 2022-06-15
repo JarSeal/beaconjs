@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 import startBackend from '../test/serverSetup';
-import { createUserAndLogin, createUser, doLogout, login, getCSRF } from '../test/utils';
+import {
+  createUserAndLogin,
+  createUser,
+  doLogout,
+  login,
+  getCSRF,
+  resetAllUsers,
+} from '../test/utils';
 import config from '../utils/config';
 import AdminSetting from '../models/adminSetting';
 import Form from '../models/form';
@@ -51,6 +58,7 @@ describe('login controller, access', () => {
 
   beforeAll(async () => {
     loginData = await createUserAndLogin();
+    loginData = await resetAllUsers(loginData);
   });
 
   it('should get access with from: "admin"', async () => {

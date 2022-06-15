@@ -3,7 +3,14 @@ import axios from 'axios';
 import User from '../models/user';
 import AdminSetting from '../models/adminSetting';
 import startBackend from '../test/serverSetup';
-import { createUserAndLogin, createUser, doLogout, getCSRF, login } from '../test/utils';
+import {
+  createUserAndLogin,
+  createUser,
+  doLogout,
+  getCSRF,
+  login,
+  resetAllUsers,
+} from '../test/utils';
 import config from '../utils/config';
 
 let loginData;
@@ -449,5 +456,192 @@ describe('users 3', () => {
     expect(response.data.username).toEqual('newUser1');
     expect(response.data.email).toEqual('newuser1@sometestdomain.com');
     expect(response.data.userLevel).toEqual(2);
+
+    // Try to register a new user with a username that is already taken
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users`,
+        {
+          id: 'new-user-form',
+          username: 'newUser1',
+          password: 'testuser',
+          name: '',
+          email: 'newuser1@sometestdomain.com',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.data).toEqual({
+      msg: 'Bad request. Validation errors.',
+      errors: { username: 'username_taken' },
+      usernameTaken: true,
+    });
+
+    // Try to register a new user with a email that is already taken
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users`,
+        {
+          id: 'new-user-form',
+          username: 'newUser2',
+          password: 'testuser',
+          name: '',
+          email: 'newuser1@sometestdomain.com',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.data).toEqual({
+      msg: 'Bad request. Validation errors.',
+      errors: { email: 'email_taken' },
+      emailTaken: true,
+    });
+  });
+
+  // EDIT OWN PROFILE
+  it('should edit own profile', async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await createUserAndLogin('superAdmin');
+    loginData = await doLogout(loginData.session.credentials);
+    loginData = await createUserAndLogin();
+
+    // Try to edit your own profile with a wrong password
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.put(
+        `${apiUrl}/users/own/profile`,
+        {
+          id: 'edit-profile-form',
+          curPassword: 'wrongpass',
+          name: 'Slim Shady',
+          email: 'newuser1@sometestdomain.com',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({
+      error: 'invalid password',
+      loggedIn: true,
+      noRedirect: true,
+      errors: { curPassword: 'wrong_password' },
+    });
+
+    // Try to edit your own profile with a taken email
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.put(
+        `${apiUrl}/users/own/profile`,
+        {
+          id: 'edit-profile-form',
+          curPassword: 'testuser',
+          name: '',
+          email: 'sometestuseradmin@sometestuserdomain.com',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.data).toEqual({
+      msg: 'Bad request. Validation errors.',
+      errors: { email: 'email_taken' },
+      emailTaken: true,
+    });
+
+    // Successfully edit profile (name and email)
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.put(
+      `${apiUrl}/users/own/profile`,
+      {
+        id: 'edit-profile-form',
+        curPassword: 'testuser',
+        name: 'Jack Doe',
+        email: 'someothertestuseremail@sometestuserdomain.com',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data.username).toEqual('testUser1');
+    expect(response.data.email).toEqual('someothertestuseremail@sometestuserdomain.com');
+    expect(response.data.name).toEqual('Jack Doe');
+    expect(response.data.userLevel).toEqual(2);
+
+    loginData = await resetAllUsers(loginData);
+  });
+
+  // EDIT EXPOSURE VALUES
+  it('should change users exposure values', async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await createUserAndLogin();
+
+    // User tries to edit own exposure levels when the setting is disabled
+    await AdminSetting.findOneAndUpdate(
+      { settingId: 'users-can-set-exposure-levels' },
+      { value: 'false' }
+    );
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.put(
+        `${apiUrl}/users/user/exposure`,
+        {
+          id: 'edit-expose-profile-form',
+          username: 0,
+          name: 0,
+          email: 2,
+          created_date: 2,
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({
+      msg: 'Unauthorised. Users cannot set exposure levels.',
+      unauthorised: true,
+    });
+
+    // User tries to edit a disabled exposure field (username)
+    await AdminSetting.findOneAndUpdate(
+      { settingId: 'users-can-set-exposure-levels' },
+      { value: 'true' }
+    );
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.put(
+        `${apiUrl}/users/user/exposure`,
+        {
+          id: 'edit-expose-profile-form',
+          username: 2,
+          name: 2,
+          email: 2,
+          created_date: 2,
+          curPassword: 'testuser',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    console.log('RESP', response.status, response.data);
+    const checkUser = await User.find({ username: 'testUser1' });
+    console.log('YEAH', checkUser);
   });
 });

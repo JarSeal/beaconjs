@@ -28,6 +28,8 @@ const superAdminUser = {
   userLevel: 9,
 };
 
+const allUsers = [superAdminUser, defaultUser];
+
 export const createUser = async (userData) => {
   _chechEnv();
   const { username, password, email, name, userLevel, verified } = userData;
@@ -185,4 +187,43 @@ export const doLogout = async (credentials) => {
     username: null,
     password: null,
   };
+};
+
+export const resetAllUsers = async (loginData) => {
+  await doLogout(loginData?.session?.credentials);
+  for (let i = 0; i < allUsers.length; i++) {
+    await User.deleteOne({ username: allUsers[i].username });
+  }
+  const userConfig = shared.CONFIG.USER;
+  for (let i = 0; i < allUsers.length; i++) {
+    const passwordHash = await bcrypt.hash(allUsers[i].password, userConfig.password.saltRounds);
+    const newUser = new User({
+      username: allUsers[i].username,
+      email: allUsers[i].email,
+      name: allUsers[i].name || '',
+      userLevel: allUsers[i].userLevel,
+      passwordHash,
+      created: {
+        by: null,
+        publicForm: true,
+        date: new Date(),
+      },
+      security: {
+        loginAttempts: 0,
+        coolDown: false,
+        coolDownStarted: null,
+        lastLogins: [],
+        lastAttempts: [],
+        newPassLink: {},
+        verifyEmail: {
+          token: null,
+          oldEmail: null,
+          verified: allUsers[i].verified || true,
+        },
+        twoFactor: {},
+      },
+    });
+    await newUser.save();
+  }
+  return loginData;
 };

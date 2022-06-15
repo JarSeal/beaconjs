@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import startBackend from '../test/serverSetup';
-import { createUserAndLogin, doLogout, login } from '../test/utils';
+import { createUserAndLogin, login, resetAllUsers } from '../test/utils';
 import config from '../utils/config';
 
 let loginData;
@@ -15,7 +15,7 @@ describe('forms controller', () => {
   });
 
   it('should get a form by id', async () => {
-    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await resetAllUsers(loginData);
 
     // Get beacon main login form as a public user
     let response = await axios.get(`${apiUrl}/forms/beacon-main-login`);
@@ -53,7 +53,6 @@ describe('forms controller', () => {
     // Get user settings as a logged in, level 2 user
     response = await axios.get(`${apiUrl}/forms/user-settings-form`, loginData.session.credentials);
     expect(response.data.id).toEqual('user-settings-form');
-
     // Try to get an admin level form with level 2 user
     try {
       response = await axios.get(`${apiUrl}/forms/admin-settings-form`);

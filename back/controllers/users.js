@@ -484,19 +484,6 @@ usersRouter.put('/own/profile', async (request, response) => {
     }
   }
 
-  // Check if the session user is the same as target
-  if (!user || user.username !== request.session.username) {
-    logger.error(
-      "Could not update user's own profile. User was not found or does not match the session user (id: " +
-        body.userId +
-        ').'
-    );
-    return response.json({
-      msg: 'Bad request.',
-      badRequest: true,
-    });
-  }
-
   const verifyEmail = await _createOldEmail(request, user, body.email);
   const edited = await createNewEditedArray(user.edited, userId);
   const updatedUser = Object.assign(
@@ -554,7 +541,9 @@ usersRouter.put('/user/exposure', async (request, response) => {
     }
 
     const passwordCorrect =
-      user === null ? false : await bcrypt.compare(body.curPassword, user.passwordHash);
+      user === null || !body.curPassword
+        ? false
+        : await bcrypt.compare(body.curPassword, user.passwordHash);
     if (!passwordCorrect) {
       return response.status(401).json({
         error: 'invalid password',
