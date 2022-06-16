@@ -463,7 +463,9 @@ usersRouter.put('/own/profile', async (request, response) => {
 
   const user = await User.findById(userId);
   const passwordCorrect =
-    user === null ? false : await bcrypt.compare(body.curPassword, user.passwordHash);
+    user === null || !body.curPassword
+      ? false
+      : await bcrypt.compare(body.curPassword, user.passwordHash);
   if (!passwordCorrect) {
     return response.status(401).json({
       error: 'invalid password',
@@ -598,6 +600,7 @@ usersRouter.put('/user/exposure', async (request, response) => {
       edited,
     };
   } else {
+    logger.error(`No valid exposure fields to update were found (user id: ${userId}).`);
     return response.status(400).json({
       msg: 'Bad request. No valid fields to update were found.',
       noFieldsFound: true,
@@ -607,7 +610,7 @@ usersRouter.put('/user/exposure', async (request, response) => {
   const savedUser = await User.findByIdAndUpdate(userId, updatedUser, { new: true });
   if (!savedUser) {
     logger.error(
-      "Could not update user's own profile exposure. User was not found (id: " + userId + ').'
+      `Could not update user's own profile exposure. User was not found (id: ${userId}).`
     );
     return response.status(404).json({
       msg: 'User to update was not found.',
@@ -624,7 +627,9 @@ usersRouter.post('/own/delete', async (request, response) => {
   const userId = request.session._id;
   const user = await User.findById(userId);
   const passwordCorrect =
-    user === null ? false : await bcrypt.compare(body.password, user.passwordHash);
+    user === null || !body.password
+      ? false
+      : await bcrypt.compare(body.password, user.passwordHash);
   if (!passwordCorrect) {
     return response.status(401).json({
       error: 'invalid password',
@@ -672,7 +677,9 @@ usersRouter.post('/own/changepass', async (request, response) => {
   const userId = request.session._id;
   const user = await User.findById(userId);
   const passwordCorrect =
-    user === null ? false : await bcrypt.compare(body.curPassword, user.passwordHash);
+    user === null || !body.curPassword
+      ? false
+      : await bcrypt.compare(body.curPassword, user.passwordHash);
   if (!passwordCorrect) {
     return response.status(401).json({
       error: 'invalid password',

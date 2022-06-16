@@ -628,7 +628,7 @@ describe('users 3', () => {
         `${apiUrl}/users/user/exposure`,
         {
           id: 'edit-expose-profile-form',
-          username: 2,
+          username: 1,
           name: 2,
           email: 2,
           created_date: 2,
@@ -640,8 +640,108 @@ describe('users 3', () => {
     } catch (err) {
       response = err.response;
     }
-    console.log('RESP', response.status, response.data);
-    const checkUser = await User.find({ username: 'testUser1' });
-    console.log('YEAH', checkUser);
+    expect(response.data.exposure).toEqual({ name: 2, created_date: 2 });
+
+    // Update exposure field successfully (name and created_date)
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.put(
+      `${apiUrl}/users/user/exposure`,
+      {
+        id: 'edit-expose-profile-form',
+        username: 0,
+        name: 1,
+        email: 2,
+        created_date: 1,
+        curPassword: 'testuser',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data.exposure).toEqual({ name: 1, created_date: 1 });
   });
+
+  // DELETE OWN PROFILE
+  it("should delete a user's own profile", async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
+
+    // Try to delete own profile as a superAdmin
+    loginData = await createUserAndLogin('superAdmin');
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users/own/delete`,
+        {
+          id: 'delete-profile-form',
+          password: 'testuser',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(403);
+    expect(response.data).toEqual({ error: 'unauthorised', loggedIn: true });
+
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await createUserAndLogin({
+      username: 'testUser2',
+      password: 'testuser',
+      email: 'sometestuser2@sometestuserdomain.com',
+      name: '',
+      userLevel: 2,
+    });
+
+    // Try to delete own profile with wrong password
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users/own/delete`,
+        {
+          id: 'delete-profile-form',
+          password: 'testfusser',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({
+      error: 'invalid password',
+      loggedIn: true,
+    });
+
+    // Successfully delete profile
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/own/delete`,
+      {
+        id: 'delete-profile-form',
+        password: 'testuser',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data).toEqual({ userDeleted: true });
+  });
+
+  // CHANGE PASSWORD
+  it("should update the user's password", async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
+  });
+
+  // Request a new password link
+
+  // Save new password with token
+
+  // Verify user account with token
+
+  // Send a new E-mail verification link
+
+  // _sendVerificationEmail
+  // _createOldEmail
 });
