@@ -732,6 +732,57 @@ describe('users 3', () => {
   it("should update the user's password", async () => {
     let response, CSRF;
     loginData = await doLogout(loginData?.session?.credentials);
+
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await createUserAndLogin({
+      username: 'testUser3',
+      password: 'firstpassword',
+      email: 'sometestuser3@sometestuserdomain.com',
+      name: '',
+      userLevel: 2,
+    });
+
+    // Try to change password with wrong (current) password
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users/own/changepass`,
+        {
+          id: 'change-password-form',
+          curPassword: 'firstpass',
+          password: 'testuser',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({
+      error: 'invalid password',
+      errors: { curPassword: 'wrong_password' },
+      loggedIn: true,
+      noRedirect: true,
+    });
+
+    // Change password succesfully
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/own/changepass`,
+      {
+        id: 'change-password-form',
+        curPassword: 'firstpassword',
+        password: 'testuser',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data.username).toEqual('testUser3');
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await login({ username: 'testUser3', password: 'testuser' }, loginData.session);
+    expect(loginData?.user?.username).toEqual('testUser3');
+    expect(loginData?.user?.loggedIn).toEqual(true);
   });
 
   // Request a new password link
