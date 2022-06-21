@@ -134,7 +134,7 @@ export const createUserAndLogin = async (userData) => {
   const createdUser = await createUser({
     username,
     password,
-    verified: userData?.verified || true,
+    verified: userData?.verified === undefined ? true : userData.verified,
     email: userData?.email || user.email,
     userLevel: userData?.userLevel || user.userLevel,
   });

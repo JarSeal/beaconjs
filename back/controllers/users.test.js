@@ -16,7 +16,7 @@ import config from '../utils/config';
 let loginData;
 const apiUrl = config.getApiBaseUrl('http://localhost');
 
-describe('users 1', () => {
+describe('users tests 1', () => {
   startBackend();
 
   beforeAll(async () => {
@@ -292,14 +292,6 @@ describe('users 1', () => {
       unauthorised: true,
     });
   });
-});
-
-describe('users 2', () => {
-  startBackend();
-
-  beforeAll(async () => {
-    loginData = await createUserAndLogin();
-  });
 
   // DELETE USERS
   it('should delete one and/or many users', async () => {
@@ -398,7 +390,7 @@ describe('users 2', () => {
   });
 });
 
-describe('users 3', () => {
+describe('users tests 2', () => {
   startBackend();
 
   beforeAll(async () => {
@@ -784,14 +776,229 @@ describe('users 3', () => {
     expect(loginData?.user?.username).toEqual('testUser3');
     expect(loginData?.user?.loggedIn).toEqual(true);
   });
+});
 
-  // Request a new password link
+describe('users tests 3', () => {
+  startBackend();
 
-  // Save new password with token
+  beforeAll(async () => {
+    loginData = await createUserAndLogin();
+  });
 
-  // Verify user account with token
+  // REQUEST A NEW PASSWORD LINK
+  it('should be able to request a new password link', async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
 
-  // Send a new E-mail verification link
+    await AdminSetting.findOneAndUpdate({ settingId: 'email-sending' }, { value: 'true' });
+    await AdminSetting.findOneAndUpdate({ settingId: 'use-email-verification' }, { value: 'true' });
+
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/newpassrequest`,
+      {
+        id: 'new-pass-request-form',
+        email: 'someNonExistingEmail@someNonExistingDomain.org',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data).toEqual({ tryingToSend: true });
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/newpassrequest`,
+      {
+        id: 'new-pass-request-form',
+        email: 'sometestuser@sometestuserdomain.com',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data).toEqual({ tryingToSend: true });
+  });
+
+  // SAVE NEW PASSWORD WITH TOKEN
+  it('should save a new password with a token', async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
+
+    await AdminSetting.findOneAndUpdate({ settingId: 'email-sending' }, { value: 'true' });
+    await AdminSetting.findOneAndUpdate({ settingId: 'use-email-verification' }, { value: 'true' });
+
+    // Create new password token
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/newpassrequest`,
+      {
+        id: 'new-pass-request-form',
+        email: 'sometestuser@sometestuserdomain.com',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+
+    // Try to reset password with invalid token
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users/newpass`,
+        {
+          id: 'reset-password-w-token-form',
+          password: 'newpassword',
+          token: 'invalidtokenvalue',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({
+      msg: 'Token invalid or expired.',
+      tokenError: true,
+    });
+
+    // Create new password with token
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/newpass`,
+      {
+        id: 'reset-password-w-token-form',
+        password: 'newpassword',
+        token: '123456',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data).toEqual({ passwordUpdated: true });
+  });
+
+  // VERIFY USER ACCOUNT WITH TOKEN
+  it('should send a new e-mail verification link', async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
+
+    await AdminSetting.findOneAndUpdate({ settingId: 'email-sending' }, { value: 'true' });
+    await AdminSetting.findOneAndUpdate({ settingId: 'use-email-verification' }, { value: 'true' });
+
+    loginData = await createUserAndLogin({
+      username: 'testUserVerifyWToken',
+      password: 'testuser',
+      email: 'testUserVerifyWToken@sometestuserdomain.com',
+      name: '',
+      userLevel: 2,
+      verified: false,
+    });
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/newemailverification`,
+      {
+        id: 'new-email-verification',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+
+    // Try to verify with an invalid token
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.get(
+        `${apiUrl}/users/verify/someinvalidtoken`,
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({ msg: 'Token invalid or expired.', tokenError: true });
+
+    // Verify account with correct token
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.get(
+      `${apiUrl}/users/verify/123456testUserVerifyWToken`,
+      loginData.session.credentials
+    );
+    expect(response.data).toEqual({ verified: true, username: 'testUserVerifyWToken' });
+    const user = await User.findOne({ username: 'testUserVerifyWToken' });
+    expect(user.security.verifyEmail.verified).toEqual(true);
+  });
+
+  // SEND A NEW E-MAIL VERIFICATION LINK
+  it('should send a new e-mail verification link', async () => {
+    let response, CSRF;
+    loginData = await doLogout(loginData?.session?.credentials);
+
+    await AdminSetting.findOneAndUpdate({ settingId: 'email-sending' }, { value: 'true' });
+    await AdminSetting.findOneAndUpdate({ settingId: 'use-email-verification' }, { value: 'true' });
+
+    // Try to send a new E-mail verification link, without being logged in
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users/newemailverification`,
+        {
+          id: 'new-email-verification',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({
+      msg: 'User not authenticated or session has expired',
+      _sess: false,
+      loggedIn: false,
+    });
+
+    // Try to send new E-mail verification link when user already verified
+    loginData = await createUserAndLogin({
+      username: 'testUserSendVLink',
+      password: 'testuser',
+      email: 'sometestuserSendVLink@sometestuserdomain.com',
+      name: '',
+      userLevel: 2,
+      verified: true,
+    });
+    try {
+      CSRF = await getCSRF(loginData.session);
+      response = await axios.post(
+        `${apiUrl}/users/newemailverification`,
+        {
+          id: 'new-email-verification',
+          _csrf: CSRF,
+        },
+        loginData.session.credentials
+      );
+    } catch (err) {
+      response = err.response;
+    }
+    expect(response.status).toEqual(401);
+    expect(response.data).toEqual({ msg: 'Unauthorised', unauthorised: true });
+
+    // Send a new E-mail verification link
+    loginData = await doLogout(loginData?.session?.credentials);
+    loginData = await createUserAndLogin({
+      username: 'testUserSendVLink2',
+      password: 'testuser',
+      email: 'sometestuserSendVLink2@sometestuserdomain.com',
+      name: '',
+      userLevel: 2,
+      verified: false,
+    });
+    CSRF = await getCSRF(loginData.session);
+    response = await axios.post(
+      `${apiUrl}/users/newemailverification`,
+      {
+        id: 'new-email-verification',
+        _csrf: CSRF,
+      },
+      loginData.session.credentials
+    );
+    expect(response.data).toEqual({ newVerificationSent: true });
+  });
 
   // _sendVerificationEmail
   // _createOldEmail

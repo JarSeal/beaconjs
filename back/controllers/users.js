@@ -724,7 +724,7 @@ usersRouter.post('/own/changepass', async (request, response) => {
 // Request a new password link
 usersRouter.post('/newpassrequest', async (request, response) => {
   const monoResponse = () => {
-    // For security reasons
+    // For security reasons, always send the same response
     return response.json({ tryingToSend: true });
   };
 
@@ -750,7 +750,8 @@ usersRouter.post('/newpassrequest', async (request, response) => {
       }
     }
 
-    const newToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+    let newToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+    if (config.ENV === 'test') newToken = '123456';
     const linkLife = await getSetting(request, 'new-pass-link-lifetime', true);
     const newPassLinkAndDate = {
       token: newToken,
@@ -943,7 +944,10 @@ usersRouter.post('/newemailverification', async (request, response) => {
 });
 
 const _sendVerificationEmail = async (request, response, user) => {
-  const newEmailToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+  let newEmailToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+  if (config.ENV === 'test') {
+    newEmailToken = '123456' + user.username;
+  }
   const verifyEmail = {
     'security.verifyEmail': {
       token: newEmailToken,
