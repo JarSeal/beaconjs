@@ -11,6 +11,17 @@ import AdminSetting from '../../models/adminSetting.js';
 export const getAndValidateForm = async (formId, method, request) => {
   let error = null;
   const formData = await Form.findOne({ formId });
+  if (!formData) {
+    logger.log(`Form not found in getAndValidateForm (formId: ${formId}).`);
+    return {
+      code: 404,
+      obj: {
+        msg: 'Form not found',
+        formNotFoundError: true,
+        loggedIn: request.session.loggedIn,
+      },
+    };
+  }
 
   if (method === 'GET') {
     error = await validatePrivileges(formData, request);
@@ -33,7 +44,7 @@ export const getAndValidateForm = async (formId, method, request) => {
 export const validateField = (form, key, value) => {
   if (key === 'id') return null;
 
-  let fieldsets = form.fieldsets;
+  const fieldsets = form.fieldsets;
   if (!fieldsets) return null;
   for (let i = 0; i < fieldsets.length; i++) {
     const fieldset = fieldsets[i];
@@ -215,6 +226,8 @@ export const validatePrivileges = async (form, request) => {
       },
     };
   }
+
+  return null;
 };
 
 export const csrfProtection = csrf({ cookie: false });
