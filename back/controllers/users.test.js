@@ -999,7 +999,4 @@ describe('users tests 3', () => {
     );
     expect(response.data).toEqual({ newVerificationSent: true });
   });
-
-  // _sendVerificationEmail
-  // _createOldEmail
 });
