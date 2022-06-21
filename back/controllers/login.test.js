@@ -57,8 +57,8 @@ describe('login controller, access', () => {
   startBackend();
 
   beforeAll(async () => {
-    loginData = await createUserAndLogin();
     loginData = await resetAllUsers(loginData);
+    loginData = await createUserAndLogin();
   });
 
   it('should get access with from: "admin"', async () => {
