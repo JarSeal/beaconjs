@@ -1,5 +1,3 @@
-import csrf from 'csurf';
-
 import Form from '../../models/form.js';
 import shared from '../../shared/index.js';
 import logger from './../../utils/logger.js';
@@ -53,13 +51,13 @@ export const validateField = (form, key, value) => {
       if (field.id === key) {
         switch (field.type) {
           case 'textinput':
-            return textInput(field, value.trim());
+            return textInput(field, value);
           case 'checkbox':
             return checkbox(field, value);
           case 'dropdown':
             return dropdown(field, value);
           case 'textarea':
-            return textArea(field, value.trim());
+            return textArea(field, value);
           default:
             return checkAllowedFieldTypes(field.type);
         }
@@ -69,6 +67,7 @@ export const validateField = (form, key, value) => {
 };
 
 const textInput = (field, value) => {
+  value = value ? String(value).trim() : '';
   if (field.required && (!value || value === '')) return 'Required';
   if (field.minLength && value.length < field.minLength && value !== '')
     return `Value is too short (minimum: ${field.minLength} chars)`;
@@ -88,12 +87,13 @@ const checkbox = (field, value) => {
 };
 
 const dropdown = (field, value) => {
-  if (field.required && String(value).trim() === '') return 'Required';
+  value = value !== undefined && value !== null ? String(value).trim() : '';
+  if (field.required && value === '') return 'Required';
   // Validate that the value passed is one of the options
   if (field.options) {
     let valueFound = false;
     for (let i = 0; i < field.options.length; i++) {
-      if (String(field.options[i].value).trim() === String(value).trim()) {
+      if (String(field.options[i].value).trim() === value) {
         valueFound = true;
         break;
       }
@@ -107,8 +107,13 @@ const dropdown = (field, value) => {
       return 'Unknown value';
     }
   } else if ((field.minValue || field.minValue === 0) && (field.maxValue || field.maxValue === 0)) {
-    if (field.minValue > value || field.maxValue < value) {
-      logger.log('Value is out of validation range for a dropdown. (+ value, field)', value, field);
+    const valueAsNumber = Number(value);
+    if (field.minValue > valueAsNumber || field.maxValue < valueAsNumber || isNaN(valueAsNumber)) {
+      logger.log(
+        'Value is out of validation range for a dropdown or value is NaN. (+ value, field)',
+        value,
+        field
+      );
       return 'Value is out of validation range.';
     }
   } else {
@@ -123,6 +128,7 @@ const dropdown = (field, value) => {
 };
 
 const textArea = (field, value) => {
+  value = value ? String(value).trim() : '';
   if (field.required && (!value || value === '')) return 'Required';
   if (field.minLength && value.length < field.minLength && value !== '')
     return `Value is too short (minimum: ${field.minLength} chars)`;
@@ -162,14 +168,14 @@ export const validateFormData = async (formData, request) => {
   if (!formData || !formData.form) {
     return {
       code: 404,
-      obj: { msg: 'Could not find form (' + body.id + '),' },
+      obj: { msg: 'Could not find form (' + body?.id + ').' },
     };
   }
 
   const error = await validatePrivileges(formData, request);
   if (error) return error;
 
-  const keys = Object.keys(body);
+  const keys = Object.keys(body || {});
   if (!formData.form.singleEdit) {
     const keysFound = validateKeys(formData.form, keys);
     if (!keysFound) {
@@ -230,13 +236,6 @@ export const validatePrivileges = async (form, request) => {
   return null;
 };
 
-export const csrfProtection = csrf({ cookie: false });
-let crsfToken = null;
-export const csrfNewToken = (request) => {
-  if (request.crsfToken && !crsfToken) crsfToken = request.crsfToken;
-  return crsfToken();
-};
-
 export const getUserExposure = async (user) => {
   const exposeDefaultsFormId = editExposeProfileFormData.formId;
   const defaultValues = await Form.findOne({ formId: exposeDefaultsFormId });
@@ -252,11 +251,11 @@ export const getUserExposure = async (user) => {
     const fs = fieldsets[i];
     for (let j = 0; j < fs.fields.length; j++) {
       const field = fs.fields[j];
-      if (field.type === 'divider') continue;
+      if (field.type === 'divider' || field.id === 'curPassword') continue;
       exposures[field.id] = field.defaultValue;
       if (
         (usersCanEditSetting.value === 'true' || userUsersExposesSetting.value === 'true') &&
-        user.exposure[field.id] !== undefined
+        user?.exposure[field.id] !== undefined
       ) {
         exposures[field.id] = user.exposure[field.id];
       }
@@ -271,8 +270,6 @@ const formEngine = {
   validateKeys,
   validateFormData,
   validatePrivileges,
-  csrfProtection,
-  csrfNewToken,
   getUserExposure,
 };
 
