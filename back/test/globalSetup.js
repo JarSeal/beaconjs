@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 import config from '../utils/config.js';
-import createPresetForms from '../controllers/forms/createPresetForms.js';
+import createPresetData from '../controllers/forms/createPresetData.js';
 
 const globalSetup = async () => {
   await mongoose
@@ -12,7 +12,7 @@ const globalSetup = async () => {
       useCreateIndex: true,
     })
     .then(async (conn) => {
-      await createPresetForms(true);
+      await createPresetData(true);
       console.log('\n\nPresetForms created');
       await conn.connection.close();
     })

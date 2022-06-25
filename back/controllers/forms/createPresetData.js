@@ -10,7 +10,7 @@ const formData = shared.formData;
 const emailData = shared.emailData;
 const routeAccess = shared.CONFIG.ROUTE_ACCESS;
 
-const createPresetForms = async (quiet) => {
+const createPresetData = async (quiet) => {
   let newForm, checkForm, adminSettings;
   for (let i = 0; i < formData.length; i++) {
     checkForm = await Form.findOne({ formId: formData[i].formId });
@@ -92,4 +92,4 @@ const _enCryptPass = (value) => {
   return ciphertext;
 };
 
-export default createPresetForms;
+export default createPresetData;

@@ -15,7 +15,7 @@ import settingsRouter from './controllers/settings.js';
 import healthRouter from './controllers/health.js';
 import middleware from './utils/middleware.js';
 import logger from './utils/logger.js';
-import createPresetForms from './controllers/forms/createPresetForms.js';
+import createPresetData from './controllers/forms/createPresetData.js';
 import { createRandomString } from '../shared/parsers.js';
 
 const app = express();
@@ -32,7 +32,7 @@ if (config.ENV !== 'test') {
     })
     .then(() => {
       logger.info('connected to MongoDB');
-      createPresetForms();
+      createPresetData();
     })
     .catch((error) => {
       logger.error('error connection to MongoDB:', error.message);
