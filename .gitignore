@@ -4,3 +4,4 @@
 .env
 **/mongo/database
 .vscode
+**/coverage

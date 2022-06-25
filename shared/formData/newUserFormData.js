@@ -2,7 +2,7 @@ import { USER } from '../../CONFIG.js';
 
 const newUserFormData = {
   formId: 'new-user-form',
-  path: '/api/users',
+  path: '/users',
   method: 'POST',
   type: 'form',
   useRightsLevel: 0,

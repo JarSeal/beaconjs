@@ -1,6 +1,6 @@
 const newPassRequestFormData = {
   formId: 'new-pass-request-form',
-  path: '/api/users/newpassrequest',
+  path: '/users/newpassrequest',
   method: 'POST',
   type: 'form',
   useRightsLevel: 0,

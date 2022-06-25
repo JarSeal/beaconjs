@@ -42,7 +42,7 @@ fieldset {
   .form--success & {
     color: $font-color;
     opacity: 1;
-    .dialog-box & {
+    .dialog .inner-box & {
       color: $font-color-invert;
       text-align: left;
     }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Component } from '../../LIGHTER';
-import { _CONFIG } from '../../_CONFIG';
+import { getApiBaseUrl } from '../../helpers/config';
 
 class Logout extends Component {
   constructor(data) {
@@ -17,12 +17,12 @@ class Logout extends Component {
     appState.set('user.loggedIn', false);
     appState.set('user.username', null);
 
-    let url = _CONFIG.apiBaseUrl + '/api/login/access';
+    let url = getApiBaseUrl() + '/login/access';
     let payload = { from: 'logout' };
     await axios.post(url, payload, { withCredentials: true });
 
     const browserId = this.appState.get('browserId');
-    url = _CONFIG.apiBaseUrl + '/api/login/access';
+    url = getApiBaseUrl() + '/login/access';
     payload = { from: 'checklogin', browserId };
     const response = await axios.post(url, payload, { withCredentials: true });
     appState.set('serviceSettings', response.data.serviceSettings);

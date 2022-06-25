@@ -2,15 +2,16 @@ import CryptoJS from 'crypto-js';
 import nodemailer from 'nodemailer';
 import { marked } from 'marked';
 
-import config from './config.js';
-import logger from './logger.js';
-import Email from '../models/email.js';
-import { getSettings } from './settingsService.js';
-import shared from '../shared/index.js';
+import config from './config';
+import logger from './logger';
+import Email from '../models/email';
+import { getSettings } from './settingsService';
+import shared from '../shared/index';
 
 const confUI = shared.CONFIG.UI;
 
 const sendEmailById = async (id, emailParams, request) => {
+  if (config.ENV === 'test') return { emailSent: true };
   const settings = await getSettings(request);
   if (!settings['email-sending']) return;
 
@@ -69,7 +70,7 @@ const sendEmailById = async (id, emailParams, request) => {
     // },
   });
 
-  const mainUrl = confUI?.baseUrl + confUI?.basePath;
+  const mainUrl = config.getClientBaseUrl();
   emailParams.mainBeaconUrl = mainUrl;
   emailParams.newPassRequestUrl = mainUrl + '/u/newpassrequest';
 
@@ -97,23 +98,8 @@ const sendEmailById = async (id, emailParams, request) => {
     };
   }
 
-  // Placeholder replacing happens here (placeholder: $[variableName] ):
-  // The variables that match the emailParams will be replaced with the value
-  let subjectAndText = template.defaultEmail; // TODO: Do different languages here
-  let subject = subjectAndText.subject;
-  let text = subjectAndText.text;
-  const variables = extractVariables(text).concat(extractVariables(subject));
-  if (variables) {
-    for (let i = 0; i < variables.length; i++) {
-      const v = variables[i];
-      const regex = new RegExp('\\$\\[' + v + '\\]', 'g');
-      if (emailParams[v]) {
-        const replaceWith = emailParams[v];
-        subject = subject.replace(regex, replaceWith);
-        text = text.replace(regex, replaceWith);
-      }
-    }
-  }
+  const subjectAndText = template.defaultEmail; // TODO: Do different languages here
+  const { subject, text } = replaceVariables(subjectAndText, emailParams);
 
   const mailOptions = {
     from,
@@ -139,6 +125,7 @@ const sendEmailById = async (id, emailParams, request) => {
 };
 
 const extractVariables = (text, startsWith, endsWith) => {
+  if (!text) return [];
   if (!startsWith) startsWith = '\\$\\[';
   if (!endsWith) endsWith = '\\]';
   const variables = [];
@@ -154,6 +141,26 @@ const extractVariables = (text, startsWith, endsWith) => {
   };
   _extractText(text);
   return variables;
+};
+
+const replaceVariables = (subjectAndText, emailParams) => {
+  // Placeholder replacing happens here (placeholder: $[variableName] ):
+  // The variables that match the emailParams will be replaced with the value
+  let subject = subjectAndText.subject;
+  let text = subjectAndText.text;
+  const variables = extractVariables(text).concat(extractVariables(subject));
+  if (variables.length) {
+    for (let i = 0; i < variables.length; i++) {
+      const v = variables[i];
+      const regex = new RegExp('\\$\\[' + v + '\\]', 'g');
+      if (emailParams[v]) {
+        const replaceWith = emailParams[v];
+        subject = subject.replace(regex, replaceWith);
+        text = text.replace(regex, replaceWith);
+      }
+    }
+  }
+  return { subject, text };
 };
 
 const _wrapHtmlTemplate = (content, fromName) => {
@@ -221,4 +228,4 @@ const _wrapHtmlTemplate = (content, fromName) => {
   return html;
 };
 
-export { sendEmailById, extractVariables };
+export { sendEmailById, extractVariables, replaceVariables };

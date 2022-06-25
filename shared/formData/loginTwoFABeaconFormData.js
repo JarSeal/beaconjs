@@ -1,6 +1,6 @@
 const loginTwoFABeaconFormData = {
   formId: 'beacon-twofa-login',
-  path: '/api/login/two',
+  path: '/login/two',
   method: 'POST',
   type: 'form',
   useRightsLevel: 0,

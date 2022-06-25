@@ -6,23 +6,24 @@ import {
   createNewEditedArray,
   checkIfEmailTaken,
   getUserEmail,
-} from '../utils/helpers.js';
-import shared from '../shared/index.js';
-import readUsersFormData from '../../shared/formData/deleteUsersFormData.js';
-import readOneUserFormData from '../../shared/formData/readOneUserFormData.js';
-import readProfileFormData from '../../shared/formData/readProfileFormData.js';
-import editExposeProfileFormData from '../../shared/formData/editExposeProfileFormData.js';
-import verifyAccountWToken from '../../shared/formData/verifyAccountWToken.js';
-import emailVerificationFormData from './../../shared/formData/emailVerificationFormData.js';
-import logger from '../utils/logger.js';
-import User from '../models/user.js';
-import UserSetting from '../models/userSetting.js';
-import Form from '../models/form.js';
-import { getAndValidateForm, getUserExposure } from './forms/formEngine.js';
-import { checkIfLoggedIn } from '../utils/checkAccess.js';
-import { sendEmailById } from '../utils/emailService.js';
-import { createRandomString } from '../../shared/parsers.js';
-import { getSetting } from '../utils/settingsService.js';
+} from '../utils/helpers';
+import shared from '../shared/index';
+import readUsersFormData from '../../shared/formData/deleteUsersFormData';
+import readOneUserFormData from '../../shared/formData/readOneUserFormData';
+import readProfileFormData from '../../shared/formData/readProfileFormData';
+import editExposeProfileFormData from '../../shared/formData/editExposeProfileFormData';
+import verifyAccountWToken from '../../shared/formData/verifyAccountWToken';
+import emailVerificationFormData from './../../shared/formData/emailVerificationFormData';
+import logger from '../utils/logger';
+import User from '../models/user';
+import UserSetting from '../models/userSetting';
+import Form from '../models/form';
+import { getAndValidateForm, getUserExposure } from './forms/formEngine';
+import { checkIfLoggedIn } from '../utils/checkAccess';
+import { sendEmailById } from '../utils/emailService';
+import { createRandomString } from '../../shared/parsers';
+import { getSetting } from '../utils/settingsService';
+import config from '../utils/config';
 
 const usersRouter = Router();
 const CONFIG = shared.CONFIG;
@@ -65,12 +66,14 @@ usersRouter.get('/:userId', async (request, response) => {
     }
   }
 
+  const userNotFoundResponse = {
+    msg: 'User was not found',
+    userNotFoundError: true,
+  };
+
   if (!userToView) {
     logger.log('Could not find user with this id: ' + userId + ' (+ session)', request.session);
-    return response.status(404).json({
-      msg: 'User was not found.',
-      userNotFoundError: true,
-    });
+    return response.status(404).json(userNotFoundResponse);
   }
 
   // Exposure check
@@ -148,10 +151,7 @@ usersRouter.get('/:userId', async (request, response) => {
       request.session,
       userId
     );
-    return response.status(404).json({
-      msg: 'User was not found.',
-      userNotFoundError: true,
-    });
+    return response.status(404).json(userNotFoundResponse);
   }
 
   response.json(publishUser);
@@ -186,7 +186,7 @@ usersRouter.put('/', async (request, response) => {
     );
     return response.status(401).json({
       unauthorised: true,
-      msg: 'User not authorised.',
+      msg: 'User not authorised',
     });
   } else if (body.userLevel < 1) {
     logger.log(
@@ -196,11 +196,21 @@ usersRouter.put('/', async (request, response) => {
     );
     return response.status(400).json({
       badRequest: true,
-      msg: 'Bad request.',
+      msg: 'Bad request',
     });
   }
 
   const user = await User.findById(body.userId);
+  if (user.username === request.session.username) {
+    logger.log(
+      'Unauthorised. User tried to edit own profile via edit profile api. (+ session)',
+      request.session
+    );
+    return response.status(401).json({
+      unauthorised: true,
+      msg: 'User not authorised',
+    });
+  }
   const verifyEmail = await _createOldEmail(request, user, body.email);
   const edited = await createNewEditedArray(user.edited, request.session._id);
   const updatedUser = Object.assign(
@@ -314,6 +324,19 @@ usersRouter.post('/delete', async (request, response) => {
 // Register user
 usersRouter.post('/', async (request, response) => {
   const body = request.body;
+  const loggedIn = checkIfLoggedIn(request.session);
+
+  if (!loggedIn) {
+    const publicCanRegister = await getSetting(request, 'public-user-registration', true);
+    // Check if public registration is possible
+    if (!publicCanRegister) {
+      return response.status(401).json({
+        unauthorised: true,
+        msg: 'Unauthorised',
+      });
+    }
+  }
+
   const error = await getAndValidateForm(body.id, 'POST', request);
   if (error) {
     return response.status(error.code).json(error.obj);
@@ -348,7 +371,7 @@ usersRouter.post('/', async (request, response) => {
       : 1;
 
   let createdBy = null;
-  if (checkIfLoggedIn(request.session)) createdBy = request.session._id;
+  if (loggedIn) createdBy = request.session._id;
 
   if (userCount.length === 0) {
     // First registration is always for a super admin (level 9)
@@ -440,7 +463,9 @@ usersRouter.put('/own/profile', async (request, response) => {
 
   const user = await User.findById(userId);
   const passwordCorrect =
-    user === null ? false : await bcrypt.compare(body.curPassword, user.passwordHash);
+    user === null || !body.curPassword
+      ? false
+      : await bcrypt.compare(body.curPassword, user.passwordHash);
   if (!passwordCorrect) {
     return response.status(401).json({
       error: 'invalid password',
@@ -459,19 +484,6 @@ usersRouter.put('/own/profile', async (request, response) => {
         emailTaken: true,
       });
     }
-  }
-
-  // Check if the session user is the same as target
-  if (!user || user.username !== request.session.username) {
-    logger.error(
-      "Could not update user's own profile. User was not found or does not match the session user (id: " +
-        body.userId +
-        ').'
-    );
-    return response.json({
-      msg: 'Bad request.',
-      badRequest: true,
-    });
   }
 
   const verifyEmail = await _createOldEmail(request, user, body.email);
@@ -501,7 +513,7 @@ usersRouter.put('/own/profile', async (request, response) => {
       {
         to: body.email.trim(),
         username: user.username,
-        verifyEmailTokenUrl: CONFIG.UI.baseUrl + CONFIG.UI.basePath + '/u/verify/' + newEmailToken,
+        verifyEmailTokenUrl: `${config.getClientBaseUrl()}/u/verify/${newEmailToken}`,
       },
       request
     );
@@ -531,7 +543,9 @@ usersRouter.put('/user/exposure', async (request, response) => {
     }
 
     const passwordCorrect =
-      user === null ? false : await bcrypt.compare(body.curPassword, user.passwordHash);
+      user === null || !body.curPassword
+        ? false
+        : await bcrypt.compare(body.curPassword, user.passwordHash);
     if (!passwordCorrect) {
       return response.status(401).json({
         error: 'invalid password',
@@ -586,6 +600,7 @@ usersRouter.put('/user/exposure', async (request, response) => {
       edited,
     };
   } else {
+    logger.error(`No valid exposure fields to update were found (user id: ${userId}).`);
     return response.status(400).json({
       msg: 'Bad request. No valid fields to update were found.',
       noFieldsFound: true,
@@ -595,7 +610,7 @@ usersRouter.put('/user/exposure', async (request, response) => {
   const savedUser = await User.findByIdAndUpdate(userId, updatedUser, { new: true });
   if (!savedUser) {
     logger.error(
-      "Could not update user's own profile exposure. User was not found (id: " + userId + ').'
+      `Could not update user's own profile exposure. User was not found (id: ${userId}).`
     );
     return response.status(404).json({
       msg: 'User to update was not found.',
@@ -612,7 +627,9 @@ usersRouter.post('/own/delete', async (request, response) => {
   const userId = request.session._id;
   const user = await User.findById(userId);
   const passwordCorrect =
-    user === null ? false : await bcrypt.compare(body.password, user.passwordHash);
+    user === null || !body.password
+      ? false
+      : await bcrypt.compare(body.password, user.passwordHash);
   if (!passwordCorrect) {
     return response.status(401).json({
       error: 'invalid password',
@@ -660,7 +677,9 @@ usersRouter.post('/own/changepass', async (request, response) => {
   const userId = request.session._id;
   const user = await User.findById(userId);
   const passwordCorrect =
-    user === null ? false : await bcrypt.compare(body.curPassword, user.passwordHash);
+    user === null || !body.curPassword
+      ? false
+      : await bcrypt.compare(body.curPassword, user.passwordHash);
   if (!passwordCorrect) {
     return response.status(401).json({
       error: 'invalid password',
@@ -705,7 +724,7 @@ usersRouter.post('/own/changepass', async (request, response) => {
 // Request a new password link
 usersRouter.post('/newpassrequest', async (request, response) => {
   const monoResponse = () => {
-    // For security reasons
+    // For security reasons, always send the same response
     return response.json({ tryingToSend: true });
   };
 
@@ -731,7 +750,8 @@ usersRouter.post('/newpassrequest', async (request, response) => {
       }
     }
 
-    const newToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+    let newToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+    if (config.ENV === 'test') newToken = '123456';
     const linkLife = await getSetting(request, 'new-pass-link-lifetime', true);
     const newPassLinkAndDate = {
       token: newToken,
@@ -756,7 +776,7 @@ usersRouter.post('/newpassrequest', async (request, response) => {
       {
         to: email,
         username: savedUser.username,
-        newPassWTokenUrl: CONFIG.UI.baseUrl + CONFIG.UI.basePath + '/u/newpass/' + newToken,
+        newPassWTokenUrl: `${config.getClientBaseUrl()}/u/newpass/${newToken}`,
         linkLife,
       },
       request
@@ -924,7 +944,10 @@ usersRouter.post('/newemailverification', async (request, response) => {
 });
 
 const _sendVerificationEmail = async (request, response, user) => {
-  const newEmailToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+  let newEmailToken = createRandomString(64, true); // Maybe improve this by checking for token collision
+  if (config.ENV === 'test') {
+    newEmailToken = '123456' + user.username;
+  }
   const verifyEmail = {
     'security.verifyEmail': {
       token: newEmailToken,
@@ -946,7 +969,7 @@ const _sendVerificationEmail = async (request, response, user) => {
     {
       to: user.email,
       username: user.username,
-      verifyEmailTokenUrl: CONFIG.UI.baseUrl + CONFIG.UI.basePath + '/u/verify/' + newEmailToken,
+      verifyEmailTokenUrl: `${config.getClientBaseUrl()}/u/verify/${newEmailToken}`,
     },
     request
   );

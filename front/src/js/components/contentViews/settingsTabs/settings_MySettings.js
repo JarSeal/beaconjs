@@ -21,8 +21,8 @@ class MySettings extends Component {
         spinner: true,
       })
     );
-    this.formDataApi = new ReadApi({ url: '/api/forms/user-settings-form' });
-    this.settingsDataApi = new ReadApi({ url: '/api/settings' });
+    this.formDataApi = new ReadApi({ url: '/forms/user-settings-form' });
+    this.settingsDataApi = new ReadApi({ url: '/settings' });
   }
 
   init = () => {

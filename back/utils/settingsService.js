@@ -11,9 +11,10 @@ const reloadSettings = async (request) => {
   const adminSettings = await AdminSetting.find({});
   all = {};
   let userLevel = 0;
-  const loggedIn = checkIfLoggedIn(request.session);
+  const loggedIn = checkIfLoggedIn(request?.session);
   if (loggedIn) userLevel = request.session.userLevel;
   for (let i = 0; i < adminSettings.length; i++) {
+    // Might not need this (it is now always 0 for all admin settings)
     if (userLevel >= adminSettings[i].settingReadRight) {
       all[adminSettings[i].settingId] = parseValue(adminSettings[i]);
     }
@@ -50,11 +51,13 @@ const getSetting = async (request, id, admin, noReload) => {
   if (!noReload) {
     const loggedIn = checkIfLoggedIn(request.session);
     let setting;
-    admin
-      ? (setting = await AdminSetting.findOne({ settingId: id }))
-      : loggedIn
-      ? (setting = await UserSetting.findOne({ settingId: id, userId: request.session._id }))
-      : null;
+    if (admin) {
+      setting = await AdminSetting.findOne({ settingId: id });
+    } else {
+      setting = loggedIn
+        ? await UserSetting.findOne({ settingId: id, userId: request.session._id })
+        : null;
+    }
     if (!setting) return null;
     let userLevel = 0;
     if (loggedIn) userLevel = request.session.userLevel;
@@ -63,7 +66,7 @@ const getSetting = async (request, id, admin, noReload) => {
   }
   let value = all[id];
   if (value === undefined) {
-    let setting = await UserSetting.findOne({ settingId: id, userId: request.session._id });
+    const setting = await UserSetting.findOne({ settingId: id, userId: request.session._id });
     value = setting ? parseValue(setting) : await getDefaultValue(id, request);
   }
   return value;
@@ -167,7 +170,7 @@ const publicSettingsRemapping = {
 
 // Get relevant admin settings that might prevent
 // users from setting some settings
-const getEnabledSettingsData = async (request) => {
+const getEnabledUserSettingsData = async (request) => {
   const enabledSettings = {};
   let value, key;
 
@@ -181,7 +184,7 @@ const getEnabledSettingsData = async (request) => {
 const getFilteredSettings = (settings, enabledSettings) => {
   return settings.filter((s) => {
     if (!s.enabledId) return true;
-    return checkIfAdminSettingEnabled(enabledSettings[s.enabledId], s.id);
+    return checkIfAdminSettingEnabled(enabledSettings[s.enabledId], s.settingId);
   });
 };
 
@@ -205,7 +208,7 @@ export {
   getSetting,
   parseValue,
   getPublicSettings,
-  getEnabledSettingsData,
+  getEnabledUserSettingsData,
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 };

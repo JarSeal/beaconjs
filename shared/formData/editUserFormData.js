@@ -2,7 +2,7 @@ import { USER } from '../../CONFIG.js';
 
 const editUserFormData = {
   formId: 'edit-user-form',
-  path: '/api/users',
+  path: '/users',
   method: 'PUT',
   type: 'form',
   useRightsLevel: 8,

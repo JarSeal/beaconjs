@@ -1,12 +1,12 @@
 import { Component, LocalStorage, Logger, SessionStorage } from '../../../LIGHTER';
 import axios from 'axios';
 import { getText } from '../../../helpers/lang';
-import { _CONFIG } from '../../../_CONFIG';
 import Table from '../../widgets/Table';
 import { getHashCode } from '../../../helpers/storage';
 import ViewTitle from '../../widgets/ViewTitle';
 import ReadApi from '../../forms/ReadApi';
 import DialogForms from '../../widgets/dialogs/dialog_Forms';
+import { getApiBaseUrl } from '../../../helpers/config';
 
 class UsersList extends Component {
   constructor(data) {
@@ -36,7 +36,7 @@ class UsersList extends Component {
         spinner: true,
       })
     );
-    this.usersDataApi = new ReadApi({ url: '/api/users' });
+    this.usersDataApi = new ReadApi({ url: '/users' });
     this.dialogForms = new DialogForms({ id: 'settings-users-dialog-forms' });
     this.usersTable = this.addChild(
       new Table({
@@ -141,7 +141,7 @@ class UsersList extends Component {
 
   _deleteUsers = async (users) => {
     if (!users || !users.length) return;
-    const url = _CONFIG.apiBaseUrl + '/api/users';
+    const url = getApiBaseUrl() + '/users';
     try {
       const response = await axios.delete(url, { withCredentials: true, users });
       return response;

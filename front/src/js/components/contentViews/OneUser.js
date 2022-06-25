@@ -29,7 +29,7 @@ class OneUser extends Component {
 
   init = () => {
     this.userId = this.Router.getRouteParams().user;
-    this.readApi = new ReadApi({ url: '/api/users/' + this.userId });
+    this.readApi = new ReadApi({ url: '/users/' + this.userId });
     this.viewTitle.draw();
     this._loadUserData();
   };

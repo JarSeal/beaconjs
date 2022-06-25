@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Logger } from '../LIGHTER';
-import { _CONFIG } from '../_CONFIG';
+import { getApiBaseUrl } from './config';
 
 const checkRouteAccess = async (routeData) => {
   if (!routeData || !routeData.route) {
@@ -16,7 +16,7 @@ const checkRouteAccess = async (routeData) => {
       return '/login';
     }
   } else {
-    const url = _CONFIG.apiBaseUrl + '/api/login/access';
+    const url = getApiBaseUrl() + '/login/access';
     const payload = {
       ids: [
         {
@@ -44,7 +44,7 @@ const checkRouteAccess = async (routeData) => {
 };
 
 const getAdminRights = async () => {
-  const url = _CONFIG.apiBaseUrl + '/api/login/access';
+  const url = getApiBaseUrl() + '/login/access';
   const payload = { from: 'admin' };
   try {
     const response = await axios.post(url, payload, { withCredentials: true });

@@ -1,0 +1,2 @@
+// For jest tests
+{ "presets": ["@babel/preset-env"] }

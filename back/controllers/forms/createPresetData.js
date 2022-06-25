@@ -10,7 +10,7 @@ const formData = shared.formData;
 const emailData = shared.emailData;
 const routeAccess = shared.CONFIG.ROUTE_ACCESS;
 
-const createPresetForms = async () => {
+const createPresetData = async (quiet) => {
   let newForm, checkForm, adminSettings;
   for (let i = 0; i < formData.length; i++) {
     checkForm = await Form.findOne({ formId: formData[i].formId });
@@ -23,7 +23,7 @@ const createPresetForms = async () => {
       };
       newForm = new Form(formData[i]);
       await newForm.save();
-      logger.log(`Preset form '${formData[i].formId}' created.`);
+      if (!quiet) logger.log(`Preset form '${formData[i].formId}' created.`);
     }
   }
   for (let i = 0; i < routeAccess.length; i++) {
@@ -37,7 +37,7 @@ const createPresetForms = async () => {
       routeAccess[i].type = 'view';
       newForm = new Form(routeAccess[i]);
       await newForm.save();
-      logger.log(`Preset form (route access) '${routeAccess[i].formId}' created.`);
+      if (!quiet) logger.log(`Preset form (route access) '${routeAccess[i].formId}' created.`);
     }
   }
 
@@ -65,7 +65,7 @@ const createPresetForms = async () => {
         }
       }
     }
-    if (settingsSaved)
+    if (settingsSaved && !quiet)
       logger.log(`Saved ${settingsSaved} admin setting${settingsSaved === 1 ? '' : 's'}.`);
   }
 
@@ -81,7 +81,7 @@ const createPresetForms = async () => {
       email.created.date = new Date();
       const newEmail = new Email(email);
       await newEmail.save();
-      logger.log(`Preset email template '${email.emailId}' created.`);
+      if (!quiet) logger.log(`Preset email template '${email.emailId}' created.`);
     }
   }
 };
@@ -92,4 +92,4 @@ const _enCryptPass = (value) => {
   return ciphertext;
 };
 
-export default createPresetForms;
+export default createPresetData;

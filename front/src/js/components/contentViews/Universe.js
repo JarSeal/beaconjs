@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Component } from '../../LIGHTER';
 import * as parsers from '../../shared';
-import { _CONFIG } from '../../_CONFIG';
+import { getApiBaseUrl } from '../../helpers/config';
 import ViewTitle from '../widgets/ViewTitle';
 
 class NewUser extends Component {
@@ -41,8 +41,8 @@ class NewUser extends Component {
   getData = async () => {
     this.viewTitle.showSpinner(true);
 
-    const path = '/api/universes/' + this.universeId;
-    const response = await axios.get(_CONFIG.apiBaseUrl + path, { withCredentials: true });
+    const path = '/universes/' + this.universeId;
+    const response = await axios.get(getApiBaseUrl() + path, { withCredentials: true });
     const uniData = response.data;
 
     if (!uniData) {

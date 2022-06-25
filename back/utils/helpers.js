@@ -58,13 +58,31 @@ const checkIfEmailTaken = async (emailToCheck, userId) => {
   const findEmail = await User.findOne({ email: emailToCheck.trim() });
   const findOldEmail = await User.findOne({ 'security.verifyEmail.oldEmail': emailToCheck.trim() });
   return (
-    (findEmail !== null && String(findEmail._id) !== userId) ||
-    (findOldEmail !== null && String(findOldEmail._id) !== userId)
+    (findEmail !== null && String(findEmail._id) !== String(userId)) ||
+    (findOldEmail !== null && String(findOldEmail._id) !== String(userId))
   );
 };
 
 const getUserEmail = (user) => {
   return user.security?.verifyEmail?.verified ? user.email : user.security?.verifyEmail?.oldEmail;
+};
+
+const loopFormFields = ({ formData, form, allFields }, fn) => {
+  const data = form ? { form: form } : formData;
+  for (let i = 0; i < data.form.fieldsets.length; i++) {
+    const fs = data.form.fieldsets[i];
+    for (let j = 0; j < fs.fields.length; j++) {
+      if (
+        !allFields &&
+        (fs.fields[j].type === 'divider' ||
+          fs.fields[j].type === 'subheading' ||
+          fs.fields[j].type === 'subdescription')
+      ) {
+        continue;
+      }
+      fn(fs.fields[j], fs);
+    }
+  }
 };
 
 export {
@@ -73,4 +91,5 @@ export {
   createNewLoginLogsArray,
   checkIfEmailTaken,
   getUserEmail,
+  loopFormFields,
 };

@@ -2,20 +2,16 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import { Router } from 'express';
 
-import User from '../models/user.js';
-import Form from '../models/form.js';
-import UserSetting from '../models/userSetting.js';
-import logger from '../utils/logger.js';
-import { createNewLoginLogsArray } from '../utils/helpers.js';
-import { checkAccess, checkIfLoggedIn } from '../utils/checkAccess.js';
-import { createRandomString } from '../../shared/parsers.js';
-import {
-  getSetting,
-  getSettings,
-  getPublicSettings,
-  parseValue,
-} from '../utils/settingsService.js';
-import { sendEmailById } from '../utils/emailService.js';
+import User from '../models/user';
+import Form from '../models/form';
+import UserSetting from '../models/userSetting';
+import logger from '../utils/logger';
+import { createNewLoginLogsArray } from '../utils/helpers';
+import { checkIfLoggedIn } from '../utils/checkAccess';
+import { createRandomString } from '../../shared/parsers';
+import { getSetting, getSettings, getPublicSettings, parseValue } from '../utils/settingsService';
+import { sendEmailById } from '../utils/emailService';
+import config from '../utils/config';
 
 const loginRouter = Router();
 
@@ -46,7 +42,6 @@ loginRouter.post('/access', async (request, response) => {
       if (user) {
         result.username = request.session.username;
         result.userLevel = request.session.userLevel || 0;
-        if (result.userLevel === 0) request.session.userLevel = 0;
         // Check email and account verification
         result.accountVerified = null;
         request.session.verified = null;
@@ -57,12 +52,9 @@ loginRouter.post('/access', async (request, response) => {
           result.accountVerified = true;
           request.session.verified = true;
         }
-      } else {
-        request.session.browserId = browserId;
       }
-    } else {
-      request.session.browserId = browserId;
     }
+    request.session.browserId = browserId;
     result.serviceSettings = settings;
   } else if (request.body.from === 'getCSRF') {
     if (!request.session) {
@@ -77,37 +69,21 @@ loginRouter.post('/access', async (request, response) => {
         request.session,
         request.body
       );
-      return response.status('409').json({
+      return response.status(409).json({
         conflictError: true,
         errorMsg: 'browserId conflict',
         loggedIn: checkIfLoggedIn(request.session),
       });
     }
   } else if (request.body.from === 'logout') {
-    if (request.session.username) {
+    if (request.session?.username) {
       request.session.destroy();
       if (request.cookies['connect.sid']) {
         response.clearCookie('connect.sid');
       }
     }
-  } else {
-    const ids = request.body.ids;
-    for (let i = 0; i < ids.length; i++) {
-      const id = ids[i];
-      if (id.from === 'universe') {
-        // TODO, do universe here (find by universeId)
-      } else {
-        // Default is Form
-        check = await Form.findOne({ formId: id.id });
-      }
-      const settings = await getSettings(request, true);
-      result[id.id] = checkAccess(request, check, settings);
-      result.serviceSettings = await getPublicSettings(request, true);
-    }
   }
-
   result.loggedIn = checkIfLoggedIn(request.session);
-
   return response.json(result);
 });
 
@@ -181,7 +157,7 @@ loginRouter.post('/two', async (request, response) => {
   }
 
   // Check 2FA code
-  const isTwoFACodeInvalid = await _check2FACode(user, body);
+  const isTwoFACodeInvalid = await _check2FACode(request, user, body);
   if (isTwoFACodeInvalid) {
     return response.status(isTwoFACodeInvalid.statusCode).json(isTwoFACodeInvalid.sendObj);
   }
@@ -198,7 +174,7 @@ loginRouter.post('/two', async (request, response) => {
   await _createSessionAndRespond(request, response, user, body);
 });
 
-const _getUserSecurity = (user) => {
+export const _getUserSecurity = (user) => {
   let userSecurity;
   if (user) {
     userSecurity = user.security ? user.security : {};
@@ -228,6 +204,22 @@ const _getUserSecurity = (user) => {
     ...userSecurity,
   };
 };
+
+export const _invalidUsernameOrPasswordResponse = {
+  statusCode: 401,
+  sendObj: {
+    error: 'invalid username and/or password',
+    loggedIn: false,
+  },
+};
+
+export const _serverErrorResponse = (loggedIn) => ({
+  statusCode: 500,
+  sendObj: {
+    error: 'internal server error',
+    loggedIn: loggedIn || false,
+  },
+});
 
 const _userUnderCooldown = async (request, user) => {
   const timeNow = new Date();
@@ -269,22 +261,6 @@ const _userUnderCooldown = async (request, user) => {
   // All good, no cooldown
   return null;
 };
-
-const _invalidUsernameOrPasswordResponse = {
-  statusCode: 401,
-  sendObj: {
-    error: 'invalid username and/or password',
-    loggedIn: false,
-  },
-};
-
-const _getServerError = (loggedIn) => ({
-  statusCode: 500,
-  sendObj: {
-    error: 'internal server error',
-    loggedIn: loggedIn || false,
-  },
-});
 
 const _checkGivenPassword = async (user, request) => {
   const userSecurity = _getUserSecurity(user);
@@ -388,7 +364,10 @@ const _check2Fa = async (user, request, body) => {
   // Create and send a new 2FA code and respond
   const timeNow = new Date();
   const twoFactorLife = await getSetting(request, 'two-factor-code-lifetime', true);
-  const twoFactorCode = createRandomString(6, '0123456789QWERTY');
+  let twoFactorCode = createRandomString(6, '0123456789QWERTY');
+  if (config.ENV === 'test') {
+    twoFactorCode = '123456';
+  }
   userSecurity.twoFactor = {
     code: twoFactorCode,
     expires: new Date(timeNow.getTime() + twoFactorLife * 60000),
@@ -402,7 +381,7 @@ const _check2Fa = async (user, request, body) => {
     logger.log(
       'Could not update user security data for 2FA. User was not found (id: ' + user._id + ').'
     );
-    return _getServerError();
+    return _serverErrorResponse();
   }
   const emailResult = await sendEmailById(
     'two-factor-auth-email',
@@ -414,7 +393,7 @@ const _check2Fa = async (user, request, body) => {
     request
   );
   if (!emailResult.emailSent) {
-    return _getServerError();
+    return _serverErrorResponse();
   }
   return {
     statusCode: 200,
@@ -461,7 +440,7 @@ const _clearNewPassLinkAndLoginAttempts = async (user, body) => {
   );
   if (!savedUser) {
     logger.log('Could not clear user attempts. User was not found (id: ' + user._id + ').');
-    return _getServerError();
+    return _serverErrorResponse();
   }
 
   // All good
@@ -509,12 +488,12 @@ const _createSessionAndRespond = async (request, response, user, body) => {
   });
 };
 
-const _check2FACode = async (user, body) => {
+const _check2FACode = async (request, user, body) => {
   const userSecurity = _getUserSecurity(user);
   const userTwoFactor = userSecurity.twoFactor;
   const code = body.twofacode;
   const timestampNow = new Date().getTime();
-  const invalidCodeResponse = {
+  let invalidCodeResponse = {
     statusCode: 401,
     sendObj: {
       loggedIn: false,
@@ -524,8 +503,8 @@ const _check2FACode = async (user, body) => {
 
   // Check validity of user data
   if (!userSecurity || !userTwoFactor || !userTwoFactor.expires || !userTwoFactor.code) {
-    logger.log('Could not clear user attempts. User was not found (id: ' + user._id + ').');
-    return _getServerError();
+    logger.log(`Could not clear user attempts. User was not found (id: ${user._id}).`);
+    return _serverErrorResponse();
   }
 
   // Check if code hasn't expired
@@ -535,6 +514,35 @@ const _check2FACode = async (user, body) => {
 
   // Check if the code is correct
   if (code !== userTwoFactor.code) {
+    const maxLoginAttempts = await getSetting(request, 'max-login-attempts', true);
+    userSecurity.loginAttempts = userSecurity.loginAttempts + 1 || 1;
+    if (userSecurity.loginAttempts >= maxLoginAttempts) {
+      userSecurity.coolDown = true;
+      userSecurity.coolDownStarted = new Date();
+      logger.log(
+        `User set to cooldown from too many incorrect 2FA codes period (id: ${user._id}).`
+      );
+    } else {
+      userSecurity.coolDown = false;
+      userSecurity.coolDownStarted = null;
+    }
+
+    userSecurity.lastAttempts = userSecurity.lastAttempts || [];
+    userSecurity.lastAttempts.push({
+      date: new Date(),
+    });
+
+    const savedUser = await User.findByIdAndUpdate(
+      user.id,
+      { security: userSecurity },
+      { new: true }
+    );
+    if (!savedUser) {
+      logger.log(
+        `Could not update user security data after 2FA code check. User was not found (id: ${user._id}).`
+      );
+    }
+
     return invalidCodeResponse;
   }
 
@@ -547,8 +555,8 @@ const _check2FACode = async (user, body) => {
     { new: true }
   );
   if (!savedUser) {
-    logger.log('Could not clear user twoFactor data. User was not found (id: ' + user._id + ').');
-    return _getServerError();
+    logger.log(`Could not clear user twoFactor data. User was not found (id: ${user._id}).`);
+    return _serverErrorResponse();
   }
 
   // All good, proceed

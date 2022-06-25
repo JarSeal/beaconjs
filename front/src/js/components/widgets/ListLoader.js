@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { getApiBaseUrl } from '../../helpers/config';
 import { Component } from '../../LIGHTER';
-import { _CONFIG } from '../../_CONFIG';
 
 // Attributes for data:
 // - api = API to call when the list is loaded
@@ -29,7 +29,7 @@ class ListLoader extends Component {
 
   _loadData = async () => {
     this.loading = true;
-    const url = _CONFIG.apiBaseUrl + this.api;
+    const url = getApiBaseUrl() + this.api;
     const response = await axios.get(url, { withCredentials: true });
     this.list = response.data;
     this.buildList();

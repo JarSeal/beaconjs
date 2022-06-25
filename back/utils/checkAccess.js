@@ -62,6 +62,8 @@ const checkSettings = (check, settings, session) => {
       return settings['user-level-required-to-register'] <= session.userLevel;
     }
     return settings['public-user-registration'];
+  } else if (check.formId === 'beacon-main-login' && loggedIn) {
+    return false;
   }
   return true;
 };

@@ -15,27 +15,29 @@ import settingsRouter from './controllers/settings.js';
 import healthRouter from './controllers/health.js';
 import middleware from './utils/middleware.js';
 import logger from './utils/logger.js';
-import createPresetForms from './controllers/forms/createPresetForms.js';
+import createPresetData from './controllers/forms/createPresetData.js';
 import { createRandomString } from '../shared/parsers.js';
 
 const app = express();
 process.env.TZ = 'Europe/London';
 logger.info('connecting to', config.MONGODB_URI);
 
-mongoose
-  .connect(config.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  })
-  .then(() => {
-    logger.info('connected to MongoDB');
-    createPresetForms();
-  })
-  .catch((error) => {
-    logger.error('error connection to MongoDB:', error.message);
-  });
+if (config.ENV !== 'test') {
+  mongoose
+    .connect(config.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true,
+    })
+    .then(() => {
+      logger.info('connected to MongoDB');
+      createPresetData();
+    })
+    .catch((error) => {
+      logger.error('error connection to MongoDB:', error.message);
+    });
+}
 
 app.use(cookieParser());
 app.use(
@@ -55,10 +57,15 @@ app.use(
 app.use(
   cors({
     origin: [
+      // TODO: Move this to config and provide these only according to environment
       'http://localhost:8080',
       'https://localhost:8080',
-      'http://localhost:3001',
-      'https://localhost:3001',
+      'http://localhost:3011',
+      'https://localhost:3011',
+      'http://127.0.0.1:8080',
+      'https://127.0.0.1:8080',
+      'http://127.0.0.1:3011',
+      'https://127.0.0.1:3011',
     ],
     credentials: true,
     exposedHeaders: ['set-cookie'],
@@ -103,11 +110,6 @@ app.use('/api/forms', formsRouter);
 app.use('/api/universes', universesRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/health', healthRouter);
-
-if (process.env.NODE_ENV === 'test') {
-  const testingRouter = require('./controllers/testing');
-  app.use('/api/testing', testingRouter);
-}
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);

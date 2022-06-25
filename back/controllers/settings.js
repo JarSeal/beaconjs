@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import mongoose from 'mongoose';
 import { Router } from 'express';
 
 import UserSetting from '../models/userSetting.js';
@@ -10,7 +11,7 @@ import { createNewEditedArray } from './../utils/helpers.js';
 import { getAndValidateForm } from './forms/formEngine.js';
 import {
   getPublicSettings,
-  getEnabledSettingsData,
+  getEnabledUserSettingsData,
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 } from '../utils/settingsService.js';
@@ -26,7 +27,7 @@ settingsRouter.get('/', async (request, response) => {
   }
 
   const result = await UserSetting.find({ userId: request.session._id });
-  const enabledSettings = await getEnabledSettingsData(request);
+  const enabledSettings = await getEnabledUserSettingsData(request);
   const filteredResult = getFilteredSettings(result, enabledSettings);
 
   response.json(filteredResult);
@@ -40,8 +41,15 @@ settingsRouter.put('/', async (request, response) => {
     return response.status(error.code).json(error.obj);
   }
 
+  if (!mongoose.isValidObjectId(body.mongoId)) {
+    return response.status(400).json({
+      msg: 'MongoId not valid ID',
+      mongoIdNotValid: true,
+    });
+  }
+
   const setting = await UserSetting.findById(body.mongoId);
-  const enabledSettings = await getEnabledSettingsData(request);
+  const enabledSettings = await getEnabledUserSettingsData(request);
 
   if (!setting) {
     logger.error(
@@ -49,7 +57,7 @@ settingsRouter.put('/', async (request, response) => {
       body
     );
     return response.status(404).json({
-      msg: 'Setting was not found.',
+      msg: 'Setting was not found',
       settingNotFoundError: true,
     });
   } else if (body[setting.settingId] === null || body[setting.settingId] === undefined) {
@@ -60,10 +68,10 @@ settingsRouter.put('/', async (request, response) => {
       body
     );
     return response.status(400).json({
-      msg: 'Bad request.',
+      msg: 'Bad request',
       settingValueNotFoundError: true,
     });
-  } else if (!checkIfAdminSettingEnabled(enabledSettings[setting.enabledId], setting.id)) {
+  } else if (!checkIfAdminSettingEnabled(enabledSettings[setting.enabledId], setting.settingId)) {
     logger.error(
       `Could not update user setting. Setting is either disabled, always enabled (${
         enabledSettings[setting.enabledId]
@@ -91,7 +99,7 @@ settingsRouter.put('/', async (request, response) => {
       body
     );
     return response.status(404).json({
-      msg: 'Setting was not found.',
+      msg: 'Setting was not found',
       settingNotFoundError: true,
     });
   }
@@ -131,14 +139,22 @@ settingsRouter.put('/admin', async (request, response) => {
     return response.status(error.code).json(error.obj);
   }
 
+  if (!mongoose.isValidObjectId(body.mongoId)) {
+    return response.status(400).json({
+      msg: 'MongoId not valid ID',
+      mongoIdNotValid: true,
+    });
+  }
+
   const setting = await AdminSetting.findById(body.mongoId);
+
   if (!setting) {
     logger.error(
       'Could not find admin setting. Setting was not found (id: ' + body.mongoId + '). (+ body)',
       body
     );
     return response.status(404).json({
-      msg: 'Setting was not found.',
+      msg: 'Setting was not found',
       settingNotFoundError: true,
     });
   } else if (body[setting.settingId] === null || body[setting.settingId] === undefined) {
@@ -149,7 +165,7 @@ settingsRouter.put('/admin', async (request, response) => {
       body
     );
     return response.status(400).json({
-      msg: 'Bad request.',
+      msg: 'Bad request',
       settingValueNotFoundError: true,
     });
   }
@@ -177,7 +193,7 @@ settingsRouter.put('/admin', async (request, response) => {
       body
     );
     return response.status(404).json({
-      msg: 'Setting was not found.',
+      msg: 'Setting was not found',
       settingNotFoundError: true,
     });
   }

@@ -10,7 +10,7 @@ import logger from '../utils/logger.js';
 import { validatePrivileges } from './forms/formEngine.js';
 import {
   getSetting,
-  getEnabledSettingsData,
+  getEnabledUserSettingsData,
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 } from '../utils/settingsService.js';
@@ -217,7 +217,7 @@ const getAdditionalData = async (formId, dataId, request, formData) => {
     }
 
     // Check if current setting is enabled
-    const enabledSettings = await getEnabledSettingsData(request);
+    const enabledSettings = await getEnabledUserSettingsData(request);
     const settingInArray = getFilteredSettings([setting], enabledSettings);
 
     if (!setting || !settingInArray.length) {
@@ -290,7 +290,7 @@ const getAdditionalData = async (formId, dataId, request, formData) => {
 
 const _formatSpecialForms = async (request, form) => {
   if (form.id === 'user-settings-form') {
-    const enabledSettings = await getEnabledSettingsData(request);
+    const enabledSettings = await getEnabledUserSettingsData(request);
     const fs = form.fieldsets;
     const removeSettings = [];
     for (let i = 0; i < fs.length; i++) {

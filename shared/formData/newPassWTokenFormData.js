@@ -2,7 +2,7 @@ import { USER } from '../../CONFIG.js';
 
 const newPassWTokenFormData = {
   formId: 'reset-password-w-token-form',
-  path: '/api/users/newpass',
+  path: '/users/newpass',
   method: 'POST',
   type: 'form',
   useRightsLevel: 0,

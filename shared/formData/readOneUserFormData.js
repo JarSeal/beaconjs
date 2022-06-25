@@ -1,6 +1,6 @@
 const readOneUserFormData = {
   formId: 'read-one-user',
-  path: '/api/users/:userid',
+  path: '/users/:userid',
   method: 'GET',
   type: 'readapi',
   useRightsLevel: 0,

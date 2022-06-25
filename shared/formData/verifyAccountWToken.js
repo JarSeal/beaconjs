@@ -1,6 +1,6 @@
 const verifyAccountWToken = {
   formId: 'verify-w-token',
-  path: '/api/users/verify/:token',
+  path: '/users/verify/:token',
   method: 'GET',
   type: 'readapi',
   useRightsLevel: 0,

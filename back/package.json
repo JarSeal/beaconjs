@@ -9,11 +9,12 @@
     "yarn": ">=1.22.15"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=production node index.js",
-    "start-prod": "NODE_ENV=production SERVE_STATIC=production node index.js",
-    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "start": "cross-env NODE_ENV=production node --es-module-specifier-resolution=node index.js",
+    "start-prod": "NODE_ENV=production SERVE_STATIC=production node -es-module-specifier-resolution=node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon --es-module-specifier-resolution=node index.js",
     "lint": "eslint .",
-    "test": "cross-env NODE_ENV=test jest --verbose --runInBand --detectOpenHandles",
+    "test": "cross-env NODE_ENV=test TZ=UTC TEARDOWN=true NODE_OPTIONS=--es-module-specifier-resolution=node jest --verbose --runInBand --detectOpenHandles --coverage",
+    "test:watch": "cross-env NODE_ENV=test WATCH=true TZ=UTC NODE_OPTIONS=--es-module-specifier-resolution=node jest --watchAll --verbose --runInBand --detectOpenHandles",
     "start:test": "cross-env NODE_ENV=test node index.js",
     "prettify": "prettier --write ./**/*.js"
   },
@@ -24,6 +25,8 @@
   "author": "Kai Forsman",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.27.2",
+    "babel-jest": "^28.1.0",
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -41,16 +44,30 @@
     "prettier": "^2.6.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.18.2",
     "cross-env": "^7.0.2",
     "eslint": "^7.28.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "4.0.0",
     "eslint-config-import": "^0.13.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "2.25.4",
-    "jest": "^26.6.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "jest": "27.5.1",
     "nodemon": "^2.0.4"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist",
+      "<rootDir>/mongo"
+    ],
+    "transform": {
+      "^.+\\.(js)$": "babel-jest"
+    },
+    "globalSetup": "<rootDir>/test/globalSetup.js",
+    "globalTeardown": "<rootDir>/test/globalTeardown.js",
+    "testTimeout": 30000
   }
 }

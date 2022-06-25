@@ -1,6 +1,6 @@
 const readUsersFormData = {
   formId: 'delete-users',
-  path: '/api/users/delete',
+  path: '/users/delete',
   method: 'POST',
   type: 'form',
   useRightsLevel: 8,
