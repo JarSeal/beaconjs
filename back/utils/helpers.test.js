@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 import connectTestMongo from '../test/mongoSetup';
 import AdminSetting from '../models/adminSetting';
+import adminSettingsFormData from '../../shared/formData/adminSettingsFormData';
 import User from '../models/user';
 import {
   isValidObjectId,
@@ -9,6 +10,7 @@ import {
   createNewLoginLogsArray,
   checkIfEmailTaken,
   getUserEmail,
+  loopFormFields,
 } from './helpers';
 import { getSettings } from './settingsService';
 
@@ -166,5 +168,44 @@ describe('helpers', () => {
     expect(email1).toEqual('first.last@somedomain.org');
     expect(email2).toEqual('some.email@somedomain.org');
     expect(email3).toEqual(undefined);
+  });
+
+  it('should loop through form fields and run a function', () => {
+    let fieldIds1 = [];
+    for (let i = 0; i < adminSettingsFormData.form.fieldsets.length; i++) {
+      const fs = adminSettingsFormData.form.fieldsets[i];
+      for (let j = 0; j < fs.fields.length; j++) {
+        if (
+          fs.fields[j].type === 'divider' ||
+          fs.fields[j].type === 'subheading' ||
+          fs.fields[j].type === 'subdescription'
+        ) {
+          continue;
+        }
+        fieldIds1.push(fs.fields[j].id);
+      }
+    }
+    let fieldIds2 = [];
+    loopFormFields({ formData: adminSettingsFormData }, (field) => fieldIds2.push(field.id));
+    expect(fieldIds1).toEqual(fieldIds2);
+
+    fieldIds1 = [];
+    fieldIds2 = [];
+    for (let i = 0; i < adminSettingsFormData.form.fieldsets.length; i++) {
+      const fs = adminSettingsFormData.form.fieldsets[i];
+      for (let j = 0; j < fs.fields.length; j++) {
+        fieldIds1.push(fs.fields[j].id);
+      }
+    }
+    loopFormFields({ formData: adminSettingsFormData, allFields: true }, (field) =>
+      fieldIds2.push(field.id)
+    );
+    expect(fieldIds1).toEqual(fieldIds2);
+
+    fieldIds2 = [];
+    loopFormFields({ form: adminSettingsFormData.form, allFields: true }, (field) =>
+      fieldIds2.push(field.id)
+    );
+    expect(fieldIds1).toEqual(fieldIds2);
   });
 });

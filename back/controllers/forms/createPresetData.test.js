@@ -7,6 +7,7 @@ import formData from '../../../shared/formData/formData';
 import emailData from '../../../shared/emailData/emailData';
 import adminSettings from '../../../shared/formData/adminSettingsFormData';
 import shared from '../../shared/index.js';
+import { loopFormFields } from '../../utils/helpers';
 
 describe('formEngine', () => {
   startBackend();
@@ -50,19 +51,7 @@ describe('formEngine', () => {
 
     // Get adminSetting ids
     const adminFieldIDs = [];
-    for (let i = 0; i < adminSettings.form.fieldsets.length; i++) {
-      const fs = adminSettings.form.fieldsets[i];
-      for (let j = 0; j < fs.fields.length; j++) {
-        if (
-          fs.fields[j].type === 'divider' ||
-          fs.fields[j].type === 'subheading' ||
-          fs.fields[j].type === 'subdescription'
-        ) {
-          continue;
-        }
-        adminFieldIDs.push(fs.fields[j].id);
-      }
-    }
+    loopFormFields({ formData: adminSettings }, (field) => adminFieldIDs.push(field.id));
 
     await createPresetData();
 
