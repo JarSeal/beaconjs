@@ -6,6 +6,7 @@ import { _CONFIG } from './_CONFIG';
 import baseHTML from './base.html?raw';
 import { loadAssets } from './helpers/lang';
 import Dialog from './components/widgets/Dialog';
+import Toaster from './components/widgets/Toaster';
 import baseStyles from './Base.module.scss';
 import { getApiBaseUrl } from './helpers/config';
 
@@ -27,7 +28,9 @@ class Base extends Component {
     this.dialog = this.addChild(
       new Dialog({ id: 'dialog', attach: 'overlays', appState: this.appState })
     );
+    this.toaster = this.addChild(new Toaster({ id: 'toaster' }));
     this.appState.set('Dialog', this.dialog);
+    this.appState.set('Toaster', this.toaster);
     this.loadData();
   }
 
@@ -38,6 +41,7 @@ class Base extends Component {
 
   paint = () => {
     this.dialog.disappear();
+    this.toaster.draw();
     if (this.appState.get('loading.main')) {
       if (this.mainLoader) this.mainLoader.draw();
     } else {

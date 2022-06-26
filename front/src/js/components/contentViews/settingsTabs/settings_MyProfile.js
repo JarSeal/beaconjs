@@ -16,6 +16,7 @@ class MyProfile extends Component {
     this.template = '<div class="settingsTabView"></div>';
     this.appState = this.Router.commonData.appState;
     this.Dialog = this.appState.get('Dialog');
+    this.Toaster = this.appState.get('Toaster');
     this.viewTitle = this.addChild(
       new ViewTitle({
         id: this.id + '-sub-view-title',
@@ -164,6 +165,7 @@ class MyProfile extends Component {
             title: getText('edit'),
             editDataId: 'own',
             afterFormSentFn: () => {
+              this.Toaster.addToast({ text: 'testing' });
               this._loadMyData();
             },
             onErrorFn: () => {
