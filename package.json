@@ -16,7 +16,8 @@
     "lint": "cd front && yarn lint && cd ../back && yarn lint && eslint .",
     "lint:shared": "eslint .",
     "prettify": "prettier --write ./**/*.js",
-    "envFiles": "node createEnvFiles.js"
+    "envFiles": "node createEnvFiles.js",
+    "test": "cd back && yarn test"
   },
   "repository": {
     "type": "git",
