@@ -10,7 +10,7 @@ class DialogForms extends Component {
   }
 
   createDeleteDialog = (params) => {
-    const { id, title, addToMessage, formDesc, afterFormSentFn, onErrorFn } = params;
+    const { id, title, addToMessage, formDesc, afterFormSentFn, onErrorFn, onCloseFn } = params;
     if (!this.Dialog) this.Dialog = this.appState.get('Dialog');
     this.Dialog.appear({
       component: FormCreator,
@@ -34,6 +34,9 @@ class DialogForms extends Component {
             this.Router.changeRoute('/');
           }
         },
+        onCloseFn: () => {
+          if (onCloseFn) onCloseFn();
+        },
         onFormChanges: () => {
           this.Dialog.changeHappened();
         },
@@ -53,7 +56,7 @@ class DialogForms extends Component {
   };
 
   createEmptyFormDialog = (params) => {
-    const { id, title, afterFormSentFn, onErrorFn, cancelButton } = params;
+    const { id, title, afterFormSentFn, onErrorFn, cancelButton, onCloseFn } = params;
     if (!this.Dialog) this.Dialog = this.appState.get('Dialog');
     this.Dialog.appear({
       component: FormCreator,
@@ -74,6 +77,9 @@ class DialogForms extends Component {
           if (res && res.status === 401 && res.data.loggedIn !== false) {
             this.Router.changeRoute('/');
           }
+        },
+        onCloseFn: () => {
+          if (onCloseFn) onCloseFn();
         },
         onFormChanges: () => {
           this.Dialog.changeHappened();
@@ -96,7 +102,7 @@ class DialogForms extends Component {
   };
 
   createEditDialog = (params) => {
-    const { id, title, addToMessage, editDataId, afterFormSentFn, onErrorFn } = params;
+    const { id, title, addToMessage, editDataId, afterFormSentFn, onErrorFn, onCloseFn } = params;
     if (!this.Dialog) this.Dialog = this.appState.get('Dialog');
     this.Dialog.appear({
       component: FormCreator,
@@ -119,6 +125,9 @@ class DialogForms extends Component {
           if (res && res.status === 401 && res.data && res.data.loggedIn && !res.data.noRedirect) {
             this.Router.changeRoute('/');
           }
+        },
+        onCloseFn: () => {
+          if (onCloseFn) onCloseFn();
         },
         onFormChanges: () => {
           this.Dialog.changeHappened();

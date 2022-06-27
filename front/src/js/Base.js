@@ -28,7 +28,7 @@ class Base extends Component {
     this.dialog = this.addChild(
       new Dialog({ id: 'dialog', attach: 'overlays', appState: this.appState })
     );
-    this.toaster = this.addChild(new Toaster({ id: 'toaster' }));
+    this.toaster = this.addChild(new Toaster({ id: 'toaster', attach: 'overlays' }));
     this.appState.set('Dialog', this.dialog);
     this.appState.set('Toaster', this.toaster);
     this.loadData();
@@ -39,9 +39,12 @@ class Base extends Component {
     this.onResize();
   }
 
+  init = () => {
+    this.toaster.draw();
+  };
+
   paint = () => {
     this.dialog.disappear();
-    this.toaster.draw();
     if (this.appState.get('loading.main')) {
       if (this.mainLoader) this.mainLoader.draw();
     } else {

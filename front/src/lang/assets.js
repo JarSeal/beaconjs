@@ -938,4 +938,12 @@ export const assetsObj = {
     en: 'The 2FA code is either incorrect or expired.',
     fi: 'Annettu 2FA-koodi on joko väärä tai poistunut käytöstä.',
   },
+  profile_saved: {
+    en: 'Profile saved',
+    fi: 'Profiili tallennettu',
+  },
+  profile_deleted: {
+    en: 'Profile has been deleted',
+    fi: 'Profiili on poistettu',
+  },
 };

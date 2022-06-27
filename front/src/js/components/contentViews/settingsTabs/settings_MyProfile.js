@@ -165,7 +165,10 @@ class MyProfile extends Component {
             title: getText('edit'),
             editDataId: 'own',
             afterFormSentFn: () => {
-              this.Toaster.addToast({ text: 'testing' });
+              this.Toaster.addToast({
+                content: getText('profile_saved'),
+                type: 'success',
+              });
               this._loadMyData();
             },
             onErrorFn: () => {
@@ -192,6 +195,10 @@ class MyProfile extends Component {
               },
               afterFormSentFn: () => {
                 this.Dialog.disappear();
+                this.Toaster.addToast({
+                  content: getText('profile_saved'),
+                  type: 'success',
+                });
                 this._loadMyData();
               },
               onErrorsFn: () => {
@@ -226,6 +233,10 @@ class MyProfile extends Component {
               title: getText('profile_exposure'),
               editDataId: 'own',
               afterFormSentFn: () => {
+                this.Toaster.addToast({
+                  content: getText('profile_saved'),
+                  type: 'success',
+                });
                 this._loadMyData();
               },
               onErrorFn: () => {
@@ -273,6 +284,11 @@ class MyProfile extends Component {
               },
               afterFormSentFn: () => {
                 this.Dialog.disappear();
+                this.Toaster.addToast({
+                  content: getText('profile_deleted'),
+                  type: 'info',
+                  delay: 0,
+                });
                 this.Router.changeRoute('/logout');
               },
               onErrorsFn: () => {

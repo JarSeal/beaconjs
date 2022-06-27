@@ -77,7 +77,7 @@ class Component {
     if (this.elem) this.discard();
     this.parent = document.getElementById(data.attach || this.parentId);
     if (!this.template) this.template = data.template || this._createDefaultTemplate(this.id, data);
-    this.template = this._templateId(this.template, data);
+    this.template = this._templateId(this.template, data).trim();
     if (data.replace) {
       // Exclusive element draw to parent's innerHTML
       this.parent.innerHTML = this.template;
