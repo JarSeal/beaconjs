@@ -196,7 +196,7 @@ class MyProfile extends Component {
               afterFormSentFn: () => {
                 this.Dialog.disappear();
                 this.Toaster.addToast({
-                  content: getText('profile_saved'),
+                  content: getText('profile_password_changed'),
                   type: 'success',
                 });
                 this._loadMyData();
@@ -234,7 +234,7 @@ class MyProfile extends Component {
               editDataId: 'own',
               afterFormSentFn: () => {
                 this.Toaster.addToast({
-                  content: getText('profile_saved'),
+                  content: getText('profile_exposure_changed'),
                   type: 'success',
                 });
                 this._loadMyData();

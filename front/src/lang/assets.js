@@ -942,8 +942,20 @@ export const assetsObj = {
     en: 'Profile saved',
     fi: 'Profiili tallennettu',
   },
+  profile_password_changed: {
+    en: 'Profile password changed',
+    fi: 'Profiili salasana vaihdettu',
+  },
+  profile_exposure_changed: {
+    en: 'Profile exposure changed',
+    fi: 'Profiilin julkisuus muutettu',
+  },
   profile_deleted: {
     en: 'Profile has been deleted',
     fi: 'Profiili on poistettu',
+  },
+  setting_updated: {
+    en: 'Setting updated',
+    fi: 'Asetus päivitetty',
   },
 };
