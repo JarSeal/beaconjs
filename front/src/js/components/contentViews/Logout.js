@@ -1,12 +1,14 @@
 import axios from 'axios';
 import { Component } from '../../LIGHTER';
 import { getApiBaseUrl } from '../../helpers/config';
+import { getText } from '../../helpers/lang';
 
 class Logout extends Component {
   constructor(data) {
     // Technically not a view, but it is a route
     super(data);
     this.appState = data.appState;
+    this.Toaster = this.appState.get('Toaster');
   }
 
   init = (data) => {
@@ -31,6 +33,9 @@ class Logout extends Component {
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get('r');
     if (redirect && redirect.length) nextRoute += '?r=' + redirect;
+
+    this.Toaster.addToast({ content: getText('you_are_now_logged_out') });
+
     this.Router.changeRoute(nextRoute);
   };
 }

@@ -24,6 +24,7 @@ class SettingsGroup extends Component {
     this.fields = [];
     this.appState = this.Router.commonData.appState;
     this.Dialog = this.appState.get('Dialog');
+    this.Toaster = this.appState.get('Toaster');
     this.dialogForms = new DialogForms({ id: this.id + '-dialog-forms-sg' });
     this.updateSettings = data.updateSettings;
   }
@@ -44,9 +45,17 @@ class SettingsGroup extends Component {
           addToMessage: { mongoId: fieldId },
           afterFormSentFn: (response) => {
             this.appState.set('serviceSettings', response.data);
+            this.Toaster.addToast({
+              content: getText('setting_updated'),
+              type: 'success',
+            });
             this.updateSettings();
           },
           onErrorFn: () => {
+            this.Toaster.addToast({
+              type: 'error',
+              content: `${getText('error')}: could not update setting`,
+            });
             this.updateSettings();
           },
         });

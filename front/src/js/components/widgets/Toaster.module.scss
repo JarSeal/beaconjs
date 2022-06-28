@@ -1,0 +1,109 @@
+.toaster {
+  position: fixed;
+  width: 30rem;
+  height: auto;
+  z-index: 400;
+  right: 0;
+  bottom: 0;
+  padding-right: 0.3rem;
+}
+.toast {
+  display: flex;
+  position: relative;
+  width: 100%;
+  padding: 1.4rem 2.4rem 1rem 2rem;
+  transform: translate3d(102%, 0, 0);
+  opacity: 0;
+  margin-bottom: 0.3rem;
+  font-size: 1.2rem;
+  transition-property: transform, opacity;
+  transition-timing-function: ease-out;
+  border-radius: 0.4rem;
+  background-color: rgba(#333, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 0.1rem solid #222;
+  &__show {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  &__info {
+    color: #4488ee;
+    .toast__close {
+      &:before,
+      &:after {
+        background-color: #4488ee;
+      }
+    }
+  }
+  &__error {
+    color: #cc2200;
+    .toast__close {
+      &:before,
+      &:after {
+        background-color: #cc2200;
+      }
+    }
+  }
+  &__success {
+    color: #339933;
+    .toast__close {
+      &:before,
+      &:after {
+        background-color: #339933;
+      }
+    }
+  }
+  &__warning {
+    color: #ffee99;
+    .toast__close {
+      &:before,
+      &:after {
+        background-color: #ffee99;
+      }
+    }
+  }
+}
+.toast.toast__beforeHide {
+  overflow: hidden;
+  transition-property: height, opacity, margin-bottom, padding-top, padding-bottom;
+  transition-timing-function: ease-out;
+  transform: translate3d(0, 0, 0);
+}
+.toast.toast__hide {
+  height: 0 !important;
+  opacity: 0;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+.toast__close {
+  background: none;
+  border: none;
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: rgba(#fff, 0.05);
+  transition: background-color 0.2s ease-in-out;
+  &:hover {
+    background-color: rgba(#fff, 0.15);
+    border: none;
+  }
+  &:before,
+  &:after {
+    position: absolute;
+    content: '';
+    width: 0.1rem;
+    height: 0.8rem;
+    top: 0.6rem;
+  }
+  &:before {
+    transform: rotate(45deg);
+  }
+  &:after {
+    transform: rotate(-45deg);
+  }
+}

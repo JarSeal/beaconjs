@@ -13,8 +13,9 @@ class UsersList extends Component {
     super(data);
     this.template = '<div class="settings-tab-view"></div>';
     this.users = [];
-    this.Dialog = this.Router.commonData.appState.state.Dialog;
     this.appState = this.Router.commonData.appState;
+    this.Dialog = this.appState.get('Dialog');
+    this.Toaster = this.appState.get('Toaster');
     const tableSortingSetting = this.appState.get('serviceSettings')['tableSorting'];
     let storage;
     if (tableSortingSetting === 'session') {
@@ -64,7 +65,13 @@ class UsersList extends Component {
             id: 'multi-delete-tool',
             text: getText('delete'),
             clickFn: (e, selected) => {
-              if (!selected.length) return;
+              if (!selected.length) {
+                this.Toaster.addToast({
+                  type: 'warning',
+                  content: getText('select_one_or_more_users'),
+                });
+                return;
+              }
               this.dialogForms.createDeleteDialog({
                 id: 'delete-users',
                 title: getText('delete_users') + ': ',
@@ -72,9 +79,17 @@ class UsersList extends Component {
                   getText('delete_many_users_confirmation') + '\n' + this._listUsernames(selected),
                 addToMessage: { users: selected.map((sel) => sel.id) },
                 afterFormSentFn: async () => {
+                  this.Toaster.addToast({
+                    type: 'success',
+                    content: getText('users_deleted'),
+                  });
                   await this._loadUsers();
                 },
                 onErrorsFn: async () => {
+                  this.Toaster.addToast({
+                    type: 'error',
+                    content: `${getText('error')}: could not delete multiple users`,
+                  });
                   await this._loadUsers();
                 },
               });
@@ -102,9 +117,17 @@ class UsersList extends Component {
                 id: 'new-user-form',
                 title: getText('new_user'),
                 afterFormSentFn: async () => {
+                  this.Toaster.addToast({
+                    type: 'success',
+                    content: getText('new_user_registered'),
+                  });
                   await this._loadUsers();
                 },
                 onErrorsFn: async () => {
+                  this.Toaster.addToast({
+                    type: 'error',
+                    content: `${getText('error')}: could not register new user`,
+                  });
                   await this._loadUsers();
                 },
               });
@@ -187,9 +210,17 @@ class UsersList extends Component {
             editDataId: rowData.id,
             addToMessage: { userId: rowData.id },
             afterFormSentFn: async () => {
+              this.Toaster.addToast({
+                type: 'success',
+                content: getText('user_updated'),
+              });
               await this._loadUsers();
             },
             onErrorsFn: async () => {
+              this.Toaster.addToast({
+                type: 'error',
+                content: `${getText('error')}: could not edit user`,
+              });
               await this._loadUsers();
             },
           });
@@ -207,9 +238,17 @@ class UsersList extends Component {
             formDesc: getText('delete_single_user_confirmation', [rowData.username]),
             addToMessage: { users: [rowData.id] },
             afterFormSentFn: async () => {
+              this.Toaster.addToast({
+                type: 'success',
+                content: getText('user_deleted'),
+              });
               await this._loadUsers();
             },
             onErrorsFn: async () => {
+              this.Toaster.addToast({
+                type: 'error',
+                content: `${getText('error')}: could not delete user`,
+              });
               await this._loadUsers();
             },
           });

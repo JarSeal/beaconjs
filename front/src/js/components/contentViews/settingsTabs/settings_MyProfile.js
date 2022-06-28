@@ -16,6 +16,7 @@ class MyProfile extends Component {
     this.template = '<div class="settingsTabView"></div>';
     this.appState = this.Router.commonData.appState;
     this.Dialog = this.appState.get('Dialog');
+    this.Toaster = this.appState.get('Toaster');
     this.viewTitle = this.addChild(
       new ViewTitle({
         id: this.id + '-sub-view-title',
@@ -164,6 +165,10 @@ class MyProfile extends Component {
             title: getText('edit'),
             editDataId: 'own',
             afterFormSentFn: () => {
+              this.Toaster.addToast({
+                content: getText('profile_saved'),
+                type: 'success',
+              });
               this._loadMyData();
             },
             onErrorFn: () => {
@@ -190,6 +195,10 @@ class MyProfile extends Component {
               },
               afterFormSentFn: () => {
                 this.Dialog.disappear();
+                this.Toaster.addToast({
+                  content: getText('profile_password_changed'),
+                  type: 'success',
+                });
                 this._loadMyData();
               },
               onErrorsFn: () => {
@@ -224,6 +233,10 @@ class MyProfile extends Component {
               title: getText('profile_exposure'),
               editDataId: 'own',
               afterFormSentFn: () => {
+                this.Toaster.addToast({
+                  content: getText('profile_exposure_changed'),
+                  type: 'success',
+                });
                 this._loadMyData();
               },
               onErrorFn: () => {
@@ -271,6 +284,11 @@ class MyProfile extends Component {
               },
               afterFormSentFn: () => {
                 this.Dialog.disappear();
+                this.Toaster.addToast({
+                  content: getText('profile_deleted'),
+                  type: 'info',
+                  delay: 0,
+                });
                 this.Router.changeRoute('/logout');
               },
               onErrorsFn: () => {

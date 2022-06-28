@@ -12,6 +12,8 @@ class LoginTwoFA extends Component {
       this.Router.changeRoute('/', { replaceState: true });
     }
 
+    this.Toaster = this.appState.get('Toaster');
+
     this.viewTitle = this.addChild(
       new ViewTitle({
         id: this.id + '-view-title',
@@ -28,6 +30,12 @@ class LoginTwoFA extends Component {
           const cooldownTime = response?.data?.cooldownTime;
           if (cooldownTime) {
             setFormMsg(getText('cooldown_login_message', [cooldownTime]));
+          } else {
+            this.Toaster.addToast({
+              type: 'error',
+              content: `${getText('error')}: could not login`,
+              delay: 0,
+            });
           }
         },
         addToMessage: {
@@ -58,6 +66,7 @@ class LoginTwoFA extends Component {
       const urlParams = new URLSearchParams(window.location.search);
       const redirect = urlParams.get('r');
       if (redirect && redirect.length) nextRoute = redirect;
+      this.Toaster.addToast({ content: getText('you_are_now_logged_in') });
       this.Router.changeRoute(nextRoute);
     }
   };

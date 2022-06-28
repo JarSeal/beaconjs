@@ -17,6 +17,7 @@ class Dialog extends Component {
     this.isTransitioning = false;
     this.isLocked = false;
     this.hasChanges = false;
+    this.onCloseFn = null;
     this.compoToShow;
     this.dialogTitle;
     this.resizeTimer;
@@ -99,6 +100,7 @@ class Dialog extends Component {
         attach: this.id + '-box-wrapper',
       });
     }
+    if (dialogData.componentData?.onCloseFn) this.onCloseFn = dialogData.componentData.onCloseFn;
     this.draw({ appear: true });
     this.isShowing = true;
     setTimeout(() => {
@@ -114,6 +116,8 @@ class Dialog extends Component {
     this.hasChanges = false;
 
     this.appState.remove('resizers.dialog');
+
+    if (this.onCloseFn) this.onCloseFn();
 
     setTimeout(() => {
       this.unlock();
