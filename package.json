@@ -1,5 +1,5 @@
 {
-  "name": "design-documenter",
+  "name": "beaconjs",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -10,25 +10,26 @@
     "stopMongo": "cd back/mongo && docker-compose down",
     "dev": "yarn envFiles && concurrently --kill-others --names \"BACK,FRONT\" -c \"bgBlue.bold,bgMagenta.bold\" \"yarn run devBack\" \"npm run devFront\"",
     "devFront": "yarn envFiles && cd front && yarn dev",
-    "devBack": "yarn envFiles && cd back/mongo && docker-compose up -d && cd .. && yarn run dev",
+    "devBack": "yarn envFiles && cd back/mongo && docker-compose up -d && cd .. && NODE_ENV=dev yarn run dev",
     "devMongo": "docker exec -it beacondb mongo beacondb",
     "devMongoTest": "docker exec -it beacondb mongo beacondb-test",
     "lint": "cd front && yarn lint && cd ../back && yarn lint && eslint .",
     "lint:shared": "eslint .",
     "prettify": "prettier --write ./**/*.js",
     "envFiles": "node createEnvFiles.js",
-    "test": "cd back && yarn test"
+    "test": "cd back && yarn test",
+    "devData": "cd back && NODE_ENV=dev node createDevData.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JarSeal/design-documenter.git"
+    "url": "git+https://github.com/JarSeal/beaconjs.git"
   },
-  "author": "Kai Forsman",
+  "author": "JarSeal",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/JarSeal/design-documenter/issues"
+    "url": "https://github.com/JarSeal/beaconjs/issues"
   },
-  "homepage": "https://github.com/JarSeal/design-documenter#readme",
+  "homepage": "https://github.com/JarSeal/beaconjs#readme",
   "dependencies": {
     "dotenv": "^16.0.1",
     "prettier": "^2.6.2"
