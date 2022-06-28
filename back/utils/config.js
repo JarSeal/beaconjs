@@ -22,7 +22,7 @@ const SECRET = process.env.SECRET;
 const FORM_TOKEN_SECRET = process.env.FORM_TOKEN_SECRET;
 
 const v = (v) => {
-  return v.length === 0 || v === undefined || v === null;
+  return v === undefined || v === null || v.length === 0;
 };
 
 if (v(API_URL) || v(CLIENT_URL) || v(SECRET) || v(FORM_TOKEN_SECRET)) {

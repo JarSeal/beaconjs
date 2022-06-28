@@ -1,13 +1,13 @@
-import Form from '../../models/form';
-import AdminSetting from '../../models/adminSetting';
-import Email from '../../models/email';
+import Form from '../models/form';
+import AdminSetting from '../models/adminSetting';
+import Email from '../models/email';
 import createPresetData from './createPresetData';
-import startBackend from '../../test/serverSetup';
-import formData from '../../../shared/formData/formData';
-import emailData from '../../../shared/emailData/emailData';
-import adminSettings from '../../../shared/formData/adminSettingsFormData';
-import shared from '../../shared/index.js';
-import { loopFormFields } from '../../utils/helpers';
+import startBackend from '../test/serverSetup';
+import formData from '../../shared/formData/formData';
+import emailData from '../../shared/emailData/emailData';
+import adminSettings from '../../shared/formData/adminSettingsFormData';
+import shared from '../shared/index.js';
+import { loopFormFields } from '../utils/helpers';
 
 describe('formEngine', () => {
   startBackend();

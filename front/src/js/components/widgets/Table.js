@@ -749,6 +749,7 @@ class Table extends Component {
             this.filterString = '';
             this.filterCaretPos = null;
             this._closeFilterSettings();
+            this.groupMax = this.data.showGroupSize || 0;
             this._filterData();
           },
         })
@@ -882,7 +883,7 @@ class Table extends Component {
   _filterData = (noRefresh) => {
     if (this.filterString === '') {
       this.tableData = [...this.allData];
-      this.groupMax = this.data.showGroupSize || 0;
+      // this.groupMax = this.data.showGroupSize || 0;
       if (!noRefresh) this._refreshView();
       return;
     }
