@@ -25,6 +25,7 @@ class OneUser extends Component {
     this.appState = this.Router.commonData.appState;
     this.readApi;
     this.dialogForms = new DialogForms({ id: 'dialog-forms-one-user' });
+    this.Toaster = this.appState.get('Toaster');
   }
 
   init = () => {
@@ -160,9 +161,18 @@ class OneUser extends Component {
               editDataId: this.userData.id,
               addToMessage: { userId: this.userData.id },
               afterFormSentFn: () => {
+                this.appState.get('Toaster').addToast({
+                  type: 'success',
+                  content: getText('user_updated'),
+                });
                 this._loadUserData();
               },
               onErrorFn: () => {
+                this.appState.get('Toaster').addToast({
+                  type: 'error',
+                  content: `${getText('error')}: could not edit user`,
+                  delay: 0,
+                });
                 this._loadUserData();
               },
             });
@@ -180,9 +190,18 @@ class OneUser extends Component {
               editDataId: this.userData.id,
               addToMessage: { userId: this.userData.id },
               afterFormSentFn: () => {
+                this.appState.get('Toaster').addToast({
+                  type: 'success',
+                  content: getText('user_updated'),
+                });
                 this._loadUserData();
               },
               onErrorFn: () => {
+                this.appState.get('Toaster').addToast({
+                  type: 'error',
+                  content: `${getText('error')}: could not edit user exposure`,
+                  delay: 0,
+                });
                 this._loadUserData();
               },
             });

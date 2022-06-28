@@ -52,6 +52,10 @@ class SettingsGroup extends Component {
             this.updateSettings();
           },
           onErrorFn: () => {
+            this.Toaster.addToast({
+              type: 'error',
+              content: `${getText('error')}: could not update setting`,
+            });
             this.updateSettings();
           },
         });

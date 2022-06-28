@@ -958,4 +958,32 @@ export const assetsObj = {
     en: 'Setting updated',
     fi: 'Asetus päivitetty',
   },
+  you_are_now_logged_out: {
+    en: 'You are now logged out',
+    fi: 'Olet nyt kirjautunut ulos',
+  },
+  you_are_now_logged_in: {
+    en: 'You are now logged in',
+    fi: 'Olet nyt kirjautunut sisään',
+  },
+  user_updated: {
+    en: 'User updated',
+    fi: 'Käyttäjä päivitetty',
+  },
+  user_deleted: {
+    en: 'User deleted',
+    fi: 'Käyttäjä poistettu',
+  },
+  users_deleted: {
+    en: 'Users deleted',
+    fi: 'Käyttäjät poistettu',
+  },
+  select_one_or_more_users: {
+    en: 'Select one or more users',
+    fi: 'Valitse yksi tai useampi käyttäjä',
+  },
+  email_sent: {
+    en: 'E-mail sent',
+    fi: 'Sähköposti lähetetty',
+  },
 };

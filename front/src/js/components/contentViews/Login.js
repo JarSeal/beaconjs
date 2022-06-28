@@ -12,6 +12,8 @@ class Login extends Component {
     this.appState = this.Router.commonData.appState;
     this.ls = new LocalStorage('bjs_');
 
+    this.Toaster = this.appState.get('Toaster');
+
     this.viewTitle = this.addChild(
       new ViewTitle({
         id: this.id + '-view-title',
@@ -37,6 +39,12 @@ class Login extends Component {
           const cooldownTime = response.data.cooldownTime;
           if (cooldownTime) {
             setFormMsg(getText('cooldown_login_message', [cooldownTime]));
+          } else {
+            this.Toaster.addToast({
+              type: 'error',
+              content: `${getText('error')}: could not login`,
+              delay: 0,
+            });
           }
         },
         addToMessage: {
@@ -98,6 +106,11 @@ class Login extends Component {
                   },
                   onErrorsFn: () => {
                     this.Dialog.unlock();
+                    this.appState.get('Toaster').addToast({
+                      type: 'error',
+                      content: `${getText('error')}: could not request new password`,
+                      delay: 0,
+                    });
                   },
                   formLoadedFn: () => {
                     this.Dialog.onResize();
@@ -131,6 +144,7 @@ class Login extends Component {
       const urlParams = new URLSearchParams(window.location.search);
       const redirect = urlParams.get('r');
       if (redirect && redirect.length) nextRoute = redirect;
+      this.Toaster.addToast({ content: getText('you_are_now_logged_in') });
       this.Router.changeRoute(nextRoute);
     }
   };
