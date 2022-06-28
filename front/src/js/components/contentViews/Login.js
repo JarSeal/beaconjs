@@ -39,12 +39,6 @@ class Login extends Component {
           const cooldownTime = response.data.cooldownTime;
           if (cooldownTime) {
             setFormMsg(getText('cooldown_login_message', [cooldownTime]));
-          } else {
-            this.Toaster.addToast({
-              type: 'error',
-              content: `${getText('error')}: could not login`,
-              delay: 0,
-            });
           }
         },
         addToMessage: {
