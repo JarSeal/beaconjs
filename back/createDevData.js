@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import config from './utils/config.js';
 import { createUsers } from './data/devData.js';
 
+const USERS_TO_CREATE = 200;
+
 const createDevData = () => {
   if (config.ENV === 'production') {
     console.error('Development data cannot be created in production environment.');
@@ -20,7 +22,7 @@ const createDevData = () => {
       console.log('- Connected to MongoDB');
 
       console.log('---------------\n- Adding new users...');
-      const newUserCount = await createUsers(100);
+      const newUserCount = await createUsers(USERS_TO_CREATE);
       console.log(`- Added ${newUserCount} new users`);
 
       console.log('---------------\n-- All done! --');
