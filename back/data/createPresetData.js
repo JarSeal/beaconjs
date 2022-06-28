@@ -1,10 +1,10 @@
 import CryptoJS from 'crypto-js';
 
-import logger from '../../utils/logger.js';
-import Form from '../../models/form.js';
-import AdminSetting from '../../models/adminSetting.js';
-import Email from '../../models/email.js';
-import shared from '../../shared/index.js';
+import logger from '../utils/logger.js';
+import Form from '../models/form.js';
+import AdminSetting from '../models/adminSetting.js';
+import Email from '../models/email.js';
+import shared from '../shared/index.js';
 
 const formData = shared.formData;
 const emailData = shared.emailData;
