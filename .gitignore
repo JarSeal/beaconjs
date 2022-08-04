@@ -5,3 +5,4 @@
 **/mongo/database
 .vscode
 **/coverage
+yarn-error.log

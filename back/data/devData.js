@@ -13,6 +13,9 @@ export const createUsers = async (count) => {
     }
   }
 
+  // TODO: Add some clearly named test users
+  // ..like Keijo, userlevel 2 - SiteAdmin, userlevel 8 etc.
+
   let usersCreated = 0;
   const lettersOnly = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const password = 'adminator';

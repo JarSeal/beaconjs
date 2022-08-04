@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 import config from '../utils/config.js';
-import createPresetData from '../controllers/forms/createPresetData.js';
+import createPresetData from '../data/createPresetData.js';
 
 const globalSetup = async () => {
   await mongoose

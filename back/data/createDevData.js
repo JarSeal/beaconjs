@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
-import config from './utils/config.js';
-import { createUsers } from './data/devData.js';
+import config from '../utils/config.js';
+import { createUsers } from './devData.js';
 
 const USERS_TO_CREATE = 200;
 
