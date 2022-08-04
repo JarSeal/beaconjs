@@ -4,6 +4,9 @@ const conf = shared.CONFIG;
 
 const optionsFns = {
   userLevels: (args) => {
+    if (!args || args.readerLevel === undefined || isNaN(args.readerLevel)) {
+      return [];
+    }
     let { readerLevel } = args;
     const levels = conf.USER_LEVELS;
     const options = [];
@@ -18,6 +21,9 @@ const optionsFns = {
     return options;
   },
   userLevelsWithNine: (args) => {
+    if (!args || args.readerLevel === undefined || isNaN(args.readerLevel)) {
+      return [];
+    }
     let { readerLevel } = args;
     const levels = conf.USER_LEVELS;
     const options = [];
