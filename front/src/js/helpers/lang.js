@@ -32,6 +32,7 @@ export const getLang = () => {
     const SS = new SessionStorage(frontConfig.ssKeyPrefix);
     lang = SS.getItem('lang');
   }
+  if (!lang) lang = curLang;
   if (!lang) lang = frontConfig.langs[0];
   if (!lang) lang = baseLang;
   curLang = lang;
