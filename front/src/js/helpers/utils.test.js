@@ -11,7 +11,6 @@ describe('utils', () => {
     expect(hash).toEqual(1525206135);
     hash = getHashCode('myname and a longer sentence');
     expect(hash).toEqual(1525206135);
-    expect(hash).toEqual(1525206135);
     hash = getHashCode('myname and a longer sentence2');
     expect(hash).toEqual(36749879);
     hash = getHashCode('myname and a longer sentence 2');
