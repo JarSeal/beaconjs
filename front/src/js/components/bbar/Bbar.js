@@ -1,5 +1,5 @@
 import bbar from './bbar.html?raw';
-import { _CONFIG } from '../../_CONFIG';
+import { _CONFIG } from '../../_ROUTES';
 import MainMenu from './MainMenu';
 import styles from './Bbar.module.scss';
 import Component from '../../LIGHTER/Component';

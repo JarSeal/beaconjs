@@ -28,6 +28,7 @@ const checkRouteAccess = async (routeData) => {
     try {
       const response = await axios.post(url, payload, { withCredentials: true });
       const access = response.data[id];
+      console.log('ACCESS', response);
       if (!access) {
         if (!response.data.loggedIn) {
           const redirectRoute = '?r=' + routeData.curRoute.replace(routeData.basePath, '');
@@ -57,23 +58,4 @@ const getAdminRights = async () => {
   }
 };
 
-const getHashCode = (str) => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  if (hash < 0) return Math.abs(hash);
-  return hash;
-};
-
-const checkAccountVerification = (routeData) => {
-  const appState = routeData.commonData.appState;
-  const isVerified = appState.get('user.verified');
-  if (isVerified === false) {
-    return '/u/verificationneeded';
-  }
-};
-
-export { checkRouteAccess, getAdminRights, getHashCode, checkAccountVerification };
+export { checkRouteAccess, getAdminRights };

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { State, Component, Router } from './LIGHTER';
 import Bbar from './components/bbar/Bbar';
 import MainLoader from './components/loaders/MainLoader';
-import { _CONFIG } from './_CONFIG';
+import { _CONFIG } from './_ROUTES';
 import baseHTML from './base.html?raw';
 import { loadAssets } from './helpers/lang';
 import Dialog from './components/widgets/Dialog';

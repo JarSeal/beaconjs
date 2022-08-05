@@ -13,7 +13,7 @@ export const validateSimpleId = (id) => {
 export const urlParamRoute = (route, recover) => {
   if (!recover) return route.replace(/\//g, '**');
   // eslint-disable-next-line
-  return route.replace(/**/g, '/');
+  return route.replace(/**/ g, '/');
 };
 
 export const createRandomString = (length, charsOrPreset) => {

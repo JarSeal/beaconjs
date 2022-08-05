@@ -95,7 +95,7 @@ const parseDateFormat = (dateData, shape) => {
 
 export const createDate = (dateData, shape) => {
   if (!dateData) return '';
-  const newDate = new Date(dateData.toString());
+  const newDate = new Date(dateData);
   return parseDateFormat(newDate, shape);
 };
 
@@ -111,7 +111,7 @@ export const getMonthName = (monthIndex, long) => {
 
 export const getWeekDayName = (weekDayIndex, long) => {
   if (weekDayIndex < 0 || weekDayIndex > 6) {
-    new Logger('Date, getWeekDayIndex *****').log(
+    new Logger('Date, getWeekDayName *****').log(
       'Weekday index is not withing 0 and 6.',
       weekDayIndex
     );

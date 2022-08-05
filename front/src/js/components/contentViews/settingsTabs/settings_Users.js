@@ -2,7 +2,7 @@ import { Component, LocalStorage, Logger, SessionStorage } from '../../../LIGHTE
 import axios from 'axios';
 import { getText } from '../../../helpers/lang';
 import Table from '../../widgets/Table';
-import { getHashCode } from '../../../helpers/storage';
+import { getHashCode } from '../../../helpers/utils';
 import ViewTitle from '../../widgets/ViewTitle';
 import ReadApi from '../../forms/ReadApi';
 import DialogForms from '../../widgets/dialogs/dialog_Forms';

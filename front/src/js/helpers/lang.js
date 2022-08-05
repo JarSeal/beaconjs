@@ -1,6 +1,6 @@
 import { assetsObj } from '../../lang/assets';
 import { LocalStorage, SessionStorage, Logger } from '../LIGHTER';
-import { _CONFIG } from '../_CONFIG';
+import { frontConfig } from '../_CONFIG';
 
 let assets,
   curLang,
@@ -15,10 +15,10 @@ export const loadAssets = () => {
 };
 
 export const setLang = (newLang) => {
-  const LS = new LocalStorage(_CONFIG.lsKeyPrefix);
+  const LS = new LocalStorage(frontConfig.lsKeyPrefix);
   let success = LS.setItem('lang', newLang);
   if (!success) {
-    const SS = new SessionStorage(_CONFIG.ssKeyPrefix);
+    const SS = new SessionStorage(frontConfig.ssKeyPrefix);
     success = SS.setItem('lang', newLang);
   }
   curLang = newLang;
@@ -26,13 +26,13 @@ export const setLang = (newLang) => {
 
 export const getLang = () => {
   let lang;
-  const LS = new LocalStorage(_CONFIG.lsKeyPrefix);
+  const LS = new LocalStorage(frontConfig.lsKeyPrefix);
   lang = LS.getItem('lang');
   if (!lang) {
-    const SS = new SessionStorage(_CONFIG.ssKeyPrefix);
+    const SS = new SessionStorage(frontConfig.ssKeyPrefix);
     lang = SS.getItem('lang');
   }
-  if (!lang) lang = _CONFIG.langs[0];
+  if (!lang) lang = frontConfig.langs[0];
   if (!lang) lang = baseLang;
   curLang = lang;
   return lang;
