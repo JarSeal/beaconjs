@@ -28,7 +28,6 @@ const checkRouteAccess = async (routeData) => {
     try {
       const response = await axios.post(url, payload, { withCredentials: true });
       const access = response.data[id];
-      console.log('ACCESS', response);
       if (!access) {
         if (!response.data.loggedIn) {
           const redirectRoute = '?r=' + routeData.curRoute.replace(routeData.basePath, '');
