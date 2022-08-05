@@ -7,7 +7,7 @@ import Form from '../models/form';
 import UserSetting from '../models/userSetting';
 import logger from '../utils/logger';
 import { createNewLoginLogsArray } from '../utils/helpers';
-import { checkIfLoggedIn } from '../utils/checkAccess';
+import { checkAccess, checkIfLoggedIn } from '../utils/checkAccess';
 import { createRandomString } from '../../shared/parsers';
 import { getSetting, getSettings, getPublicSettings, parseValue } from '../utils/settingsService';
 import { sendEmailById } from '../utils/emailService';
@@ -81,6 +81,20 @@ loginRouter.post('/access', async (request, response) => {
       if (request.cookies['connect.sid']) {
         response.clearCookie('connect.sid');
       }
+    }
+  } else {
+    const ids = request.body.ids;
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      if (id.from === 'universe') {
+        // TODO, do universe here (find by universeId)
+      } else {
+        // Default is 'Form'
+        check = await Form.findOne({ formId: id.id });
+      }
+      const settings = await getSettings(request, true);
+      result[id.id] = checkAccess(request, check, settings);
+      result.serviceSettings = await getPublicSettings(request, true);
     }
   }
   result.loggedIn = checkIfLoggedIn(request.session);
