@@ -1,5 +1,5 @@
 import { getText } from '../../helpers/lang';
-import { getAdminRights } from '../../helpers/storage';
+import { getAdminRights } from '../../helpers/rightsAndAccess';
 import { Component } from '../../LIGHTER';
 import TabSystem from '../buttons/TabSystem';
 import ViewTitle from '../widgets/ViewTitle';

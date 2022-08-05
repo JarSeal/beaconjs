@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Component } from '../../LIGHTER';
-import * as parsers from '../../shared';
+import shared from '../../shared';
 import { getApiBaseUrl } from '../../helpers/config';
 import ViewTitle from '../widgets/ViewTitle';
 
@@ -21,7 +21,7 @@ class NewUser extends Component {
     if (
       this.Router.curRouteData.params &&
       this.Router.curRouteData.params.universeId &&
-      parsers.validateSimpleId(this.Router.curRouteData.params.universeId)
+      shared.parsers.validateSimpleId(this.Router.curRouteData.params.universeId)
     ) {
       this.universeId = this.Router.curRouteData.params.universeId;
       this.getData();

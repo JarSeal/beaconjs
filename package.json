@@ -18,7 +18,7 @@
     "prettify": "prettier --write ./**/*.js",
     "envFiles": "node createEnvFiles.js",
     "test": "cd back && yarn test",
-    "devData": "cd back && NODE_ENV=dev node createDevData.js"
+    "devData": "cd back && NODE_ENV=dev node data/createDevData.js"
   },
   "repository": {
     "type": "git",

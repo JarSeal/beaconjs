@@ -26,7 +26,6 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.27.2",
-    "babel-jest": "^28.1.0",
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -45,6 +44,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.18.2",
+    "babel-jest": "^28.1.0",
     "cross-env": "^7.0.2",
     "eslint": "^7.28.0",
     "eslint-config-import": "^0.13.0",
