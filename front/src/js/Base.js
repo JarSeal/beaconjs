@@ -19,18 +19,18 @@ class Base extends Component {
     loadAssets();
     this._initResizer();
     _CONFIG.basePath = import.meta.env.VITE_CLIENT_PATH || '';
-    this.Router = new Router(_CONFIG, this.id, this.paint, {
-      appState: this.appState,
-      attach: 'content-area',
-    });
-    this.bbar = this.addChild(new Bbar({ id: 'bbar', appState: this.appState }));
-    this.mainLoader = this.addChild(new MainLoader({ id: 'main-loader', attach: 'overlays' }));
     this.dialog = this.addChild(
       new Dialog({ id: 'dialog', attach: 'overlays', appState: this.appState })
     );
     this.toaster = this.addChild(new Toaster({ id: 'toaster', attach: 'overlays' }));
     this.appState.set('Dialog', this.dialog);
     this.appState.set('Toaster', this.toaster);
+    this.Router = new Router(_CONFIG, this.id, this.paint, {
+      appState: this.appState,
+      attach: 'content-area',
+    });
+    this.bbar = this.addChild(new Bbar({ id: 'bbar', appState: this.appState }));
+    this.mainLoader = this.addChild(new MainLoader({ id: 'main-loader', attach: 'overlays' }));
     this.loadData();
   }
 

@@ -74,48 +74,55 @@ class Login extends Component {
       this.Router.changeRoute('/', { replaceState: true });
     } else {
       this.loginFormWrapper.draw();
-      this.loginForm.draw();
-      this.addChildDraw({
-        id: 'extra-links-wrapper',
-        class: styles['login-extra-links'],
+      this.loginForm.draw({
+        formLoadedFn: () => {
+          this._drawForgotPasswordLink();
+        },
       });
-      if (this.appState.get('serviceSettings.forgotPass')) {
-        this.addChildDraw(
-          new Button({
-            id: 'forgot-password-button',
-            text: getText('forgot_password') + '?',
-            attach: 'extra-links-wrapper',
-            class: [styles['login-extra-link'], 'link'],
-            click: () => {
-              this.Dialog.appear({
-                component: FormCreator,
-                componentData: {
-                  id: 'new-pass-request-form',
-                  appState: this.appState,
-                  beforeFormSendingFn: () => {
-                    this.Dialog.lock();
-                  },
-                  afterFormSentFn: () => {
-                    this.Dialog.unlock();
-                  },
-                  onErrorsFn: () => {
-                    this.Dialog.unlock();
-                    this.appState.get('Toaster').addToast({
-                      type: 'error',
-                      content: `${getText('error')}: could not request new password`,
-                      delay: 0,
-                    });
-                  },
-                  formLoadedFn: () => {
-                    this.Dialog.onResize();
-                  },
+    }
+  };
+
+  _drawForgotPasswordLink = () => {
+    this.addChildDraw({
+      id: 'extra-links-wrapper',
+      class: styles['login-extra-links'],
+    });
+    if (this.appState.get('serviceSettings.forgotPass')) {
+      this.addChildDraw(
+        new Button({
+          id: 'forgot-password-button',
+          text: getText('forgot_password') + '?',
+          attach: 'extra-links-wrapper',
+          class: [styles['login-extra-link'], 'link'],
+          click: () => {
+            this.Dialog.appear({
+              component: FormCreator,
+              componentData: {
+                id: 'new-pass-request-form',
+                appState: this.appState,
+                beforeFormSendingFn: () => {
+                  this.Dialog.lock();
                 },
-                title: getText('forgot_password'),
-              });
-            },
-          })
-        );
-      }
+                afterFormSentFn: () => {
+                  this.Dialog.unlock();
+                },
+                onErrorsFn: () => {
+                  this.Dialog.unlock();
+                  this.appState.get('Toaster').addToast({
+                    type: 'error',
+                    content: `${getText('error')}: could not request new password`,
+                    delay: 0,
+                  });
+                },
+                formLoadedFn: () => {
+                  this.Dialog.onResize();
+                },
+              },
+              title: getText('forgot_password'),
+            });
+          },
+        })
+      );
     }
   };
 
