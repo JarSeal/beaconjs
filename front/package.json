@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite serve --port 8080",
-    "build": "vite build",
+    "build": "cross-env vite build",
     "test": "cross-env NODE_ENV=test TZ=UTC TEARDOWN=true NODE_OPTIONS=--es-module-specifier-resolution=node jest --verbose --runInBand --detectOpenHandles --coverage",
     "test:watch": "cross-env NODE_ENV=test WATCH=true TZ=UTC NODE_OPTIONS=--es-module-specifier-resolution=node jest --watchAll --verbose --runInBand --detectOpenHandles",
     "lint": "eslint . src config || true",
@@ -35,7 +35,8 @@
     "postcss-loader": "^6.2.0",
     "postcss-preset-env": "^7.6.0",
     "sass": "^1.52.1",
-    "vite": "^2.9.9"
+    "vite": "^2.9.9",
+    "vite-plugin-static-copy": "^0.7.0"
   },
   "repository": {
     "type": "git",
