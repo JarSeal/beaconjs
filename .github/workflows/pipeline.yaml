@@ -1,0 +1,100 @@
+# Deployment Pipeline
+name: Deployment pipeline
+
+on:
+  push:
+    branches:
+      - test
+  pull_request:
+    branches: [test]
+    types: [opened, synchronize]
+
+jobs:
+  simple_deployment_pipeline:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.13.2'
+
+      # install, lint, test, and build:
+      - name: yarn install (root)
+        working-directory: ./
+        run: yarn install
+      - name: yarn install (back)
+        working-directory: ./back
+        run: yarn install
+      - name: yarn install (front)
+        working-directory: ./front
+        run: yarn install
+
+      # HEROKU DEPLOYMENT:
+      # - uses: akhileshns/heroku-deploy@v3.7.8
+      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
+      #   with:
+      #     heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+      #     heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+      #     heroku_email: ${{secrets.HEROKU_EMAIL}}
+      #     appdir: "backend"
+      #     healthcheck: "https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com/api/health"
+      #     checkstring: "ok"
+      #     rollbackonhealthcheckfailed: true
+
+      # - name: e2e tests
+      #   uses: cypress-io/github-action@v2
+      #   with:
+      #     working-directory: ./frontend
+      #     command: npm run test:e2e
+      #     start: cd ../backend && TEST_MONGODB_URI=$TEST_MONGODB_URI PORT=$PORT SECRET=$SECRET npm run start:test
+      #     wait-on: http://localhost:3000
+      #   env:
+      #     TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
+      #     PORT: ${{secrets.PORT}}
+      #     SECRET: ${{secrets.SOME_SECRET}}
+      # - uses: akhileshns/heroku-deploy@v3.7.8
+      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
+      #   with:
+      #     heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+      #     heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+      #     heroku_email: ${{secrets.HEROKU_EMAIL}}
+      #     healthcheck: "https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com/health"
+      #     checkstring: "ok"
+      #     rollbackonhealthcheckfailed: true
+      # - uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: custom
+      #     custom_payload: |
+      #       {
+      #         attachments: [{
+      #             color: 'danger',
+      #             text: `Deployment to https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com failed.\n${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}, ${{ job.status }} in ${process.env.AS_TOOK}. Commit message: "${process.env.AS_MESSAGE}"`
+      #           }]
+      #       }
+      #     fields: repo,message,commit,workflow,job,took
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') && failure()"
+      # - uses: actions/checkout@v2
+      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
+      # - name: Bump version and push tag
+      #   id: new_id
+      #   uses: anothrNick/github-tag-action@1.33.0
+      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: custom
+      #     custom_payload: |
+      #       {
+      #         attachments: [{
+      #             color: 'good',
+      #             text: `Deployment to https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com done and version upgraded to ${process.env.NEW_VERSION_NUMBER}.\n${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}, ${{ job.status }} in ${process.env.AS_TOOK}. Commit message: "${process.env.AS_MESSAGE}"`
+      #           }]
+      #       }
+      #     fields: repo,message,commit,workflow,job,took
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     NEW_VERSION_NUMBER: ${{ steps.new_id.outputs.new_tag }}
+      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
