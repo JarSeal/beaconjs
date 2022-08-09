@@ -1,7 +1,14 @@
+# release:
+#   web: yarn install
+#   image: mongo:4.4.10
+#   command:
+#     - mongod
+build:
+  docker:
+    worker: back/mongo/Dockerfile
 release:
-  web: yarn install
-  image: mongo:4.4.10
   command:
-    - mongod
+    - ./mongod
+  image: worker
 run:
   web: cd back && yarn start-prod
