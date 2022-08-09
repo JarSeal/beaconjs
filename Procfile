@@ -1,2 +1,2 @@
 release: yarn install && cd back/mongo && docker-compose up -d
-web: cd back && yarn start-prod
+web: cd back && ../back && yarn start-prod
