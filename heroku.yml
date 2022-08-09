@@ -1,0 +1,2 @@
+run:
+  web: cd back/mongo && docker-compose up -d
