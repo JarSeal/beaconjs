@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "yarn install && cd back && yarn install && cd ../front && yarn install",
     "start-prod": "cd back && yarn start-prod",
     "setup": "yarn envFiles && cd front && yarn install && cd ../back && yarn install && cd mongo && docker-compose up --no-start && cd ../.. && yarn install",
     "setupFront": "yarn envFiles && cd front && yarn install",
@@ -33,7 +32,21 @@
   },
   "homepage": "https://github.com/JarSeal/beaconjs#readme",
   "dependencies": {
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "csurf": "^1.11.0",
     "dotenv": "^16.0.1",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "express-session": "^1.17.2",
+    "marked": "^4.0.12",
+    "mongoose": "^5.10.5",
+    "mongoose-unique-validator": "^2.0.3",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.7.2",
     "prettier": "^2.6.2"
   },
   "devDependencies": {
