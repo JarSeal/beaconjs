@@ -56,17 +56,19 @@ app.use(
 );
 app.use(
   cors({
-    origin: [
-      // TODO: Move this to config and provide these only according to environment
-      'http://localhost:8080',
-      'https://localhost:8080',
-      'http://localhost:3011',
-      'https://localhost:3011',
-      'http://127.0.0.1:8080',
-      'https://127.0.0.1:8080',
-      'http://127.0.0.1:3011',
-      'https://127.0.0.1:3011',
-    ],
+    origin:
+      config.ENV === 'production'
+        ? [`${config.CLIENT_URL}`, `${config.CLIENT_URL}:${config.CLIENT_PORT}`]
+        : [
+            'http://localhost:8080',
+            'https://localhost:8080',
+            'http://localhost:3011',
+            'https://localhost:3011',
+            'http://127.0.0.1:8080',
+            'https://127.0.0.1:8080',
+            'http://127.0.0.1:3011',
+            'https://127.0.0.1:3011',
+          ],
     credentials: true,
     exposedHeaders: ['set-cookie'],
   })
