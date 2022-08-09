@@ -37,7 +37,7 @@ jobs:
       # test
       - name: yarn test
         working-directory: ./
-        run: yarn test
+        run: echo ${{env.API_BASE_URL}} && yarn test
         env:
           API_BASE_URL: ${{env.API_BASE_URL}}
           API_BASE_PATH: ${{env.API_BASE_PATH}}
