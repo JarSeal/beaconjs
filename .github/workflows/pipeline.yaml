@@ -66,7 +66,7 @@ jobs:
           email: ${{secrets.HEROKU_EMAIL}}
           api_key: ${{secrets.HEROKU_API_KEY}}
           docker_compose_file: './back/mongo/docker-compose.yml'
-          heroku_apps: '[{"imagename":"mongo","appname":"beaconjs","apptype":"web"}]'
+          heroku_apps: '[{"imagename":"mongo:4.4.10","appname":"beaconjs","apptype":"web"}]'
 
       # Heroku backend deployment:
       - uses: akhileshns/heroku-deploy@v3.12.12
