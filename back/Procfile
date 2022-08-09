@@ -1,1 +1,1 @@
-web: docker compose down && docker compose up -d && yarn start-prod
+web: yarn start-prod

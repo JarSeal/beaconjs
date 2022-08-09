@@ -1,5 +1,5 @@
 # Deployment Pipeline
-name: Deployment pipeline
+name: Deployment pipeline to BeaconJS test server
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  simple_deployment_pipeline:
+  deploy_beaconjs_to_test_server:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -59,7 +59,7 @@ jobs:
           EMAIL_USER: ${{secrets.EMAIL_USER}}
           EMAIL_PASS: ${{secrets.EMAIL_PASS}}
 
-      # Heroku deployment:
+      # Heroku backend deployment:
       - uses: akhileshns/heroku-deploy@v3.12.12
         if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
         with:
@@ -67,6 +67,7 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           appdir: 'back'
+          branch: 'test'
           # healthcheck: '${{secrets.CLIENT_BASE_URL}}/api/health'
           # checkstring: 'ok'
           # rollbackonhealthcheckfailed: true
