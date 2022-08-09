@@ -9,7 +9,7 @@
     "yarn": ">=1.22.15"
   },
   "scripts": {
-    "start-prod": "NODE_ENV=production node -es-module-specifier-resolution=node index.js",
+    "start-prod": "NODE_ENV=production node --es-module-specifier-resolution=node index.js",
     "dev": "cross-env NODE_ENV=development nodemon --es-module-specifier-resolution=node index.js",
     "lint": "eslint .",
     "test": "cross-env NODE_ENV=test TZ=UTC TEARDOWN=true NODE_OPTIONS=--es-module-specifier-resolution=node jest --verbose --runInBand --detectOpenHandles --coverage",
