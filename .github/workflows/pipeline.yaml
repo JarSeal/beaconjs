@@ -39,20 +39,20 @@ jobs:
         working-directory: ./
         run: yarn test
         env:
-          API_BASE_URL: ${{secrets.API_BASE_URL}}
-          API_BASE_PATH: ${{secrets.API_BASE_PATH}}
-          API_PORT: ${{secrets.API_PORT}}
-          API_PORT_TEST: ${{secrets.API_PORT_TEST}}
-          CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL}}
-          CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
-          CLIENT_PORT: ${{secrets.CLIENT_PORT}}
-          MONGODB_URI: ${{secrets.MONGODB_URI}}
-          TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
-          SECRET: ${{secrets.SECRET}}
-          FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
-          EMAIL_HOST: ${{secrets.EMAIL_HOST}}
-          EMAIL_USER: ${{secrets.EMAIL_USER}}
-          EMAIL_PASS: ${{secrets.EMAIL_PASS}}
+          API_BASE_URL: ${{env.API_BASE_URL}}
+          API_BASE_PATH: ${{env.API_BASE_PATH}}
+          API_PORT: ${{env.API_PORT}}
+          API_PORT_TEST: ${{env.API_PORT_TEST}}
+          CLIENT_BASE_URL: ${{env.CLIENT_BASE_URL}}
+          CLIENT_BASE_PATH: ${{env.CLIENT_BASE_PATH}}
+          CLIENT_PORT: ${{env.CLIENT_PORT}}
+          MONGODB_URI: ${{env.MONGODB_URI}}
+          TEST_MONGODB_URI: ${{env.TEST_MONGODB_URI}}
+          SECRET: ${{env.SECRET}}
+          FORM_TOKEN_SECRET: ${{env.FORM_TOKEN_SECRET}}
+          EMAIL_HOST: ${{env.EMAIL_HOST}}
+          EMAIL_USER: ${{env.EMAIL_USER}}
+          EMAIL_PASS: ${{env.EMAIL_PASS}}
 
       # HEROKU DEPLOYMENT:
       # - uses: akhileshns/heroku-deploy@v3.7.8
