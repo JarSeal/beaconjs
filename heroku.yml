@@ -1,0 +1,6 @@
+release:
+  image: mongo:4.4.10
+  command:
+    - mongod
+run:
+  web: cd back && yarn start-prod
