@@ -1,2 +1,2 @@
 release: yarn install && cd back && yarn install && cd ../front && yarn install
-web: yarn start-prod
+web: cd back && yarn start-prod
