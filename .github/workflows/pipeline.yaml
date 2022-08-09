@@ -19,15 +19,15 @@ jobs:
           node-version: '16.13.2'
 
       # install:
-      - name: yarn install (root)
-        working-directory: ./
-        run: yarn install
-      - name: yarn install (back)
-        working-directory: ./back
-        run: yarn install
-      - name: yarn install (front)
-        working-directory: ./front
-        run: yarn install
+      # - name: yarn install (root)
+      #   working-directory: ./
+      #   run: yarn install
+      # - name: yarn install (back)
+      #   working-directory: ./back
+      #   run: yarn install
+      # - name: yarn install (front)
+      #   working-directory: ./front
+      #   run: yarn install
 
       # lints:
       # - name: yarn lint
@@ -75,6 +75,7 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
+          branch: 'test'
           # healthcheck: '${{secrets.CLIENT_BASE_URL}}/api/health'
           # checkstring: 'ok'
           # rollbackonhealthcheckfailed: true
