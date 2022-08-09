@@ -1,5 +1,0 @@
-build:
-  docker:
-    web: back/mongo/docker-compose.yml
-run:
-  web: docker-compose down && docker-compose up -d
