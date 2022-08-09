@@ -1,2 +1,2 @@
 run:
-  web: cd back/mongo && docker-compose up -d
+  worker: cd back/mongo && docker-compose up -d

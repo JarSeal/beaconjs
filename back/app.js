@@ -35,7 +35,7 @@ if (config.ENV !== 'test') {
       createPresetData();
     })
     .catch((error) => {
-      logger.error('error connection to MongoDB:', error.message);
+      logger.error('error connecting to MongoDB:', error.message);
     });
 }
 
