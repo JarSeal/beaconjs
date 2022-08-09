@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "start-prod": "yarn install && cd back && yarn install && cd ../front && yarn install && yarn build && ../back && yarn start-prod",
     "setup": "yarn envFiles && cd front && yarn install && cd ../back && yarn install && cd mongo && docker-compose up --no-start && cd ../.. && yarn install",
     "setupFront": "yarn envFiles && cd front && yarn install",
     "setupBack": "yarn envFiles && cd back && yarn install && cd mongo && docker-compose up --no-start",
