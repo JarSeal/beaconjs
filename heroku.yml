@@ -1,5 +1,5 @@
 build:
   docker:
-    web: mongo/docker-compose.yml
+    web: back/mongo/docker-compose.yml
 run:
   web: docker-compose down && docker-compose up -d
