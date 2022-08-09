@@ -1,1 +1,1 @@
-web: cd back && yarn install && yarn start-prod
+web: cd back && yarn start-prod
