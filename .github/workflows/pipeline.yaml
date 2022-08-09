@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '16.13.2'
 
-      # install, lint, test, and build:
+      # install:
       - name: yarn install (root)
         working-directory: ./
         run: yarn install
@@ -28,6 +28,16 @@ jobs:
       - name: yarn install (front)
         working-directory: ./front
         run: yarn install
+
+      # lint
+      - name: yarn lint
+        working-directory: ./
+        run: yarn lint
+
+      # test
+      - name: yarn test
+        working-directory: ./
+        run: yarn test
 
       # HEROKU DEPLOYMENT:
       # - uses: akhileshns/heroku-deploy@v3.7.8

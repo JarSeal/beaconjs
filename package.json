@@ -13,11 +13,11 @@
     "devBack": "yarn envFiles && cd back/mongo && docker-compose up -d && cd .. && NODE_ENV=dev yarn run dev",
     "devMongo": "docker exec -it beacondb mongo beacondb",
     "devMongoTest": "docker exec -it beacondb mongo beacondb-test",
-    "lint": "cd front && yarn lint && cd ../back && yarn lint && eslint .",
+    "lint": "cd front && yarn lint && cd ../back && yarn lint && cd .. && yarn lint:shared",
     "lint:shared": "eslint .",
     "prettify": "prettier --write ./**/*.js",
     "envFiles": "node createEnvFiles.js",
-    "test": "cd back && yarn test",
+    "test": "cd back && yarn test && cd ../front && yarn test",
     "devData": "cd back && NODE_ENV=dev node data/createDevData.js"
   },
   "repository": {
