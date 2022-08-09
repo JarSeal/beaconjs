@@ -30,9 +30,9 @@ jobs:
         run: yarn install
 
       # lint
-      # - name: yarn lint
-      #   working-directory: ./
-      #   run: yarn lint
+      - name: yarn lint
+        working-directory: ./
+        run: yarn lint
 
       # build docker / mongo
       - name: docker-compose up -d
@@ -40,24 +40,24 @@ jobs:
         run: docker-compose up -d
 
       # test
-      # - name: yarn test
-      #   working-directory: ./
-      #   run: yarn test
-      #   env:
-      #     API_BASE_URL: ${{secrets.API_BASE_URL}}
-      #     API_BASE_PATH: ${{secrets.API_BASE_PATH}}
-      #     API_PORT: ${{secrets.API_PORT}}
-      #     API_PORT_TEST: ${{secrets.API_PORT_TEST}}
-      #     CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL}}
-      #     CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
-      #     CLIENT_PORT: ${{secrets.CLIENT_PORT}}
-      #     MONGODB_URI: ${{secrets.MONGODB_URI}}
-      #     TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
-      #     SECRET: ${{secrets.SECRET}}
-      #     FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
-      #     EMAIL_HOST: ${{secrets.EMAIL_HOST}}
-      #     EMAIL_USER: ${{secrets.EMAIL_USER}}
-      #     EMAIL_PASS: ${{secrets.EMAIL_PASS}}
+      - name: yarn test
+        working-directory: ./
+        run: yarn test
+        env:
+          API_BASE_URL: ${{secrets.API_BASE_URL}}
+          API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          API_PORT: ${{secrets.API_PORT}}
+          API_PORT_TEST: ${{secrets.API_PORT_TEST}}
+          CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL}}
+          CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          MONGODB_URI: ${{secrets.MONGODB_URI}}
+          TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
+          SECRET: ${{secrets.SECRET}}
+          FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
+          EMAIL_HOST: ${{secrets.EMAIL_HOST}}
+          EMAIL_USER: ${{secrets.EMAIL_USER}}
+          EMAIL_PASS: ${{secrets.EMAIL_PASS}}
 
       # HEROKU DEPLOYMENT:
       # - uses: akhileshns/heroku-deploy@v3.7.8
