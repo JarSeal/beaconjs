@@ -6,7 +6,10 @@ const ENV = process.env.NODE_ENV || 'production';
 
 const API_URL = process.env.API_BASE_URL;
 const API_PATH = process.env.API_BASE_PATH;
-let PORT = process.env.API_PORT || 3000;
+let PORT =
+  ENV === 'production'
+    ? process.env.PORT // Heroku assigns ports dynamically
+    : process.env.API_PORT || 3000;
 if (ENV === 'test') PORT = process.env.API_PORT_TEST || 3004;
 
 const CLIENT_URL = process.env.CLIENT_BASE_URL;

@@ -78,10 +78,6 @@ app.use('/teest', express.static('build/teest'));
 app.use(express.json());
 app.use(middleware.requestLogger);
 
-if (process.env.SERVE_STATIC === 'production') {
-  app.use(express.static('front'));
-}
-
 app.use((req, res, next) => {
   const c = csrf({ cookie: false });
   c(req, res, () => {
