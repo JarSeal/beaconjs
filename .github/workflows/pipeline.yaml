@@ -29,26 +29,26 @@ jobs:
         working-directory: ./front
         run: yarn install
 
-      # lint
+      # lints:
       - name: yarn lint
         working-directory: ./
         run: yarn lint
 
-      # build docker / mongo
+      # build docker / mongo:
       - name: docker-compose up -d
         working-directory: ./back/mongo
         run: docker-compose up -d
 
-      # test
+      # tests:
       - name: yarn test
         working-directory: ./
         run: yarn test
         env:
-          API_BASE_URL: ${{secrets.API_BASE_URL}}
+          API_BASE_URL: 'http://localhost'
           API_BASE_PATH: ${{secrets.API_BASE_PATH}}
           API_PORT: ${{secrets.API_PORT}}
           API_PORT_TEST: ${{secrets.API_PORT_TEST}}
-          CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL}}
+          CLIENT_BASE_URL: 'http://localhost'
           CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
           CLIENT_PORT: ${{secrets.CLIENT_PORT}}
           MONGODB_URI: ${{secrets.MONGODB_URI}}
@@ -59,72 +59,29 @@ jobs:
           EMAIL_USER: ${{secrets.EMAIL_USER}}
           EMAIL_PASS: ${{secrets.EMAIL_PASS}}
 
-      # HEROKU DEPLOYMENT:
-      # - uses: akhileshns/heroku-deploy@v3.7.8
-      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
-      #   with:
-      #     heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-      #     heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
-      #     heroku_email: ${{secrets.HEROKU_EMAIL}}
-      #     appdir: "backend"
-      #     healthcheck: "https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com/api/health"
-      #     checkstring: "ok"
-      #     rollbackonhealthcheckfailed: true
-
-      # - name: e2e tests
-      #   uses: cypress-io/github-action@v2
-      #   with:
-      #     working-directory: ./frontend
-      #     command: npm run test:e2e
-      #     start: cd ../backend && TEST_MONGODB_URI=$TEST_MONGODB_URI PORT=$PORT SECRET=$SECRET npm run start:test
-      #     wait-on: http://localhost:3000
-      #   env:
-      #     TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
-      #     PORT: ${{secrets.PORT}}
-      #     SECRET: ${{secrets.SOME_SECRET}}
-      # - uses: akhileshns/heroku-deploy@v3.7.8
-      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
-      #   with:
-      #     heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-      #     heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
-      #     heroku_email: ${{secrets.HEROKU_EMAIL}}
-      #     healthcheck: "https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com/health"
-      #     checkstring: "ok"
-      #     rollbackonhealthcheckfailed: true
-      # - uses: 8398a7/action-slack@v3
-      #   with:
-      #     status: custom
-      #     custom_payload: |
-      #       {
-      #         attachments: [{
-      #             color: 'danger',
-      #             text: `Deployment to https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com failed.\n${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}, ${{ job.status }} in ${process.env.AS_TOOK}. Commit message: "${process.env.AS_MESSAGE}"`
-      #           }]
-      #       }
-      #     fields: repo,message,commit,workflow,job,took
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip') && failure()"
-      # - uses: actions/checkout@v2
-      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
-      # - name: Bump version and push tag
-      #   id: new_id
-      #   uses: anothrNick/github-tag-action@1.33.0
-      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - uses: 8398a7/action-slack@v3
-      #   with:
-      #     status: custom
-      #     custom_payload: |
-      #       {
-      #         attachments: [{
-      #             color: 'good',
-      #             text: `Deployment to https://${{secrets.HEROKU_APP_NAME}}.herokuapp.com done and version upgraded to ${process.env.NEW_VERSION_NUMBER}.\n${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}, ${{ job.status }} in ${process.env.AS_TOOK}. Commit message: "${process.env.AS_MESSAGE}"`
-      #           }]
-      #       }
-      #     fields: repo,message,commit,workflow,job,took
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      #     NEW_VERSION_NUMBER: ${{ steps.new_id.outputs.new_tag }}
-      #   if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
+      # Heroku deployment:
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          appdir: 'back'
+          healthcheck: '${{secrets.CLIENT_BASE_URL}}/api/health'
+          checkstring: 'ok'
+          rollbackonhealthcheckfailed: true
+        env:
+          HD_API_BASE_URL: ${{secrets.API_BASE_URL}}
+          HD_API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          HD_API_PORT: ${{secrets.API_PORT}}
+          HD_API_PORT_TEST: ${{secrets.API_PORT_TEST}}
+          HD_CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL}}
+          HD_CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          HD_CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          HD_MONGODB_URI: ${{secrets.MONGODB_URI}}
+          HD_TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
+          HD_SECRET: ${{secrets.SECRET}}
+          HD_FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
+          HD_EMAIL_HOST: ${{secrets.EMAIL_HOST}}
+          HD_EMAIL_USER: ${{secrets.EMAIL_USER}}
+          HD_EMAIL_PASS: ${{secrets.EMAIL_PASS}}
