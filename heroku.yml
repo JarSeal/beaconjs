@@ -1,2 +1,0 @@
-run:
-  worker: cd back/mongo && docker-compose up -d
