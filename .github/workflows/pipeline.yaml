@@ -83,12 +83,10 @@ jobs:
           HD_API_BASE_URL: ${{secrets.API_BASE_URL}}
           HD_API_BASE_PATH: ${{secrets.API_BASE_PATH}}
           HD_API_PORT: ${{secrets.API_PORT}}
-          HD_API_PORT_TEST: ${{secrets.API_PORT_TEST}}
           HD_CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL}}
           HD_CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
           HD_CLIENT_PORT: ${{secrets.CLIENT_PORT}}
           HD_MONGODB_URI: ${{secrets.MONGODB_URI}}
-          HD_TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
           HD_SECRET: ${{secrets.SECRET}}
           HD_FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
           HD_EMAIL_HOST: ${{secrets.EMAIL_HOST}}
