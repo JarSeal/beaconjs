@@ -17,16 +17,13 @@ if (!ENV) {
     'THIS IS WHAT IT OUTPUTS (process envs)',
     CLIENT_PATH,
     process.env.VITE_CLIENT_URL,
-    process.env.VITE_CLIENT_PORT
+    process.env.VITE_CLIENT_PORT,
+    process.env.VITE_API_BASE_URL,
+    process.env.VITE_API_PORT,
+    process.env.VITE_API_BASE_PATH
   );
 } else {
   CLIENT_PATH = ENV.VITE_CLIENT_PATH;
-  console.log(
-    'THIS IS WHAT IT OUTPUTS (.env file envs)',
-    CLIENT_PATH,
-    ENV.VITE_CLIENT_URL,
-    ENV.VITE_CLIENT_PORT
-  );
 }
 
 export default defineConfig({
