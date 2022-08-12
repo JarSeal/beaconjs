@@ -46,12 +46,10 @@ jobs:
       #   env:
       #     API_BASE_URL: 'http://localhost'
       #     API_BASE_PATH: ${{secrets.API_BASE_PATH}}
-      #     API_PORT: ${{secrets.API_PORT}}
       #     API_PORT_TEST: ${{secrets.API_PORT_TEST}}
       #     CLIENT_BASE_URL: 'http://localhost'
       #     CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
       #     CLIENT_PORT: ${{secrets.CLIENT_PORT}}
-      #     MONGODB_URI: ${{secrets.MONGODB_URI}}
       #     TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
       #     SECRET: ${{secrets.SECRET}}
       #     FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}

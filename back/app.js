@@ -59,7 +59,12 @@ app.use(
   cors({
     origin:
       config.ENV === 'production'
-        ? [`${config.CLIENT_URL}`, `${config.CLIENT_URL}:${config.CLIENT_PORT}`]
+        ? [
+            `${config.CLIENT_URL}`,
+            `${config.CLIENT_URL}:${config.CLIENT_PORT}`,
+            `${config.API_URL}`,
+            `${config.API_URL}:${config.PORT}`,
+          ]
         : [
             'http://localhost:8080',
             'https://localhost:8080',
