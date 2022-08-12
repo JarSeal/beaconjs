@@ -13,8 +13,20 @@ const ENV = dotenv.config({ path: normalizePath(path.resolve(_dirname, 'src/.env
 let CLIENT_PATH;
 if (!ENV) {
   CLIENT_PATH = process.env.VITE_CLIENT_PATH;
+  console.log(
+    'THIS IS WHAT IT OUTPUTS (process envs)',
+    CLIENT_PATH,
+    process.env.VITE_CLIENT_URL,
+    process.env.VITE_CLIENT_PORT
+  );
 } else {
   CLIENT_PATH = ENV.VITE_CLIENT_PATH;
+  console.log(
+    'THIS IS WHAT IT OUTPUTS (.env file envs)',
+    CLIENT_PATH,
+    ENV.VITE_CLIENT_URL,
+    ENV.VITE_CLIENT_PORT
+  );
 }
 
 export default defineConfig({
