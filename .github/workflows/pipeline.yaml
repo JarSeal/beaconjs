@@ -19,15 +19,15 @@ jobs:
           node-version: '16.13.2'
 
       # install:
-      - name: yarn install (root)
-        working-directory: ./
-        run: yarn install
-      - name: yarn install (back)
-        working-directory: ./back
-        run: yarn install
-      - name: yarn install (front)
-        working-directory: ./front
-        run: yarn install
+      # - name: yarn install (root)
+      #   working-directory: ./
+      #   run: yarn install
+      # - name: yarn install (back)
+      #   working-directory: ./back
+      #   run: yarn install
+      # - name: yarn install (front)
+      #   working-directory: ./front
+      #   run: yarn install
 
       # lints:
       # - name: yarn lint
@@ -65,10 +65,6 @@ jobs:
       #     api_key: ${{secrets.HEROKU_API_KEY}}
       #     docker_compose_file: './back/mongo/docker-compose.yml'
       #     heroku_apps: '[{"imagename":"mongo:4.4.10","appname":"beaconjs","apptype":"web"}]'
-
-      - name: Build frontend
-        working-directory: ./front
-        run: yarn build
 
       # Heroku backend deployment:
       - uses: akhileshns/heroku-deploy@v3.12.12

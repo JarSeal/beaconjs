@@ -19,7 +19,8 @@
     "prettify": "prettier --write ./**/*.js",
     "envFiles": "node createEnvFiles.js",
     "test": "cd back && yarn test && cd ../front && yarn test",
-    "devData": "cd back && NODE_ENV=dev node data/createDevData.js"
+    "devData": "cd back && NODE_ENV=dev node data/createDevData.js",
+    "heroku-postbuild": "cd back && yarn install && cd ../front && yarn install && yarn build"
   },
   "repository": {
     "type": "git",
