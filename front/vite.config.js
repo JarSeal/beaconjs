@@ -19,7 +19,7 @@ if (!ENV) {
 
 export default defineConfig({
   root: './src',
-  base: './',
+  base: CLIENT_PATH,
   build: {
     // Relative to the root (where this file is)
     outDir: `../../back/front${CLIENT_PATH}`,

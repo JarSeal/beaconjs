@@ -84,8 +84,8 @@ app.use(
 // app.use('/', express.static('front'));
 
 // BeaconJS assets and routes:
-app.use('/assets', express.static('front/assets'));
 ROUTE_ACCESS.forEach((r) => {
+  console.log('PATJHS', r.path);
   app.use(config.CLIENT_PATH + r.path, express.static(`front${config.CLIENT_PATH}`));
 });
 

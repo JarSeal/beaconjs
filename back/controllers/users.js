@@ -932,7 +932,7 @@ usersRouter.post('/newemailverification', async (request, response) => {
     if (!verificationSent) return;
   } else {
     logger.error(
-      `Trying to send a new verification, but it is prohibited (user id: ${request.session._id}, useVerification: ${useVerification})`
+      `Trying to send a new verification, but it is prohibited (user id: ${request.session._id}, useVerification: ${useVerification}, user verified: ${user.security.verifyEmail.verified})`
     );
     return response.status(401).json({
       msg: 'Unauthorised',

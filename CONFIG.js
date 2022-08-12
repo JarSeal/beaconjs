@@ -25,20 +25,14 @@ export const UI = {
 
 export const ROUTE_ACCESS = [
   {
-    path: '/',
-    formId: 'route-landing',
-    useRightsLevel: 2,
-    editorRightsLevel: 8,
-  },
-  {
-    path: '/login',
-    formId: 'route-login',
+    path: '/u/newpass/:token',
+    formId: 'route-new-pass',
     useRightsLevel: 0,
     editorRightsLevel: 8,
   },
   {
-    path: '/login/two',
-    formId: 'route-twofa-login',
+    path: '/u/verify/:token',
+    formId: 'route-verify',
     useRightsLevel: 0,
     editorRightsLevel: 8,
   },
@@ -49,26 +43,8 @@ export const ROUTE_ACCESS = [
     editorRightsLevel: 8,
   },
   {
-    path: '/newuser',
-    formId: 'route-new-user',
-    useRightsLevel: 0,
-    editorRightsLevel: 8,
-  },
-  {
     path: '/u/newpassrequest',
     formId: 'route-new-pass-request',
-    useRightsLevel: 0,
-    editorRightsLevel: 8,
-  },
-  {
-    path: '/u/newpass',
-    formId: 'route-new-pass',
-    useRightsLevel: 0,
-    editorRightsLevel: 8,
-  },
-  {
-    path: '/u/verify/:token',
-    formId: 'route-verify',
     useRightsLevel: 0,
     editorRightsLevel: 8,
   },
@@ -121,6 +97,24 @@ export const ROUTE_ACCESS = [
     editorRightsLevel: 9,
   },
   {
+    path: '/login/two',
+    formId: 'route-twofa-login',
+    useRightsLevel: 0,
+    editorRightsLevel: 8,
+  },
+  {
+    path: '/login',
+    formId: 'route-login',
+    useRightsLevel: 0,
+    editorRightsLevel: 8,
+  },
+  {
+    path: '/newuser',
+    formId: 'route-new-user',
+    useRightsLevel: 0,
+    editorRightsLevel: 8,
+  },
+  {
     path: '/404',
     formId: 'route-four-o-four',
     useRightsLevel: 0,
@@ -133,6 +127,12 @@ export const ROUTE_ACCESS = [
     useRightsLevel: 0,
     editorRightsLevel: 8,
     locked: true,
+  },
+  {
+    path: '/',
+    formId: 'route-landing',
+    useRightsLevel: 2,
+    editorRightsLevel: 8,
   },
 ];
 

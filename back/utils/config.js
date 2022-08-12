@@ -40,12 +40,14 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 
 const getApiBaseUrl = (givenBaseUrl) => {
   if (!givenBaseUrl) givenBaseUrl = API_URL;
-  return `${givenBaseUrl}:${PORT}${API_PATH}`;
+  const API_PORT = PORT === '80' ? '' : ':' + PORT;
+  return `${givenBaseUrl}${API_PORT}${API_PATH}`;
 };
 
 const getClientBaseUrl = (givenBaseUrl) => {
   if (!givenBaseUrl) givenBaseUrl = CLIENT_URL;
-  return `${givenBaseUrl}:${CLIENT_PORT}${CLIENT_PATH}`;
+  const PORT = CLIENT_PORT === '80' ? '' : ':' + CLIENT_PORT;
+  return `${givenBaseUrl}${PORT}${CLIENT_PATH}`;
 };
 
 const conf = {
