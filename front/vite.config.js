@@ -13,15 +13,6 @@ const ENV = dotenv.config({ path: normalizePath(path.resolve(_dirname, 'src/.env
 let CLIENT_PATH;
 if (!ENV) {
   CLIENT_PATH = process.env.VITE_CLIENT_PATH;
-  console.log(
-    'THIS IS WHAT IT OUTPUTS (process envs)',
-    CLIENT_PATH,
-    process.env.VITE_CLIENT_URL,
-    process.env.VITE_CLIENT_PORT,
-    process.env.VITE_API_BASE_URL,
-    process.env.VITE_API_PORT,
-    process.env.VITE_API_BASE_PATH
-  );
 } else {
   CLIENT_PATH = ENV.VITE_CLIENT_PATH;
 }

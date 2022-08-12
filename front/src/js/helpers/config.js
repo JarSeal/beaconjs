@@ -1,6 +1,8 @@
+/* eslint-disable no-undef */
 export const getApiBaseUrl = () => {
   const ENV = import.meta.env;
-  return `${ENV.VITE_API_BASE_URL}:${ENV.VITE_API_PORT}${ENV.VITE_API_BASE_PATH}`;
+  const PORT = process.env.PORT ? process.env.PORT : ENV.VITE_API_PORT;
+  return `${ENV.VITE_API_BASE_URL}:${PORT}${ENV.VITE_API_BASE_PATH}`;
 };
 
 export const getClientBaseUrl = () => {
