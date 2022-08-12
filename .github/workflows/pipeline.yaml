@@ -25,9 +25,9 @@ jobs:
       # - name: yarn install (back)
       #   working-directory: ./back
       #   run: yarn install
-      # - name: yarn install (front)
-      #   working-directory: ./front
-      #   run: yarn install
+      - name: yarn install (front)
+        working-directory: ./front
+        run: yarn install
 
       # lints:
       # - name: yarn lint
