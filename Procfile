@@ -1,2 +1,2 @@
-release: yarn install && cd back && yarn install && cd ../front && yarn install && yarn build
+release: yarn install && cd back && yarn install && cd ../front && yarn install && VITE_CLIENT_PATH=$CLIENT_PATH yarn build
 web: cd back && yarn start-prod
