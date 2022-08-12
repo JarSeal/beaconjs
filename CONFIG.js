@@ -91,6 +91,36 @@ export const ROUTE_ACCESS = [
     editorRightsLevel: 8,
   },
   {
+    path: '/settings/my-profile',
+    formId: 'route-settings-my-profile',
+    useRightsLevel: 2,
+    editorRightsLevel: 8,
+  },
+  {
+    path: '/settings/my-settings',
+    formId: 'route-settings-my-settings',
+    useRightsLevel: 2,
+    editorRightsLevel: 8,
+  },
+  {
+    path: '/settings/users',
+    formId: 'route-settings-users',
+    useRightsLevel: 8,
+    editorRightsLevel: 9,
+  },
+  {
+    path: '/settings/admin-settings',
+    formId: 'route-settings-admin-settings',
+    useRightsLevel: 8,
+    editorRightsLevel: 9,
+  },
+  {
+    path: '/settings/users',
+    formId: 'route-settings-users',
+    useRightsLevel: 8,
+    editorRightsLevel: 9,
+  },
+  {
     path: '/404',
     formId: 'route-four-o-four',
     useRightsLevel: 0,

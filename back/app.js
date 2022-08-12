@@ -17,6 +17,7 @@ import middleware from './utils/middleware.js';
 import logger from './utils/logger.js';
 import createPresetData from './data/createPresetData.js';
 import { createRandomString } from '../shared/parsers.js';
+import { ROUTE_ACCESS } from '../CONFIG.js';
 
 const app = express();
 process.env.TZ = 'Europe/London';
@@ -73,8 +74,16 @@ app.use(
     exposedHeaders: ['set-cookie'],
   })
 );
-app.use('/', express.static('build'));
-app.use('/teest', express.static('build/teest'));
+
+// Site/app that uses BeaconJS routes:
+// app.use('/', express.static('front'));
+
+// BeaconJS assets and routes:
+app.use('/assets', express.static('front/assets'));
+ROUTE_ACCESS.forEach((r) => {
+  app.use(config.CLIENT_PATH + r.path, express.static(`front${config.CLIENT_PATH}`));
+});
+
 app.use(express.json());
 app.use(middleware.requestLogger);
 
