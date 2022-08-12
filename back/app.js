@@ -55,6 +55,8 @@ app.use(
     rolling: true,
   })
 );
+if (config.ENV === 'production')
+  console.log('IN PRODUCTION', config.CLIENT_URL, config.CLIENT_PORT, config.API_URL, config.PORT);
 app.use(
   cors({
     origin:
