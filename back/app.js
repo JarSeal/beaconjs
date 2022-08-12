@@ -55,14 +55,6 @@ app.use(
     rolling: true,
   })
 );
-console.log(
-  'IN PRODUCTION',
-  config.ENV,
-  config.CLIENT_URL,
-  config.CLIENT_PORT,
-  config.API_URL,
-  config.PORT
-);
 app.use(
   cors({
     origin:
