@@ -35,9 +35,9 @@ jobs:
       #   run: yarn lint
 
       # build docker / mongo:
-      - name: docker-compose up -d
-        working-directory: ./back/mongo
-        run: docker-compose up -d
+      # - name: docker-compose up -d
+      #   working-directory: ./back/mongo
+      #   run: docker-compose up -d
 
       # tests:
       # - name: yarn test
@@ -66,6 +66,10 @@ jobs:
       #     docker_compose_file: './back/mongo/docker-compose.yml'
       #     heroku_apps: '[{"imagename":"mongo:4.4.10","appname":"beaconjs","apptype":"web"}]'
 
+      - name: Build frontend
+        working-directory: ./front
+        run: yarn build
+
       # Heroku backend deployment:
       - uses: akhileshns/heroku-deploy@v3.12.12
         if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
@@ -73,7 +77,7 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
-          branch: 'test'
+          # branch: 'test'
           # healthcheck: '${{secrets.CLIENT_BASE_URL}}/api/health'
           # checkstring: 'ok'
           # rollbackonhealthcheckfailed: true
