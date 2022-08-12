@@ -19,12 +19,12 @@ jobs:
           node-version: '16.13.2'
 
       # install:
-      # - name: yarn install (root)
-      #   working-directory: ./
-      #   run: yarn install
-      # - name: yarn install (back)
-      #   working-directory: ./back
-      #   run: yarn install
+      - name: yarn install (root)
+        working-directory: ./
+        run: yarn install
+      - name: yarn install (back)
+        working-directory: ./back
+        run: yarn install
       - name: yarn install (front)
         working-directory: ./front
         run: yarn install
