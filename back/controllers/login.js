@@ -474,12 +474,10 @@ const _createSessionAndRespond = async (request, response, user, body) => {
   const settings = await getPublicSettings(request);
   if (body['remember-me']) {
     sessionAge = await getSetting(request, 'remember-me-session-age', true, true);
-    request.session.cookie.maxAge = sessionAge * 60 * 1000; // Milliseconds
   } else {
     sessionAge = await getSetting(request, 'session-age', true, true);
-    if (!sessionAge || sessionAge < 300) sessionAge = 300; // Minimum 5 minutes
-    request.session.cookie.maxAge = sessionAge * 60 * 1000; // Milliseconds
   }
+  request.session.cookie.maxAge = sessionAge * 60 * 1000; // Milliseconds
 
   // Check email and account verification
   let accountVerified = null;

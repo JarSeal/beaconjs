@@ -1,6 +1,7 @@
 import express from 'express';
 import 'express-async-errors';
 import mongoose from 'mongoose';
+import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
@@ -45,7 +46,7 @@ app.use(
   session({
     secret: config.SECRET,
     cookie: {
-      maxAge: 3600000, // 1000 = 1 second
+      maxAge: 3600000, // 1000 = 1 second (This set according to the session time setting, so this is not the real value)
       secure: false,
       sameSite: 'lax',
     },
@@ -53,28 +54,23 @@ app.use(
     resave: false,
     unset: 'destroy',
     rolling: true,
+    store: MongoStore.create({
+      mongoUrl: config.MONGODB_URI,
+      mongoOptions: {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      },
+    }),
   })
 );
 app.use(
   cors({
-    origin:
-      config.ENV === 'production'
-        ? [
-            `${config.CLIENT_URL}`,
-            `${config.CLIENT_URL}:${config.CLIENT_PORT}`,
-            `${config.API_URL}`,
-            `${config.API_URL}:${config.PORT}`,
-          ]
-        : [
-            'http://localhost:8080',
-            'https://localhost:8080',
-            'http://localhost:3011',
-            'https://localhost:3011',
-            'http://127.0.0.1:8080',
-            'https://127.0.0.1:8080',
-            'http://127.0.0.1:3011',
-            'https://127.0.0.1:3011',
-          ],
+    origin: [
+      `${config.CLIENT_URL}`,
+      `${config.CLIENT_URL}:${config.CLIENT_PORT}`,
+      `${config.API_URL}`,
+      `${config.API_URL}:${config.PORT}`,
+    ],
     credentials: true,
     exposedHeaders: ['set-cookie'],
   })
@@ -83,9 +79,8 @@ app.use(
 // Site/app that uses BeaconJS routes:
 // app.use('/', express.static('front'));
 
-// BeaconJS assets and routes:
+// BeaconJS routes:
 ROUTE_ACCESS.forEach((r) => {
-  console.log('PATJHS', r.path);
   app.use(config.CLIENT_PATH + r.path, express.static(`front${config.CLIENT_PATH}`));
 });
 
@@ -106,7 +101,7 @@ const validateToken = (req, res, next, c) => {
     req.body['_csrf'] = token;
   }
 
-  // Check if token has expired
+  // Check if CSRF token has expired
   const maxTime = 10000; // milliseconds (1000 = 1 second)
   const tokenTime = req.session.csrfSecret.split('-')[0];
   if (parseInt(tokenTime) + maxTime < +new Date()) {

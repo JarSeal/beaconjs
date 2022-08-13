@@ -99,6 +99,9 @@ const parseValue = (setting) => {
   if (setting.type === 'integer') {
     return parseInt(setting.value);
   }
+  if (setting.type === 'float') {
+    return parseFloat(setting.value);
+  }
   if (setting.type === 'boolean') {
     return setting.value === 'true' ? true : false;
   }
