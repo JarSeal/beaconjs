@@ -204,9 +204,8 @@ describe('settings controller', () => {
     const exposureSetting = adminSettings.filter(
       (s) => s.settingId === 'users-can-set-exposure-levels'
     )[0];
-    const oldCredentials = { ...loginData.session.credentials };
-    let CSRF = await getCSRF(loginData.session);
     loginData = await doLogout(loginData?.session?.credentials);
+    let CSRF = await getCSRF(loginData.session);
 
     // Logged out user tries to update an admin setting
     let fail = async () => {
@@ -219,7 +218,7 @@ describe('settings controller', () => {
             mongoId: exposureSetting.id,
             _csrf: CSRF,
           },
-          oldCredentials
+          loginData.session.credentials
         );
         return response;
       } catch (error) {
@@ -227,8 +226,12 @@ describe('settings controller', () => {
       }
     };
     let error = await fail();
-    expect(error.status).toEqual(403);
-    expect(error.data).toEqual({ error: 'CSRF token fail' });
+    expect(error.status).toEqual(401);
+    expect(error.data).toEqual({
+      _sess: false,
+      loggedIn: false,
+      msg: 'User not authenticated or session has expired',
+    });
 
     // Default level 2 user tries to update an admin setting
     loginData = await login({

@@ -9,13 +9,11 @@
     "yarn": ">=1.22.15"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=production node --es-module-specifier-resolution=node index.js",
-    "start-prod": "NODE_ENV=production SERVE_STATIC=production node -es-module-specifier-resolution=node index.js",
+    "start-prod": "NODE_ENV=production node --es-module-specifier-resolution=node index.js",
     "dev": "cross-env NODE_ENV=development nodemon --es-module-specifier-resolution=node index.js",
     "lint": "eslint .",
-    "test": "cross-env NODE_ENV=test TZ=UTC TEARDOWN=true NODE_OPTIONS=--es-module-specifier-resolution=node jest --verbose --runInBand --detectOpenHandles --coverage",
+    "test": "cross-env NODE_ENV=test TZ=UTC NODE_OPTIONS=--es-module-specifier-resolution=node jest --verbose --runInBand --detectOpenHandles --coverage",
     "test:watch": "cross-env NODE_ENV=test WATCH=true TZ=UTC NODE_OPTIONS=--es-module-specifier-resolution=node jest --watchAll --verbose --runInBand --detectOpenHandles",
-    "start:test": "cross-env NODE_ENV=test node index.js",
     "prettify": "prettier --write ./**/*.js"
   },
   "repository": {
@@ -27,11 +25,13 @@
   "dependencies": {
     "axios": "^0.27.2",
     "bcrypt": "^5.0.0",
+    "connect-mongo": "^4.6.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "crypto-js": "^4.1.1",
     "csurf": "^1.11.0",
-    "dotenv": "^8.2.0",
+    "dotenv": "^16.0.1",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "express-session": "^1.17.2",

@@ -6,7 +6,10 @@ const ENV = process.env.NODE_ENV || 'production';
 
 const API_URL = process.env.API_BASE_URL;
 const API_PATH = process.env.API_BASE_PATH;
-let PORT = process.env.API_PORT || 3000;
+let PORT =
+  ENV === 'production'
+    ? process.env.PORT // Heroku assigns ports dynamically
+    : process.env.API_PORT || 3000;
 if (ENV === 'test') PORT = process.env.API_PORT_TEST || 3004;
 
 const CLIENT_URL = process.env.CLIENT_BASE_URL;
@@ -37,12 +40,14 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 
 const getApiBaseUrl = (givenBaseUrl) => {
   if (!givenBaseUrl) givenBaseUrl = API_URL;
-  return `${givenBaseUrl}:${PORT}${API_PATH}`;
+  const API_PORT = PORT === '80' ? '' : ':' + PORT;
+  return `${givenBaseUrl}${API_PORT}${API_PATH}`;
 };
 
 const getClientBaseUrl = (givenBaseUrl) => {
   if (!givenBaseUrl) givenBaseUrl = CLIENT_URL;
-  return `${givenBaseUrl}:${CLIENT_PORT}${CLIENT_PATH}`;
+  const PORT = CLIENT_PORT === '80' ? '' : ':' + CLIENT_PORT;
+  return `${givenBaseUrl}${PORT}${CLIENT_PATH}`;
 };
 
 const conf = {

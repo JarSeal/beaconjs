@@ -1,0 +1,105 @@
+# Deployment Pipeline
+name: Deployment pipeline to BeaconJS test server
+
+on:
+  push:
+    branches:
+      - test
+  pull_request:
+    branches: [test]
+    types: [opened, synchronize]
+
+jobs:
+  deploy_beaconjs_to_test_server:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.13.2'
+
+      # install:
+      - name: yarn install (root)
+        working-directory: ./
+        run: yarn install
+      - name: yarn install (back)
+        working-directory: ./back
+        run: yarn install
+      - name: yarn install (front)
+        working-directory: ./front
+        run: yarn install
+
+      # lints:
+      - name: yarn lint
+        working-directory: ./
+        run: yarn lint
+
+      # build docker / mongo:
+      - name: docker-compose up -d
+        working-directory: ./back/mongo
+        run: docker-compose up -d
+
+      # tests:
+      - name: backend tests
+        working-directory: ./back
+        run: yarn test
+        env:
+          API_BASE_URL: 'http://localhost'
+          API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          API_PORT_TEST: ${{secrets.API_PORT_TEST}}
+          CLIENT_BASE_URL: 'http://localhost'
+          CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
+          SECRET: ${{secrets.SECRET}}
+          FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
+          EMAIL_HOST: ${{secrets.EMAIL_HOST}}
+          EMAIL_USER: ${{secrets.EMAIL_USER}}
+          EMAIL_PASS: ${{secrets.EMAIL_PASS}}
+      - name: frontend tests
+        working-directory: ./front
+        run: yarn test
+        env:
+          API_BASE_URL: 'http://localhost'
+          API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          API_PORT_TEST: ${{secrets.API_PORT_TEST}}
+          CLIENT_BASE_URL: 'http://localhost'
+          CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
+          SECRET: ${{secrets.SECRET}}
+          FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
+          EMAIL_HOST: ${{secrets.EMAIL_HOST}}
+          EMAIL_USER: ${{secrets.EMAIL_USER}}
+          EMAIL_PASS: ${{secrets.EMAIL_PASS}}
+
+      # Heroku backend deployment:
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        if: "github.event_name == 'push' && !contains(github.event.head_commit.message, '#skip')"
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          branch: 'test'
+          healthcheck: '${{secrets.CLIENT_BASE_URL}}/api/health'
+          checkstring: 'ok'
+          rollbackonhealthcheckfailed: true
+        env:
+          HD_API_BASE_URL: ${{secrets.API_BASE_URL}}
+          HD_API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          HD_API_PORT: ${{secrets.API_PORT}}
+          HD_CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL}}
+          HD_CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          HD_CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          HD_VITE_CLIENT_URL: ${{secrets.CLIENT_BASE_URL}}
+          HD_VITE_CLIENT_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          HD_VITE_CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          HD_VITE_API_BASE_URL: ${{secrets.API_BASE_URL}}
+          HD_VITE_API_PORT: ${{secrets.API_PORT}}
+          HD_VITE_API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          HD_MONGODB_URI: ${{secrets.MONGODB_URI}}
+          HD_SECRET: ${{secrets.SECRET}}
+          HD_FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
+          HD_EMAIL_HOST: ${{secrets.EMAIL_HOST}}
+          HD_EMAIL_USER: ${{secrets.EMAIL_USER}}
+          HD_EMAIL_PASS: ${{secrets.EMAIL_PASS}}

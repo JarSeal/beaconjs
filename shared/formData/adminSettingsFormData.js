@@ -84,7 +84,7 @@ const adminSettingsFormData = {
             descriptionId: 'session_age_desc',
             defaultValue: 60, // one hour
             required: true,
-            settingType: 'integer',
+            settingType: 'float',
             regex: '[0-9]+$',
           },
           {
@@ -95,7 +95,7 @@ const adminSettingsFormData = {
             descriptionId: 'remember_me_session_age_desc',
             defaultValue: 10080, // 7 days
             required: true,
-            settingType: 'integer',
+            settingType: 'float',
             regex: '[0-9]+$',
           },
         ],

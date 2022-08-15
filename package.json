@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "start-prod": "cd back && yarn start-prod",
     "setup": "yarn envFiles && cd front && yarn install && cd ../back && yarn install && cd mongo && docker-compose up --no-start && cd ../.. && yarn install",
     "setupFront": "yarn envFiles && cd front && yarn install",
     "setupBack": "yarn envFiles && cd back && yarn install && cd mongo && docker-compose up --no-start",
@@ -13,12 +14,13 @@
     "devBack": "yarn envFiles && cd back/mongo && docker-compose up -d && cd .. && NODE_ENV=dev yarn run dev",
     "devMongo": "docker exec -it beacondb mongo beacondb",
     "devMongoTest": "docker exec -it beacondb mongo beacondb-test",
-    "lint": "cd front && yarn lint && cd ../back && yarn lint && eslint .",
+    "lint": "cd front && yarn lint && cd ../back && yarn lint && cd .. && yarn lint:shared",
     "lint:shared": "eslint .",
     "prettify": "prettier --write ./**/*.js",
     "envFiles": "node createEnvFiles.js",
-    "test": "cd back && yarn test",
-    "devData": "cd back && NODE_ENV=dev node data/createDevData.js"
+    "test": "cd back && yarn test && cd ../front && yarn test",
+    "devData": "cd back && NODE_ENV=dev node data/createDevData.js",
+    "build": "yarn install && cd back && yarn install && cd ../front && yarn install && yarn build"
   },
   "repository": {
     "type": "git",
@@ -31,7 +33,21 @@
   },
   "homepage": "https://github.com/JarSeal/beaconjs#readme",
   "dependencies": {
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "csurf": "^1.11.0",
     "dotenv": "^16.0.1",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "express-session": "^1.17.2",
+    "marked": "^4.0.12",
+    "mongoose": "^5.10.5",
+    "mongoose-unique-validator": "^2.0.3",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.7.2",
     "prettier": "^2.6.2"
   },
   "devDependencies": {

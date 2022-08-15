@@ -1,6 +1,7 @@
 import express from 'express';
 import 'express-async-errors';
 import mongoose from 'mongoose';
+import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
@@ -17,6 +18,7 @@ import middleware from './utils/middleware.js';
 import logger from './utils/logger.js';
 import createPresetData from './data/createPresetData.js';
 import { createRandomString } from '../shared/parsers.js';
+import { ROUTE_ACCESS } from '../CONFIG.js';
 
 const app = express();
 process.env.TZ = 'Europe/London';
@@ -35,7 +37,7 @@ if (config.ENV !== 'test') {
       createPresetData();
     })
     .catch((error) => {
-      logger.error('error connection to MongoDB:', error.message);
+      logger.error('error connecting to MongoDB:', error.message);
     });
 }
 
@@ -44,7 +46,7 @@ app.use(
   session({
     secret: config.SECRET,
     cookie: {
-      maxAge: 3600000, // 1000 = 1 second
+      maxAge: 3600000, // 1000 = 1 second (This set according to the session time setting, so this is not the real value)
       secure: false,
       sameSite: 'lax',
     },
@@ -52,33 +54,41 @@ app.use(
     resave: false,
     unset: 'destroy',
     rolling: true,
+    store:
+      config.ENV !== 'test'
+        ? MongoStore.create({
+            mongoUrl: config.MONGODB_URI,
+            mongoOptions: {
+              useNewUrlParser: true,
+              useUnifiedTopology: true,
+            },
+          })
+        : undefined,
   })
 );
 app.use(
   cors({
     origin: [
-      // TODO: Move this to config and provide these only according to environment
-      'http://localhost:8080',
-      'https://localhost:8080',
-      'http://localhost:3011',
-      'https://localhost:3011',
-      'http://127.0.0.1:8080',
-      'https://127.0.0.1:8080',
-      'http://127.0.0.1:3011',
-      'https://127.0.0.1:3011',
+      `${config.CLIENT_URL}`,
+      `${config.CLIENT_URL}:${config.CLIENT_PORT}`,
+      `${config.API_URL}`,
+      `${config.API_URL}:${config.PORT}`,
     ],
     credentials: true,
     exposedHeaders: ['set-cookie'],
   })
 );
-app.use('/', express.static('build'));
-app.use('/teest', express.static('build/teest'));
+
+// Site/app that uses BeaconJS routes:
+// app.use('/', express.static('front'));
+
+// BeaconJS routes:
+ROUTE_ACCESS.forEach((r) => {
+  app.use(config.CLIENT_PATH + r.path, express.static(`front${config.CLIENT_PATH}`));
+});
+
 app.use(express.json());
 app.use(middleware.requestLogger);
-
-if (process.env.SERVE_STATIC === 'production') {
-  app.use(express.static('front'));
-}
 
 app.use((req, res, next) => {
   const c = csrf({ cookie: false });
@@ -94,7 +104,7 @@ const validateToken = (req, res, next, c) => {
     req.body['_csrf'] = token;
   }
 
-  // Check if token has expired
+  // Check if CSRF token has expired
   const maxTime = 10000; // milliseconds (1000 = 1 second)
   const tokenTime = req.session.csrfSecret.split('-')[0];
   if (parseInt(tokenTime) + maxTime < +new Date()) {
