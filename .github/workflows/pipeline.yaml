@@ -43,6 +43,7 @@ jobs:
       - name: yarn test
         working-directory: ./
         run: yarn test
+        shell: bash
         env:
           API_BASE_URL: 'http://localhost'
           API_BASE_PATH: ${{secrets.API_BASE_PATH}}
