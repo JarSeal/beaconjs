@@ -226,7 +226,7 @@ describe('settings controller', () => {
       }
     };
     let error = await fail();
-    expect(error.status).toEqual(403);
+    expect(error.status).toEqual(401);
     expect(error.data).toEqual({
       _sess: false,
       loggedIn: false,
