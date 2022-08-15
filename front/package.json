@@ -57,8 +57,6 @@
       "<rootDir>/dist",
       "<rootDir>/mongo"
     ],
-    "globalSetup": "<rootDir>/test/globalSetup.js",
-    "globalTeardown": "<rootDir>/test/globalTeardown.js",
     "transform": {
       "^.+\\.(js)$": "babel-jest"
     },
