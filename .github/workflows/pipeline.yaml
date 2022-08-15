@@ -40,9 +40,26 @@ jobs:
         run: docker-compose up -d
 
       # tests:
-      - name: yarn test
+      - name: backend tests
         working-directory: ./
-        run: yarn test
+        run: cd back && yarn test
+        shell: bash
+        env:
+          API_BASE_URL: 'http://localhost'
+          API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          API_PORT_TEST: ${{secrets.API_PORT_TEST}}
+          CLIENT_BASE_URL: 'http://localhost'
+          CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
+          SECRET: ${{secrets.SECRET}}
+          FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
+          EMAIL_HOST: ${{secrets.EMAIL_HOST}}
+          EMAIL_USER: ${{secrets.EMAIL_USER}}
+          EMAIL_PASS: ${{secrets.EMAIL_PASS}}
+      - name: frontend tests
+        working-directory: ./
+        run: cd front && yarn test
         shell: bash
         env:
           API_BASE_URL: 'http://localhost'
