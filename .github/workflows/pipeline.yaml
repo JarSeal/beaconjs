@@ -43,7 +43,6 @@ jobs:
       - name: backend tests
         working-directory: ./
         run: cd back && yarn test
-        shell: bash
         env:
           API_BASE_URL: 'http://localhost'
           API_BASE_PATH: ${{secrets.API_BASE_PATH}}
@@ -60,7 +59,6 @@ jobs:
       - name: frontend tests
         working-directory: ./
         run: cd front && yarn test
-        shell: bash
         env:
           API_BASE_URL: 'http://localhost'
           API_BASE_PATH: ${{secrets.API_BASE_PATH}}
