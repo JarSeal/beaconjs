@@ -54,13 +54,16 @@ app.use(
     resave: false,
     unset: 'destroy',
     rolling: true,
-    store: MongoStore.create({
-      mongoUrl: config.MONGODB_URI,
-      mongoOptions: {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
-    }),
+    store:
+      config.ENV !== 'test'
+        ? MongoStore.create({
+            mongoUrl: config.MONGODB_URI,
+            mongoOptions: {
+              useNewUrlParser: true,
+              useUnifiedTopology: true,
+            },
+          })
+        : undefined,
   })
 );
 app.use(

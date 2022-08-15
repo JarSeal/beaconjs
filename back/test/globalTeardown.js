@@ -11,10 +11,8 @@ const globalTeardown = async () => {
       useCreateIndex: true,
     })
     .then(async (conn) => {
-      await conn.connection.db.dropDatabase(async () => {
-        await conn.connection.close();
-        if (process.env.TEARDOWN) process.exit(0);
-      });
+      await conn.connection.db.dropDatabase();
+      await conn.connection.close();
     })
     .catch((error) => {
       console.error('\n\nerror connection to MongoDB:', error.message, '\n\n');
