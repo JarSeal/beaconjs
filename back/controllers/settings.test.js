@@ -221,8 +221,10 @@ describe('settings controller', () => {
           },
           oldCredentials
         );
+        console.log('RESPONSE', response);
         return response;
       } catch (error) {
+        console.log('RESPONSE  (FAIL)', error);
         return error.response;
       }
     };

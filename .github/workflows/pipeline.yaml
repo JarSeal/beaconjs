@@ -65,9 +65,9 @@ jobs:
           heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           branch: 'test'
-          # healthcheck: '${{secrets.CLIENT_BASE_URL}}/api/health'
-          # checkstring: 'ok'
-          # rollbackonhealthcheckfailed: true
+          healthcheck: '${{secrets.CLIENT_BASE_URL}}/api/health'
+          checkstring: 'ok'
+          rollbackonhealthcheckfailed: true
         env:
           HD_API_BASE_URL: ${{secrets.API_BASE_URL}}
           HD_API_BASE_PATH: ${{secrets.API_BASE_PATH}}
