@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: '16.13.2'
 
-      install:
+      # install:
       - name: yarn install (root)
         working-directory: ./
         run: yarn install
@@ -29,17 +29,17 @@ jobs:
         working-directory: ./front
         run: yarn install
 
-      lints:
+      # lints:
       - name: yarn lint
         working-directory: ./
         run: yarn lint
 
-      build docker / mongo:
+      # build docker / mongo:
       - name: docker-compose up -d
         working-directory: ./back/mongo
         run: docker-compose up -d
 
-      tests:
+      # tests:
       - name: yarn test
         working-directory: ./
         run: yarn test
