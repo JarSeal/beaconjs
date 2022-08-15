@@ -15,7 +15,7 @@ describe('lang', () => {
     let text = getText('login');
     expect(text).toBe('Login');
     text = getText('user');
-    expect(text).toBe('Users');
+    expect(text).toBe('User');
     text = getText('passwords_dont_match');
     expect(text).toBe(`Password's don't match`);
     text = getText('minimum_x_characters', [50]);
