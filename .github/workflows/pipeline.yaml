@@ -18,53 +18,44 @@ jobs:
         with:
           node-version: '16.13.2'
 
-      # install:
-      # - name: yarn install (root)
-      #   working-directory: ./
-      #   run: yarn install
-      # - name: yarn install (back)
-      #   working-directory: ./back
-      #   run: yarn install
-      # - name: yarn install (front)
-      #   working-directory: ./front
-      #   run: yarn install
+      install:
+      - name: yarn install (root)
+        working-directory: ./
+        run: yarn install
+      - name: yarn install (back)
+        working-directory: ./back
+        run: yarn install
+      - name: yarn install (front)
+        working-directory: ./front
+        run: yarn install
 
-      # lints:
-      # - name: yarn lint
-      #   working-directory: ./
-      #   run: yarn lint
+      lints:
+      - name: yarn lint
+        working-directory: ./
+        run: yarn lint
 
-      # build docker / mongo:
-      # - name: docker-compose up -d
-      #   working-directory: ./back/mongo
-      #   run: docker-compose up -d
+      build docker / mongo:
+      - name: docker-compose up -d
+        working-directory: ./back/mongo
+        run: docker-compose up -d
 
-      # tests:
-      # - name: yarn test
-      #   working-directory: ./
-      #   run: yarn test
-      #   env:
-      #     API_BASE_URL: 'http://localhost'
-      #     API_BASE_PATH: ${{secrets.API_BASE_PATH}}
-      #     API_PORT_TEST: ${{secrets.API_PORT_TEST}}
-      #     CLIENT_BASE_URL: 'http://localhost'
-      #     CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
-      #     CLIENT_PORT: ${{secrets.CLIENT_PORT}}
-      #     TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
-      #     SECRET: ${{secrets.SECRET}}
-      #     FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
-      #     EMAIL_HOST: ${{secrets.EMAIL_HOST}}
-      #     EMAIL_USER: ${{secrets.EMAIL_USER}}
-      #     EMAIL_PASS: ${{secrets.EMAIL_PASS}}
-
-      # - name: Build, push and deploy Mongo container to Heroku
-      #   id: heroku
-      #   uses: snithyanantham/docker-compose-multiple-apps-heroku-deploy@v1.0
-      #   with:
-      #     email: ${{secrets.HEROKU_EMAIL}}
-      #     api_key: ${{secrets.HEROKU_API_KEY}}
-      #     docker_compose_file: './back/mongo/docker-compose.yml'
-      #     heroku_apps: '[{"imagename":"mongo:4.4.10","appname":"beaconjs","apptype":"web"}]'
+      tests:
+      - name: yarn test
+        working-directory: ./
+        run: yarn test
+        env:
+          API_BASE_URL: 'http://localhost'
+          API_BASE_PATH: ${{secrets.API_BASE_PATH}}
+          API_PORT_TEST: ${{secrets.API_PORT_TEST}}
+          CLIENT_BASE_URL: 'http://localhost'
+          CLIENT_BASE_PATH: ${{secrets.CLIENT_BASE_PATH}}
+          CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+          TEST_MONGODB_URI: ${{secrets.TEST_MONGODB_URI}}
+          SECRET: ${{secrets.SECRET}}
+          FORM_TOKEN_SECRET: ${{secrets.FORM_TOKEN_SECRET}}
+          EMAIL_HOST: ${{secrets.EMAIL_HOST}}
+          EMAIL_USER: ${{secrets.EMAIL_USER}}
+          EMAIL_PASS: ${{secrets.EMAIL_PASS}}
 
       # Heroku backend deployment:
       - uses: akhileshns/heroku-deploy@v3.12.12
