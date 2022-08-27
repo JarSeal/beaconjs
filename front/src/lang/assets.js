@@ -986,4 +986,24 @@ export const assetsObj = {
     en: 'E-mail sent',
     fi: 'Sähköposti lähetetty',
   },
+  api_settings: {
+    en: 'API settings',
+    fi: 'API-asetukset',
+  },
+  form_id: {
+    en: 'Form ID',
+    fi: 'Form ID',
+  },
+  path: {
+    en: 'Path',
+    fi: 'Polku',
+  },
+  method: {
+    en: 'Method',
+    fi: 'Metodi',
+  },
+  type: {
+    en: 'Type',
+    fi: 'Tyyppi',
+  },
 };

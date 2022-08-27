@@ -11,7 +11,7 @@ const formSchema = mongoose.Schema({
     unique: true,
   },
   path: String,
-  method: String,
+  method: { type: String, default: 'GET' },
   type: {
     type: String,
     required: true,
@@ -21,13 +21,13 @@ const formSchema = mongoose.Schema({
     required: true,
   },
   admin: Boolean,
-  useRightsUsers: [{ type: String }],
+  useRightsUsers: [{ type: mongoose.Schema.Types.ObjectId }],
   useRightsGroups: [{ type: String }],
   editorRightsLevel: {
     type: Number,
     required: true,
   },
-  editorRightsUsers: [{ type: String }],
+  editorRightsUsers: [{ type: mongoose.Schema.Types.ObjectId }],
   editorRightsGroups: [{ type: String }],
   editorOptions: {
     type: Object,

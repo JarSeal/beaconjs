@@ -4,6 +4,7 @@ import { Router } from 'express';
 
 import UserSetting from '../models/userSetting.js';
 import AdminSetting from '../models/adminSetting.js';
+import Form from '../models/form.js';
 import logger from '../utils/logger.js';
 import adminSettingsFormData from '../../shared/formData/adminSettingsFormData.js';
 import userSettingsFormData from '../../shared/formData/userSettingsFormData.js';
@@ -200,6 +201,25 @@ settingsRouter.put('/admin', async (request, response) => {
   logger.log(`Setting '${savedSetting.settingId}' was changed (admin setting).`);
   const publicSettings = await getPublicSettings(request);
   response.json(publicSettings);
+});
+
+// Get apis' data
+settingsRouter.get('/apis', async (request, response) => {
+  const formId = 'route-settings-api-settings';
+  const error = await getAndValidateForm(formId, 'GET', request);
+  if (error) {
+    return response.status(error.code).json(error.obj);
+  }
+
+  const result = await Form.find({
+    $or: [
+      { editorRightsLevel: { $lte: request.session.userLevel } },
+      { editorRightsUsers: request.session._id },
+      // @TODO: add groups check here as well
+    ],
+  });
+
+  response.json(result);
 });
 
 export default settingsRouter;
