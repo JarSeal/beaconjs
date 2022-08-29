@@ -145,13 +145,8 @@ class Table extends Component {
         if (struct.selected) this.filterKeys.push(struct.key);
         return struct;
       });
-    this.largeAmountLimit = 500; // If the data set is larger than this, than the filter will only start after enter key is pressed
-    window.addEventListener('keyup', this.keyUp);
+    this.largeAmountLimit = 500; // If the data set is larger than this, than the filter will only start after enter key is pressedf
   }
-
-  erase = () => {
-    window.removeEventListener('keyup', this.keyUp);
-  };
 
   init = (data) => {
     this.tableData = data.tableData;
@@ -845,6 +840,12 @@ class Table extends Component {
     this.elem.style.minHeight =
       (this.elem.querySelector('#' + this.id + '-filter-settings').offsetHeight + 62) / 10 + 'rem';
     this.elem.classList.add(styles.tableHasFilter);
+    this.addListenerAfterDraw({
+      id: 'table-filter-keyup-listener-' + this.id,
+      target: window,
+      type: 'keyup',
+      fn: this.keyUp,
+    });
   };
 
   _closeFilterSettings = (e) => {
