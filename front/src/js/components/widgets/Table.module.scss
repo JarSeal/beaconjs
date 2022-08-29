@@ -388,3 +388,103 @@
 :global(.dialog .inner-box) .tableCompo {
   color: $font-color;
 }
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .curPageNumber {
+    font-size: 1.3rem;
+    color: darken(#fff, 50%);
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    display: inline-block;
+    color: darken(#fff, 50%);
+    + li {
+      margin-left: 1.8rem;
+    }
+  }
+  button {
+    background-color: $table-pagination-button-back;
+    width: 3.2rem;
+    height: 3.2rem;
+    font-size: 1.6rem;
+    border: none;
+    border-bottom: 0.3rem solid #aaa;
+    border-radius: 0.5rem;
+    padding-top: 0.5rem;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    &:hover {
+      background-color: darken($table-pagination-button-back, 15%);
+      color: #fff;
+    }
+    &.arrowButton {
+      background-color: rgba($table-pagination-button-back, 0.1);
+      color: #fff;
+      border-bottom-color: transparent;
+      &:hover {
+        background-color: rgba($table-pagination-button-back, 0.3);
+      }
+      &:disabled {
+        opacity: 0.1;
+        &:hover {
+          background-color: rgba($table-pagination-button-back, 0.1);
+        }
+      }
+    }
+  }
+  .current {
+    border-bottom: 0.3rem solid #fff;
+    background-color: darken($table-pagination-button-back, 35%);
+    color: #fff;
+  }
+  .itemsPerPage {
+    font-size: 1.3rem;
+    text-align: right;
+    color: darken(#fff, 50%);
+    select {
+      width: 8rem;
+      padding: 0.5rem 0;
+      border-radius: 0.5rem;
+      background-color: darken($table-pagination-button-back, 35%);
+      color: #fff;
+    }
+  }
+}
+
+.tableWithSearch {
+  .tableStats {
+    display: inline-block;
+    width: 50%;
+    vertical-align: bottom;
+  }
+}
+
+.tableSearchContainer {
+  display: inline-block;
+  width: 50%;
+  text-align: right;
+}
+.tableSearchInputSection {
+  width: 100%;
+  text-align: right;
+  :global(.form-elem--text-input) {
+    display: inline-block;
+    width: auto;
+    vertical-align: top;
+  }
+  .tableSearchInputButton {
+    display: inline-block;
+    border-radius: 0.4rem;
+    margin-left: 0.6rem;
+    padding: 1.3rem 1.2rem 1.2rem;
+    padding-top: 1.3rem;
+    padding-bottom: 1.2rem;
+    vertical-align: top;
+  }
+}

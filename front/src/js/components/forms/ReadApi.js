@@ -17,9 +17,28 @@ class ReadApi {
     this.afterGet = params.afterGet;
   }
 
-  getData = async () => {
+  getData = async (queryParams) => {
     try {
-      const result = await axios.get(this.url, { withCredentials: true });
+      let query = '';
+      if (queryParams) {
+        if (typeof queryParams === 'string' || queryParams instanceof String) {
+          query = queryParams;
+        } else if (typeof queryParams === 'object' && !Array.isArray(queryParams)) {
+          const keys = Object.keys(queryParams);
+          const queryA = [];
+          for (let i = 0; i < keys.length; i++) {
+            queryA.push(keys[i] + '=' + queryParams[keys[i]]);
+          }
+          query = queryA.join('&');
+        } else {
+          Logger.error(
+            'ReadApi getData queryParams must be either a string, an object, or undefined.'
+          );
+          throw new Error('Call stack');
+        }
+      }
+      const url = query ? this.url + '?' + query : this.url;
+      const result = await axios.get(url, { withCredentials: true });
       if (result.data) {
         if (this.afterGet) this.afterGet(result.data);
         return result.data;

@@ -1,10 +1,13 @@
 import Component from '../../LIGHTER/Component';
 
 // Attributes:
-// - click = clickFn
+// - click = click
 class Button extends Component {
   constructor(data) {
     super(data);
+    if (!data.click) {
+      console.error('Button must have a clickFn declared.', this.id);
+    }
     if (!data.template) {
       this.template = '<button type="button"></button>';
     } else {

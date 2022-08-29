@@ -211,15 +211,62 @@ settingsRouter.get('/apis', async (request, response) => {
     return response.status(error.code).json(error.obj);
   }
 
-  const result = await Form.find({
-    $or: [
-      { editorRightsLevel: { $lte: request.session.userLevel } },
-      { editorRightsUsers: request.session._id },
-      // @TODO: add groups check here as well
-    ],
-  });
+  const sortBy = request.query.sortBy || 'formId',
+    sortOrder = request.query.sortOr === 'asc' ? -1 : 1,
+    itemsPerPage = request.query.itemsPerPage ? parseInt(request.query.itemsPerPage) : 25,
+    page = request.query.page || 1,
+    search = request.query.search || '',
+    searchCaseSensitive = request.query.caseSensitive === 'true',
+    searchFields = request.query.searchFields?.length
+      ? request.query.searchFields.split(',')
+      : ['formId', 'path', 'method'];
 
-  response.json(result);
+  const searchRegex = new RegExp(search, searchCaseSensitive ? '' : 'i');
+  const findConditions = {
+    $and: [
+      {
+        $or: [
+          { editorRightsLevel: { $lte: request.session.userLevel } },
+          { editorRightsUsers: request.session._id },
+          // @TODO: add groups check here as well
+          // @TODO: check owner here as well
+        ],
+      },
+      {
+        $or: [
+          ...searchFields.map((field) => {
+            field = field.trim();
+            if (field.includes('.date')) {
+              // TODO: implement search by a date,
+              // send also the date format from the frontend,
+              // then check if the format of the search string is a valid date,
+              // then convert the date to a date object (or timestamp, test this)
+              // and then compare the date with the $gte on the date and $lt on the next day.
+              logger.error('Trying to search by a date. Not supported yet.');
+              return { nonExistingField: searchRegex }; // Temp
+            }
+            return {
+              [field]: searchRegex,
+            };
+          }),
+        ],
+      },
+    ],
+  };
+
+  const totalCount = await Form.find(findConditions).countDocuments();
+  const result = await Form.find(findConditions)
+    .sort([
+      [sortBy, sortOrder],
+      ['formId', sortOrder],
+    ])
+    .skip((page - 1) * itemsPerPage)
+    .limit(itemsPerPage);
+
+  response.json({
+    totalCount,
+    result,
+  });
 });
 
 export default settingsRouter;

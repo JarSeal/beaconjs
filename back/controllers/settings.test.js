@@ -312,4 +312,8 @@ describe('settings controller', () => {
     expect(success.status).toEqual(200);
     expect(success.data.canSetExposure).toEqual(true);
   });
+
+  it('should get APIs according to user level', async () => {
+    expect(true).toBeFalsy();
+  });
 });

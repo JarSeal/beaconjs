@@ -22,13 +22,24 @@ class ApiSettings extends Component {
     this.apisData = [];
     this.apisTable = this.addChild(
       new TableWithSearch({
-        id: 'users-table',
+        id: 'apis-table',
         fullWidth: true,
-        tableData: this.apisData,
+        tableData: this.apisData?.result || [],
+        totalCount: this.apisData?.totalCount || 0,
         showStats: true,
         tableStructure: this._getTableStructure(),
+        searchHotKey: 's',
+        searchFields: 'formId,path,method',
         rowClickFn: (e, rowData) => {
           console.log('CLICK', rowData);
+        },
+        afterChange: async (queryParams) => {
+          console.log('CHANGE', queryParams);
+          this.apisData = await this.tableDataApi.getData(queryParams);
+          this.apisTable.updateTable(
+            { tableData: this.apisData?.result || [], totalCount: this.apisData?.totalCount || 0 },
+            true
+          );
         },
       })
     );
@@ -37,18 +48,21 @@ class ApiSettings extends Component {
   init = () => {
     this.viewTitle.draw();
     this._loadApis();
-    this.apisTable.draw({ tableData: this.apisData });
+    this.apisTable.draw({
+      tableData: this.apisData?.result || [],
+      totalCount: this.apisData?.totalCount || 0,
+    });
   };
 
   _loadApis = async () => {
     this.apisData = await this.tableDataApi.getData();
     this.viewTitle.showSpinner(false);
-    if (this.apisData.error) {
-      console.log('ERRORI', this.apisData);
-      return;
-    }
+    if (this.apisData.error) return;
     console.log('TADAA', this.apisData);
-    this.apisTable.updateTable(this.apisData);
+    this.apisTable.updateTable({
+      tableData: this.apisData?.result || [],
+      totalCount: this.apisData?.totalCount || 0,
+    });
   };
 
   _getTableStructure = () => {

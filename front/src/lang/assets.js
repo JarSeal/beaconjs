@@ -1006,4 +1006,12 @@ export const assetsObj = {
     en: 'Type',
     fi: 'Tyyppi',
   },
+  items_per_page: {
+    en: 'Items per page',
+    fi: 'Rivejä per sivu',
+  },
+  search: {
+    en: 'Search',
+    fi: 'Etsi',
+  },
 };

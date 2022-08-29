@@ -8,7 +8,7 @@ import TextInput from '../forms/formComponents/TextInput';
 import styles from './Table.module.scss';
 
 // Attributes for data:
-// - tableData: Array[Object]
+// - tableData: Array[Object] [required]
 // - hideTableHeader: Boolean,
 // - fullWidth: Boolean,
 // - emptyStateMsg: String,
@@ -16,6 +16,7 @@ import styles from './Table.module.scss';
 // - tableParams: Object { sortColumn, sortOrder }
 // - afterChange: Function({ id, sortColumn, sortOrder })
 // - showStats: Boolean,
+// - searchHotKey: String,
 // - unsortable: Boolean, (makes all of the columns unsortable)
 // - selectable: Boolean, (if true adds checkboxes column and maintains an array of selected data which can be retrieved by calling the getSelected method)
 // - tools: Array[Object], (array order is the order of the 'selected' tool buttons, if this is set, the selectable switch is not needed)
@@ -47,6 +48,8 @@ import styles from './Table.module.scss';
 class TableWithSearch extends Component {
   constructor(data) {
     super(data);
+    this.data.style = { position: 'relative' };
+    this.data.class = styles.tableWithSearch;
     this.tableStructure = data.tableStructure;
     if (!this.tableStructure) {
       this.logger.error(
@@ -89,6 +92,7 @@ class TableWithSearch extends Component {
       }
     }
     this.tableData = data.tableData;
+    this.totalCount = data.totalCount;
     for (let i = 0; i < this.tableData.length; i++) {
       this.tableData[i]['_tableIndex'] = i;
     }
@@ -97,16 +101,17 @@ class TableWithSearch extends Component {
     this.toolsComp;
     this.tableComp;
     this.tableParams = {
-      sortOrder: null,
-      sortColumn: null,
+      sortOr: null,
+      sortBy: null,
+      itemsPerPage: 25,
+      page: 1,
+      search: '',
+      searchFields: data.searchFields || '',
+      caseSensitive: false,
     };
+    this.previousSearch = '';
     this.statsComp;
-    window.addEventListener('keyup', this.keyUp);
   }
-
-  erase = () => {
-    window.removeEventListener('keyup', this.keyUp);
-  };
 
   init = (data) => {
     this.tableData = data.tableData;
@@ -118,6 +123,7 @@ class TableWithSearch extends Component {
   paint = () => {
     this._drawStats();
     this._drawTools();
+    this._drawSearch();
 
     const table = this._createTable();
     this.tableComp = this.addChild({ id: this.id + '-elem', template: table });
@@ -126,12 +132,7 @@ class TableWithSearch extends Component {
   };
 
   _showStatsText = () => {
-    let text =
-      getText('showing') +
-      ' ' +
-      this.tableData.length +
-      ' / ' +
-      'TODO: get total amount from server';
+    let text = getText('showing') + ' ' + this.tableData.length + ' / ' + this.totalCount;
     if (this.selected.length) {
       text += '\u00a0\u00a0\u00a0\u00a0';
       text += `(${getText('selected').toLowerCase()} ${this.selected.length})`;
@@ -308,7 +309,6 @@ class TableWithSearch extends Component {
   };
 
   _changeSortFn = (e) => {
-    // TODO: Make this create a new query to backend
     const id = e.target.id;
     const targetKey = id.split('-')[0];
     let curDir = 'desc',
@@ -338,7 +338,7 @@ class TableWithSearch extends Component {
     this._refreshView();
   };
 
-  _refreshView = (hard) => {
+  _refreshView = (hard, noAfterChange) => {
     const scrollPosX = window.pageXOffset;
     const scrollPosY = window.pageYOffset;
     if (this.data.showStats) this.statsComp.discard(true);
@@ -351,7 +351,7 @@ class TableWithSearch extends Component {
       this.rePaint();
     }
     window.scrollTo(scrollPosX, scrollPosY);
-    this.afterChange();
+    if (!noAfterChange) this.afterChange();
   };
 
   _createTable = () =>
@@ -363,23 +363,117 @@ class TableWithSearch extends Component {
     this._createPagination() +
     '</table>';
 
-  _createPagination = () => `<tr class="${styles.tableShowMoreRow}">
+  _createPagination = () => {
+    const totalPages = Math.ceil(this.totalCount / this.tableParams.itemsPerPage);
+    let pageNumberButtons = `<li>
+      <button class="paginationButton ${styles.arrowButton}" page="first"${
+      this.tableParams.page === 1 ? ' disabled' : ''
+    }>&#171;</button>
+    </li>
+    <li>
+      <button class="paginationButton ${styles.arrowButton}" page="prev"${
+      this.tableParams.page === 1 ? ' disabled' : ''
+    }>&#8249;</button>
+    </li>`;
+    const shownPageNumbersCount = 5; // Must be an odd number
+    const maxShownPageNumbersPerSide = (shownPageNumbersCount - 1) / 2;
+    if (this.tableParams.page > maxShownPageNumbersPerSide + 1) {
+      pageNumberButtons += '<li>...</li>';
+    }
+    for (let i = 0; i < totalPages; i++) {
+      const pageNumber = i + 1;
+      if (
+        pageNumber >= this.tableParams.page - maxShownPageNumbersPerSide &&
+        pageNumber <= this.tableParams.page + maxShownPageNumbersPerSide
+      ) {
+        pageNumberButtons += `<li>
+          <button class="paginationButton${
+            this.tableParams.page === pageNumber ? ` ${styles.current}` : ''
+          }" page="${pageNumber}">${pageNumber}</button>
+        </li>`;
+      }
+    }
+    if (this.tableParams.page + maxShownPageNumbersPerSide < totalPages) {
+      pageNumberButtons += '<li>...</li>';
+    }
+    pageNumberButtons += `<li>
+      <button class="paginationButton ${styles.arrowButton}" page="next"${
+      this.tableParams.page === totalPages ? ' disabled' : ''
+    }>&#8250;</button>
+    </li>
+    <li>
+      <button class="paginationButton ${styles.arrowButton}" page="last"${
+      this.tableParams.page === totalPages ? ' disabled' : ''
+    }>&#187;</button>
+    </li>`;
+    this.addListener({
+      id: 'pagination-button-listener-' + this.id,
+      type: 'click',
+      fn: (e) => {
+        if (e.target.classList.contains('paginationButton')) {
+          const pageNrClicked = e.target.getAttribute('page');
+          const parsedPageNr = parseInt(pageNrClicked);
+          if (parsedPageNr === this.tableParams.page) return;
+          if (pageNrClicked === 'first') {
+            this.tableParams.page = 1;
+          } else if (pageNrClicked === 'prev') {
+            const prevPage = this.tableParams.page - 1;
+            this.tableParams.page = prevPage > 0 ? prevPage : 1;
+          } else if (pageNrClicked === 'next') {
+            const nextPage = this.tableParams.page + 1;
+            this.tableParams.page = nextPage <= totalPages ? nextPage : totalPages;
+          } else if (pageNrClicked === 'last') {
+            this.tableParams.page = totalPages;
+          } else {
+            this.tableParams.page =
+              parsedPageNr <= totalPages && parsedPageNr > 0 ? parsedPageNr : 1;
+          }
+          this._refreshView();
+        }
+      },
+    });
+    this.addListenerAfterDraw({
+      id: 'select-items-per-page-listener-' + this.id,
+      targetId: 'select-items-per-page-' + this.id,
+      type: 'change',
+      fn: (e) => {
+        const newValue = parseInt(e.target.value);
+        if (newValue !== this.tableParams.itemsPerPage) {
+          this.tableParams.itemsPerPage = newValue;
+          this.tableParams.page = 1;
+          this._refreshView();
+        }
+      },
+    });
+    return `<tr class="${styles.tableShowMoreRow}">
         <td colspan="${this.tableStructure.length}">
-          TODO: Create pagination here
+          <div class="${styles.pagination}">
+            <span class="${styles.curPageNumber}">${this.tableParams.page} / ${totalPages}</span>
+            <ul>${pageNumberButtons}</ul>
+            <div class="${styles.itemsPerPage}">
+              <span>${getText('items_per_page')}:</span><br />
+              <select id="select-items-per-page-${this.id}">
+                <option${this.tableParams.itemsPerPage === 10 ? ' selected' : ''}>10</option>
+                <option${this.tableParams.itemsPerPage === 25 ? ' selected' : ''}>25</option>
+                <option${this.tableParams.itemsPerPage === 50 ? ' selected' : ''}>50</option>
+                <option${this.tableParams.itemsPerPage === 100 ? ' selected' : ''}>100</option>
+                <option${this.tableParams.itemsPerPage === 200 ? ' selected' : ''}>200</option>
+              </select>
+            </div>
+          </div>
         </td>
     </tr>`;
+  };
 
   _createDataRows = () => {
     if (!this.tableData.length) {
       return this._emptyState();
     }
     let rows = '',
-      sortByKey = '',
-      asc = false;
+      sortByKey = '';
     for (let i = 0; i < this.tableStructure.length; i++) {
       if (this.tableStructure[i].sort) {
         sortByKey = this.tableStructure[i].key;
-        if (this.tableStructure[i].sort === 'asc') asc = true;
         break;
       }
     }
@@ -387,7 +481,6 @@ class TableWithSearch extends Component {
       this.logger.error('Sorting key missing in table structure.', this.id);
       throw new Error('Call stack');
     }
-    this.tableData.sort(this._sortCompare(sortByKey, asc));
     for (let i = 0; i < this.tableData.length; i++) {
       rows += `<tr${this._createDataRowClass(this.tableData[i]._tableIndex)} id="rowindex-${i}-${
         this.id
@@ -490,13 +583,13 @@ class TableWithSearch extends Component {
         classString += ` ${styles.sortAvailable}`;
       }
       if (structure.sort) {
-        this.tableParams.sortColumn = structure.key;
+        this.tableParams.sortBy = structure.key;
         if (structure.sort === 'asc') {
           classString += ` ${styles.sortAsc}`;
-          this.tableParams.sortOrder = 'asc';
+          this.tableParams.sortOr = 'asc';
         } else {
           classString += ` ${styles.sortDesc}`;
-          this.tableParams.sortOrder = 'desc';
+          this.tableParams.sortOr = 'desc';
         }
       }
     }
@@ -605,7 +698,9 @@ class TableWithSearch extends Component {
           text: this.data.tools[i].text,
           attributes: this.data.tools[i].disabled ? { disabled: '' } : {},
           click: (e) => {
-            const selected = this.allData.filter((row) => this.selected.includes(row._tableIndex));
+            const selected = this.tableData.filter((row) =>
+              this.selected.includes(row._tableIndex)
+            );
             this.data.tools[i].clickFn(e, selected);
           },
         })
@@ -657,15 +752,15 @@ class TableWithSearch extends Component {
     }
     return `<label for="selection-${index}-inputSelectorBox-${this.id}" class="${styles.selectionBox}${headerClass}">
             <input
-                type="checkbox"
-                name="selection-box-input-${index}-${this.id}"
-                id="selection-${index}-inputSelectorBox-${this.id}"
-                ${checked}
+              type="checkbox"
+              name="selection-box-input-${index}-${this.id}"
+              id="selection-${index}-inputSelectorBox-${this.id}"
+              ${checked}
             />
         </label>`;
   };
 
-  getSelected = () => this.allData.filter((item) => this.selected.includes(item._tableIndex));
+  getSelected = () => this.tableData.filter((item) => this.selected.includes(item._tableIndex));
 
   removeSelectedByTableIndex = (tableIndex) => {
     let removeIndex = null;
@@ -678,19 +773,98 @@ class TableWithSearch extends Component {
     this.selected.splice(removeIndex, 1);
   };
 
-  updateTable = (newData) => {
-    this.data.tableData = newData;
-    this.tableData = newData;
-    this.allData = [...newData];
+  updateTable = (newData, noAfterChange) => {
+    this.data.tableData = newData.tableData;
+    this.data.totalCount = newData.totalCount;
+    this.tableData = newData.tableData;
+    this.totalCount = newData.totalCount;
     for (let i = 0; i < newData.length; i++) {
       this.data.tableData[i]['_tableIndex'] = i;
-      this.allData[i]['_tableIndex'] = i;
     }
-    this._refreshView(true);
+    this._refreshView(true, noAfterChange);
   };
 
   afterChange = () => {
     if (this.data.afterChange) this.data.afterChange(this.tableParams, this.data.id);
+  };
+
+  keyUp = (e) => {
+    const targetId = e.target.id;
+    const searchInputId = 'table-search-input-' + this.id + '-input';
+    if (targetId === searchInputId && e.key === 'Enter') {
+      const inputElem = this.elem.querySelector('#' + searchInputId);
+      if (this.previousSearch !== inputElem.value) {
+        this.tableParams.search = inputElem.value;
+        this.previousSearch = this.tableParams.search;
+        this._refreshView();
+      }
+    } else if (e.key === 'Escape') {
+      const inputElem = this.elem.querySelector('#' + searchInputId);
+      if (inputElem) {
+        inputElem.blur();
+        if (this.tableParams.search !== '') {
+          this.tableParams.search = '';
+          this.previousSearch = this.tableParams.search;
+          inputElem.value = '';
+          this._refreshView();
+        }
+      }
+    } else if (
+      this.data.searchHotKey &&
+      e.target.localName.toLowerCase() === 'body' &&
+      e.key === this.data.searchHotKey
+    ) {
+      this.elem.querySelector('#' + searchInputId).focus();
+    }
+  };
+
+  _drawSearch = () => {
+    const searchInputSectionId = 'table-search-input-section-' + this.id;
+    const searchInputId = 'table-search-input-' + this.id;
+    const searchInputButtonId = 'table-search-button-' + this.id;
+    this.addChildDraw({
+      id: 'table-search-container-' + this.id,
+      template: `<div class="${styles.tableSearchContainer}">
+        <div class="${styles.tableSearchInputSection}" id="${searchInputSectionId}"></div>
+      </div>`,
+    });
+    this.addChildDraw(
+      new TextInput({
+        id: searchInputId,
+        attach: searchInputSectionId,
+        class: styles.tableSearchInput,
+        label: '',
+        hideMsg: true,
+        placeholder:
+          getText('search') +
+          (this.data.searchHotKey ? ` [${this.data.searchHotKey.toUpperCase()}]` : ''),
+        value: this.tableParams.search,
+        changeFn: (e) => {
+          const val = e.target.value;
+          this.tableParams.search = val;
+        },
+      })
+    );
+    this.addChildDraw(
+      new Button({
+        id: searchInputButtonId,
+        attach: searchInputSectionId,
+        class: styles.tableSearchInputButton,
+        html: '<div>Enter</div>', // TODO: change to an search icon
+        click: () => {
+          if (this.previousSearch !== this.tableParams.search) {
+            this.previousSearch = this.tableParams.search;
+            this._refreshView();
+          }
+        },
+      })
+    );
+    this.addListenerAfterDraw({
+      id: 'table-search-keyup-listener-' + this.id,
+      target: window,
+      type: 'keyup',
+      fn: this.keyUp,
+    });
   };
 }
 
