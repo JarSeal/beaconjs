@@ -29,6 +29,7 @@ class Component {
     this.drawing = false;
     this.discarding = false;
     this.listeners = {};
+    this.listenersToAdd = [];
     this.children = {};
     this.simpletonIndex = 0;
     this.Router = RouterRef;
@@ -99,6 +100,13 @@ class Component {
     }
     this.paint(data);
     this.addListeners(data);
+    for (let i = 0; i < this.listenersToAdd.length; i++) {
+      if (this.listenersToAdd[i].targetId) {
+        this.listenersToAdd[i].target = document.getElementById(this.listenersToAdd[i].targetId);
+      }
+      this.addListener(this.listenersToAdd[i]);
+    }
+    this.listenersToAdd = [];
     this.simpletonIndex = 0;
     this.drawing = false;
   }
@@ -204,11 +212,8 @@ class Component {
 
   addListeners() {}
 
-  registerListeners() {
-    const listeners = this.defineListeners();
-    for (let i = 0; i < listeners.length; i++) {
-      this.addListener(listeners[i]);
-    }
+  addListenerAfterDraw(listener) {
+    this.listenersToAdd.push(listener);
   }
 
   removeListener(id) {
