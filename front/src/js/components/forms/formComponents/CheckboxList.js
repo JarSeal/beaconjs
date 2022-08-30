@@ -19,10 +19,10 @@ class CheckboxList extends Component {
     this.maxSelections = data.maxSelections;
     this.selectedCount = 0;
     this.template = `
-            <div class="form-elem form-elem--checkboxlist">
-                <label class="form-elem__label">${this.label}</label>
-                <div class="form-elem__error-msg" id="${this.id}-error-msg"></div>
-            </div>`;
+      <div class="form-elem form-elem--checkboxlist">
+          <label class="form-elem__label">${this.label}</label>
+          <div class="form-elem__error-msg" id="${this.id}-error-msg"></div>
+      </div>`;
   }
 
   _addClickListeners(data) {

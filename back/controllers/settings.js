@@ -16,6 +16,7 @@ import {
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 } from '../utils/settingsService.js';
+import { apiSettingsQuery } from '../utils/checkAccess.js';
 
 const settingsRouter = Router();
 
@@ -224,14 +225,7 @@ settingsRouter.get('/apis', async (request, response) => {
   const searchRegex = new RegExp(search, searchCaseSensitive ? '' : 'i');
   const findConditions = {
     $and: [
-      {
-        $or: [
-          { editorRightsLevel: { $lte: request.session.userLevel } },
-          { editorRightsUsers: request.session._id },
-          // @TODO: add groups check here as well
-          // @TODO: check owner here as well
-        ],
-      },
+      apiSettingsQuery(request),
       {
         $or: [
           ...searchFields.map((field) => {

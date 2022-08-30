@@ -85,7 +85,7 @@ class Settings extends Component {
       {
         id: 'api-settings',
         label: getText('api_settings'),
-        show: isVerified,
+        show: isVerified && this.appState.get('serviceSettings.showApiSettingsLink'),
         component: ApiSettings,
       },
       {

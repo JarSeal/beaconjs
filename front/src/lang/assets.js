@@ -1014,4 +1014,16 @@ export const assetsObj = {
     en: 'Search',
     fi: 'Etsi',
   },
+  search_settings: {
+    en: 'Search settings',
+    fin: 'Haun asetukset',
+  },
+  columns_to_search: {
+    en: 'Columns to search',
+    fi: 'Etsittävät sarakkeet',
+  },
+  clear_search: {
+    en: 'Clear search',
+    fi: 'Tyhjennä haku',
+  },
 };

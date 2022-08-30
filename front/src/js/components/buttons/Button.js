@@ -16,7 +16,7 @@ class Button extends Component {
     this.click = data.click;
   }
 
-  init = () => {
+  addListeners = () => {
     this.addListener({
       id: this.id + '-listener',
       type: 'click',

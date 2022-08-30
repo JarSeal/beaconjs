@@ -424,8 +424,6 @@
       color: #fff;
     }
     &.arrowButton {
-      background-color: rgba($table-pagination-button-back, 0.1);
-      color: #fff;
       border-bottom-color: transparent;
       &:hover {
         background-color: rgba($table-pagination-button-back, 0.3);
@@ -469,6 +467,11 @@
   display: inline-block;
   width: 50%;
   text-align: right;
+  position: relative;
+  z-index: 20;
+}
+.tableSearchInput {
+  position: relative;
 }
 .tableSearchInputSection {
   width: 100%;
@@ -477,14 +480,81 @@
     display: inline-block;
     width: auto;
     vertical-align: top;
+    input {
+      padding-right: 3.5rem;
+    }
   }
-  .tableSearchInputButton {
-    display: inline-block;
-    border-radius: 0.4rem;
-    margin-left: 0.6rem;
-    padding: 1.3rem 1.2rem 1.2rem;
-    padding-top: 1.3rem;
-    padding-bottom: 1.2rem;
-    vertical-align: top;
+}
+.tableSearchInputButton {
+  display: inline-block;
+  border-radius: 0.4rem;
+  margin-left: 0.6rem;
+  padding: 1.3rem 1.2rem 1.2rem;
+  padding-top: 1.3rem;
+  padding-bottom: 1.2rem;
+  vertical-align: top;
+}
+.tableSearchToggleOptions {
+  position: absolute;
+  right: 0;
+  bottom: 0.2rem;
+  font-size: 1.3rem;
+  color: rgba(#fff, 0.4);
+  &:hover {
+    border: none;
+    background: none;
+  }
+}
+.tableSearchOptions {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  color: $font-color-invert;
+  width: 32rem;
+  box-shadow: 0 0.3rem 1rem rgba(#000, 0.5);
+  padding: 2rem;
+  border-radius: 0.3rem;
+  :global(.form-elem--checkboxlist) {
+    :global(.form-elem__label) {
+      font-weight: 700;
+      font-size: 1.6rem;
+    }
+  }
+}
+
+.clearTableSearchButton {
+  border: none;
+  background: none;
+  border-radius: 50%;
+  width: 2.7rem;
+  height: 2.7rem;
+  position: absolute;
+  z-index: 20;
+  top: 0.7rem;
+  right: 0.6rem;
+  transition: transform 0.2s ease-in-out;
+  &:before,
+  &:after {
+    display: block;
+    content: '';
+    width: 2rem;
+    height: 0.2rem;
+    border-radius: 0.2rem;
+    background-color: lighten($font-color-invert, 40%);
+    position: absolute;
+    left: 0.4rem;
+    top: 1.3rem;
+  }
+  &:before {
+    transform: rotate(45deg);
+  }
+  &:after {
+    transform: rotate(-45deg);
+  }
+  &:hover {
+    border: none;
+    background: none;
+    transform: scale(1.2);
   }
 }

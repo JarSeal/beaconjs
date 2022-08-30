@@ -1,3 +1,4 @@
+import gsap from 'gsap';
 import { createDate } from '../../helpers/date';
 import { getText } from '../../helpers/lang';
 import { Component } from '../../LIGHTER';
@@ -13,7 +14,7 @@ import styles from './Table.module.scss';
 // - fullWidth: Boolean,
 // - emptyStateMsg: String,
 // - rowClickFn: Function(e, rowData)
-// - tableParams: Object { sortColumn, sortOrder }
+// - tableParams: Object { sortColumn, ,sortOrder }
 // - afterChange: Function({ id, sortColumn, sortOrder })
 // - showStats: Boolean,
 // - searchHotKey: String,
@@ -80,9 +81,9 @@ class TableWithSearch extends Component {
     for (let i = 0; i < this.tableStructure.length; i++) {
       if (this.tableStructure[i].actionFn) {
         this.tableStructure[i].unsortable = true;
-      } else if (data.tableParams?.sortColumn && data.tableParams?.sortOrder) {
-        if (this.tableStructure[i].key === data.tableParams.sortColumn) {
-          this.tableStructure[i].sort = data.tableParams.sortOrder;
+      } else if (data.tableParams?.sortBy && data.tableParams?.sortOr) {
+        if (this.tableStructure[i].key === data.tableParams.sortBy) {
+          this.tableStructure[i].sort = data.tableParams.sortOr;
         } else {
           delete this.tableStructure[i].sort;
         }
@@ -101,15 +102,20 @@ class TableWithSearch extends Component {
     this.toolsComp;
     this.tableComp;
     this.tableParams = {
-      sortOr: null,
-      sortBy: null,
-      itemsPerPage: 25,
-      page: 1,
-      search: '',
-      searchFields: data.searchFields || '',
-      caseSensitive: false,
+      ...{
+        sortOr: null,
+        sortBy: null,
+        itemsPerPage: 25,
+        page: 1,
+        search: '',
+        searchFields: data.searchFields || '',
+        caseSensitive: false,
+      },
+      ...data.tableParams,
     };
     this.previousSearch = '';
+    this.searchOptionsOpen = false;
+    this.searchOptionsId = 'table-search-options-' + this.id;
     this.statsComp;
   }
 
@@ -335,6 +341,7 @@ class TableWithSearch extends Component {
         }
       }
     }
+    this.searchOptionsOpen = false;
     this._refreshView();
   };
 
@@ -364,7 +371,8 @@ class TableWithSearch extends Component {
     '</table>';
 
   _createPagination = () => {
-    const totalPages = Math.ceil(this.totalCount / this.tableParams.itemsPerPage);
+    const totalPages = Math.ceil(this.totalCount / this.tableParams.itemsPerPage) || 1;
+    if (this.tableParams.page > totalPages) this.tableParams.page = totalPages;
     let pageNumberButtons = `<li>
       <button class="paginationButton ${styles.arrowButton}" page="first"${
       this.tableParams.page === 1 ? ' disabled' : ''
@@ -794,8 +802,10 @@ class TableWithSearch extends Component {
     if (targetId === searchInputId && e.key === 'Enter') {
       const inputElem = this.elem.querySelector('#' + searchInputId);
       if (this.previousSearch !== inputElem.value) {
+        this.tableParams.page = 1;
         this.tableParams.search = inputElem.value;
         this.previousSearch = this.tableParams.search;
+        this.searchOptionsOpen = false;
         this._refreshView();
       }
     } else if (e.key === 'Escape') {
@@ -803,9 +813,11 @@ class TableWithSearch extends Component {
       if (inputElem) {
         inputElem.blur();
         if (this.tableParams.search !== '') {
+          this.tableParams.page = 1;
           this.tableParams.search = '';
           this.previousSearch = this.tableParams.search;
           inputElem.value = '';
+          this.searchOptionsOpen = false;
           this._refreshView();
         }
       }
@@ -828,6 +840,7 @@ class TableWithSearch extends Component {
         <div class="${styles.tableSearchInputSection}" id="${searchInputSectionId}"></div>
       </div>`,
     });
+    let clearSearchBtn;
     this.addChildDraw(
       new TextInput({
         id: searchInputId,
@@ -842,6 +855,27 @@ class TableWithSearch extends Component {
         changeFn: (e) => {
           const val = e.target.value;
           this.tableParams.search = val;
+          if (clearSearchBtn) {
+            clearSearchBtn.data.style.display = val.length ? 'block' : 'none';
+            clearSearchBtn.draw();
+          }
+        },
+        onFocus: (e) => e.target.setSelectionRange(0, 9999),
+      })
+    );
+    clearSearchBtn = this.addChildDraw(
+      new Button({
+        id: 'clear-table-search-btn-' + this.id,
+        attach: searchInputId,
+        class: styles.clearTableSearchButton,
+        style: { display: this.tableParams.search.length ? 'block' : 'none' },
+        attributes: { title: `${getText('clear_search')} [esc]` },
+        click: () => {
+          if (this.tableParams.search !== '') {
+            this.tableParams.search = '';
+            this.previousSearch = '';
+            this._refreshView();
+          }
         },
       })
     );
@@ -850,12 +884,102 @@ class TableWithSearch extends Component {
         id: searchInputButtonId,
         attach: searchInputSectionId,
         class: styles.tableSearchInputButton,
-        html: '<div>Enter</div>', // TODO: change to an search icon
+        html: '<div>Go</div>', // TODO: change to an search icon
         click: () => {
           if (this.previousSearch !== this.tableParams.search) {
             this.previousSearch = this.tableParams.search;
+            this.tableParams.page = 1;
+            this.searchOptionsOpen = false;
             this._refreshView();
           }
+        },
+      })
+    );
+
+    const animateOptionsConfig = {
+      from: {
+        overflow: 'hidden',
+        minHeight: 0,
+        height: 0,
+        paddingTop: '0',
+        paddingBottom: '0',
+        duration: 0.2,
+      },
+      to: {
+        overflow: 'hidden',
+        minHeight: '24rem',
+        paddingTop: '2rem',
+        paddingBottom: '2rem',
+        duration: 0.4,
+        ease: 'back',
+      },
+      end: {
+        overflow: 'visible',
+        minHeight: '24rem',
+        height: 'auto',
+        paddingTop: '2rem',
+        paddingBottom: '2rem',
+      },
+    };
+    const searchOptionsComp = this.addChildDraw({
+      id: this.searchOptionsId,
+      attach: searchInputSectionId,
+      class: styles.tableSearchOptions,
+      style: animateOptionsConfig.from,
+    });
+    this.addChildDraw(
+      new Button({
+        id: 'table-search-toggle-options-' + this.id,
+        attach: searchInputSectionId,
+        class: [styles.tableSearchToggleOptions, 'link'],
+        text: getText('search_settings'),
+        click: () => {
+          const outsideClickId = 'outside-options-click-listener-' + this.id;
+          if (this.searchOptionsOpen) {
+            this._closeSearchOptions(searchOptionsComp.elem, animateOptionsConfig, outsideClickId);
+          } else {
+            this._openSearchOptions(searchOptionsComp.elem, animateOptionsConfig, outsideClickId);
+          }
+        },
+      })
+    );
+    this.addChildDraw({
+      id: 'table-search-change-case-' + this.id,
+      attach: this.searchOptionsId,
+    });
+    this.addChildDraw(
+      new Checkbox({
+        id: 'table-search-change-case-' + this.id,
+        attach: this.searchOptionsId,
+        label: getText('match_case'),
+        name: 'match-case',
+        value: this.tableParams.caseSensitive,
+        changeFn: (e) => {
+          const checked = e.target.checked;
+          this.tableParams.caseSensitive = checked;
+          this.previousSearch = '';
+        },
+      })
+    );
+    const selectedFields = this.tableParams.searchFields.split(',');
+    this.addChildDraw(
+      new CheckboxList({
+        id: 'table-search-change-fields-' + this.id,
+        attach: this.searchOptionsId,
+        label: getText('columns_to_search'),
+        minSelections: 1,
+        selectors: [
+          { key: 'formId', label: getText('form_id'), selected: selectedFields.includes('formId') },
+          { key: 'path', label: getText('path'), selected: selectedFields.includes('path') },
+          { key: 'method', label: getText('method'), selected: selectedFields.includes('method') },
+          { key: 'type', label: getText('type'), selected: selectedFields.includes('type') },
+        ],
+        changeFn: (e, selectors) => {
+          this.previousSearch = '';
+          this.tableParams.searchFields = selectors
+            .filter((s) => s.selected)
+            .map((s) => s.key)
+            .join(',');
         },
       })
     );
@@ -865,6 +989,48 @@ class TableWithSearch extends Component {
       type: 'keyup',
       fn: this.keyUp,
     });
+  };
+
+  _closeSearchOptions = (elem, animateOptionsConfig, outsideClickId) => {
+    gsap.to(elem, animateOptionsConfig.from);
+    this.removeListener(outsideClickId);
+    this.searchOptionsOpen = false;
+  };
+
+  _openSearchOptions = (elem, animateOptionsConfig, outsideClickId) => {
+    gsap.to(elem, {
+      ...animateOptionsConfig.to,
+      onComplete: () => gsap.set(elem, animateOptionsConfig.end),
+    });
+    this.addListener({
+      id: outsideClickId,
+      target: window,
+      type: 'click',
+      fn: (e) => {
+        let node = e.target,
+          counter = 0,
+          whileSwitch = true;
+        while (whileSwitch) {
+          if (!node) node = document.getElementById(this.searchOptionsId);
+          if (!node) return;
+          const id = node.id;
+          if (id === this.searchOptionsId || id === 'table-search-toggle-options-' + this.id) {
+            return;
+          }
+          if (node.localName.toLowerCase() === 'html') {
+            this.searchOptionsOpen = true;
+            this._closeSearchOptions(elem, animateOptionsConfig, outsideClickId);
+            return;
+          }
+          node = node.parentElement;
+          counter++;
+          if (counter > 100) {
+            return;
+          }
+        }
+      },
+    });
+    this.searchOptionsOpen = true;
   };
 }
 

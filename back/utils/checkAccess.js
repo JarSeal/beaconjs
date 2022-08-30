@@ -68,4 +68,15 @@ const checkSettings = (check, settings, session) => {
   return true;
 };
 
-export { checkAccess, checkIfLoggedIn };
+const apiSettingsQuery = (request) => {
+  return {
+    $or: [
+      { owner: request.session._id },
+      { editorRightsLevel: { $lte: request.session.userLevel } },
+      { editorRightsUsers: request.session._id },
+      // @TODO: add groups check here as well
+    ],
+  };
+};
+
+export { checkAccess, checkIfLoggedIn, apiSettingsQuery };
