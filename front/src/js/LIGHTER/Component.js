@@ -175,7 +175,11 @@ class Component {
     return component;
   }
 
-  addChildDraw = (component) => this.addChild(component).draw();
+  addChildDraw = (component) => {
+    const createdComponent = this.addChild(component);
+    createdComponent.draw();
+    return createdComponent;
+  };
 
   discardChild(id, notFull) {
     if (!this.children[id]) return;
