@@ -2,7 +2,7 @@ const loginTwoFABeaconFormData = {
   formId: 'beacon-twofa-login',
   path: '/login/two',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 0,
   useRightsUsers: [],
   useRightsGroups: [],

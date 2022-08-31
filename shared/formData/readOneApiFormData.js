@@ -1,12 +1,12 @@
 const readOneUserFormData = {
-  formId: 'read-one-user',
-  path: '/users/:userid',
+  formId: 'read-one-api',
+  path: '/apis/:formId',
   method: 'GET',
   type: 'sys-readapi',
-  useRightsLevel: 0,
+  useRightsLevel: 2,
   useRightsUsers: [],
   useRightsGroups: [],
-  editorRightsLevel: 8,
+  editorRightsLevel: 9,
   editorRightsUsers: [],
   editorRightsGroups: [],
 };

@@ -97,6 +97,12 @@ export const ROUTE_ACCESS = [
     editorRightsLevel: 9,
   },
   {
+    path: '/oneapi/:user',
+    formId: 'route-one-api-settings',
+    useRightsLevel: 2,
+    editorRightsLevel: 9,
+  },
+  {
     path: '/login/two',
     formId: 'route-twofa-login',
     useRightsLevel: 0,

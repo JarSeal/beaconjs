@@ -47,6 +47,7 @@ class ApiSettings extends Component {
         tableParams: params,
         rowClickFn: (e, rowData) => {
           console.log('CLICK', rowData);
+          this.Router.changeRoute('/oneapi/' + rowData.formId);
         },
         afterChange: async (queryParams) => {
           this.apisData = await this.tableDataApi.getData(queryParams);

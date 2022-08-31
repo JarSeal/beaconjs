@@ -79,4 +79,19 @@ const apiSettingsQuery = (request) => {
   };
 };
 
-export { checkAccess, checkIfLoggedIn, apiSettingsQuery };
+const validateEditRights = (apiToView, request) => {
+  const noRightsResponse = {
+    status: 401,
+    noRightsToEditApi: true,
+    msg: 'No rights to edit data.',
+  };
+  if (request.session.username === apiToView.owner) return null;
+  if (apiToView.useRightsLevel > request.session.userLevel) {
+    return noRightsResponse;
+  }
+  // Check for editorRightsGroups
+  // Check for editorRightsUsers
+  return null;
+};
+
+export { checkAccess, checkIfLoggedIn, apiSettingsQuery, validateEditRights };

@@ -8,7 +8,7 @@ const editExposeProfileFormData = {
   formId: 'edit-expose-profile-form',
   path: '/users/user/exposure',
   method: 'PUT',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 1,
   useRightsUsers: [],
   useRightsGroups: [],

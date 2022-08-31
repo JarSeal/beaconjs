@@ -139,6 +139,10 @@ export const assetsObj = {
     en: 'User',
     fi: 'Käyttäjä',
   },
+  route_title_api: {
+    en: 'API',
+    fi: 'API',
+  },
   route_test_form_data: {
     en: 'All form data examples',
     fi: 'Kaikki lomake-datan esimerkit',
@@ -1025,5 +1029,9 @@ export const assetsObj = {
   clear_search: {
     en: 'Clear search',
     fi: 'Tyhjennä haku',
+  },
+  api: {
+    en: 'API',
+    fi: 'API',
   },
 };

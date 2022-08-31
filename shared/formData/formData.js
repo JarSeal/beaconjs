@@ -6,6 +6,7 @@ import readUsersFormData from './readUsersFormData.js';
 import deleteUsersFormData from './deleteUsersFormData.js';
 import editUserFormData from './editUserFormData.js';
 import readOneUserFormData from './readOneUserFormData.js';
+import readOneApiFormData from './readOneApiFormData.js';
 import adminSettingsFormData from './adminSettingsFormData.js';
 import userSettingsFormData from './userSettingsFormData.js';
 import readProfileFormData from './readProfileFormData.js';
@@ -27,6 +28,7 @@ const formData = [
   deleteUsersFormData,
   editUserFormData,
   readOneUserFormData,
+  readOneApiFormData,
   adminSettingsFormData,
   userSettingsFormData,
   readProfileFormData,

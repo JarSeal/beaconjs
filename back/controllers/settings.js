@@ -8,6 +8,7 @@ import Form from '../models/form.js';
 import logger from '../utils/logger.js';
 import adminSettingsFormData from '../../shared/formData/adminSettingsFormData.js';
 import userSettingsFormData from '../../shared/formData/userSettingsFormData.js';
+import readOneApiFormData from '../../shared/formData/readOneApiFormData';
 import { createNewEditedArray } from './../utils/helpers.js';
 import { getAndValidateForm } from './forms/formEngine.js';
 import {
@@ -16,7 +17,7 @@ import {
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 } from '../utils/settingsService.js';
-import { apiSettingsQuery } from '../utils/checkAccess.js';
+import { apiSettingsQuery, validateEditRights } from '../utils/checkAccess.js';
 
 const settingsRouter = Router();
 
@@ -261,6 +262,42 @@ settingsRouter.get('/apis', async (request, response) => {
     totalCount,
     result,
   });
+});
+
+// Get one API data:
+settingsRouter.get('/apis/:formId', async (request, response) => {
+  const oneApiFormId = readOneApiFormData.formId;
+  const error = await getAndValidateForm(oneApiFormId, 'GET', request);
+  if (error) {
+    return response.status(error.code).json(error.obj);
+  }
+
+  const formId = request.params.formId;
+
+  let apiToView = await Form.findOne({ formId })
+    .populate('edited.by', { username: 1 })
+    .populate('created.by', { username: 1 })
+    .populate('owner', { username: 1 });
+
+  console.log('TADAA', formId, apiToView);
+
+  const apiNotFoundResponse = {
+    msg: 'API was not found',
+    apiNotFoundError: true,
+  };
+
+  if (!apiToView) {
+    logger.log('Could not find the API with this id: ' + formId);
+    return response.status(404).json(apiNotFoundResponse);
+  }
+
+  // Check rights to edit
+  const editRightsError = validateEditRights(apiToView, request);
+  if (editRightsError) {
+    return response.status(editRightsError.status).json(editRightsError);
+  }
+
+  return response.json(apiToView);
 });
 
 export default settingsRouter;

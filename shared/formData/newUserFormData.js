@@ -4,7 +4,7 @@ const newUserFormData = {
   formId: 'new-user-form',
   path: '/users',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 0,
   useRightsUsers: [],
   useRightsGroups: [],

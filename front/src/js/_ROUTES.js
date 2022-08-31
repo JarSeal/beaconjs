@@ -17,6 +17,7 @@ import { checkAccountVerification } from './helpers/utils';
 import shared from './shared/index.js';
 import { frontConfig } from './_CONFIG';
 import { getText } from './helpers/lang';
+import OneApi from './components/contentViews/OneApi';
 
 const conf = shared.CONFIG.UI;
 
@@ -109,6 +110,12 @@ const _conf = {
       source: Settings,
       titleId: 'route_title_settings',
       beforeDraw: async (routerData) => await checkRouteAccess(routerData),
+    },
+    {
+      route: '/oneapi/:formId',
+      id: 'route-one-api',
+      source: OneApi,
+      titleId: 'route_title_api',
     },
     {
       route: '/logout',
