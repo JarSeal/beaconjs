@@ -37,8 +37,8 @@ export const ROUTE_ACCESS = [
     editorRightsLevel: 8,
   },
   {
-    path: '/settings',
-    formId: 'route-settings',
+    path: '/uni/:universeId',
+    formId: 'route-universe',
     useRightsLevel: 2,
     editorRightsLevel: 8,
   },
