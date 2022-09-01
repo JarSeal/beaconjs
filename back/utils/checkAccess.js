@@ -68,4 +68,30 @@ const checkSettings = (check, settings, session) => {
   return true;
 };
 
-export { checkAccess, checkIfLoggedIn };
+const apiSettingsQuery = (request) => {
+  return {
+    $or: [
+      { owner: request.session._id },
+      { editorRightsLevel: { $lte: request.session.userLevel } },
+      { editorRightsUsers: request.session._id },
+      // @TODO: add groups check here as well
+    ],
+  };
+};
+
+const validateEditRights = (apiToView, request) => {
+  const noRightsResponse = {
+    status: 401,
+    noRightsToEditApi: true,
+    msg: 'No rights to edit data.',
+  };
+  if (request.session.username === apiToView.owner) return null;
+  if (apiToView.useRightsLevel > request.session.userLevel) {
+    return noRightsResponse;
+  }
+  // Check for editorRightsGroups
+  // Check for editorRightsUsers
+  return null;
+};
+
+export { checkAccess, checkIfLoggedIn, apiSettingsQuery, validateEditRights };

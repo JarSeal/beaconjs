@@ -4,9 +4,11 @@ import { Router } from 'express';
 
 import UserSetting from '../models/userSetting.js';
 import AdminSetting from '../models/adminSetting.js';
+import Form from '../models/form.js';
 import logger from '../utils/logger.js';
 import adminSettingsFormData from '../../shared/formData/adminSettingsFormData.js';
 import userSettingsFormData from '../../shared/formData/userSettingsFormData.js';
+import readOneApiFormData from '../../shared/formData/readOneApiFormData';
 import { createNewEditedArray } from './../utils/helpers.js';
 import { getAndValidateForm } from './forms/formEngine.js';
 import {
@@ -15,6 +17,7 @@ import {
   getFilteredSettings,
   checkIfAdminSettingEnabled,
 } from '../utils/settingsService.js';
+import { apiSettingsQuery, validateEditRights } from '../utils/checkAccess.js';
 
 const settingsRouter = Router();
 
@@ -200,6 +203,101 @@ settingsRouter.put('/admin', async (request, response) => {
   logger.log(`Setting '${savedSetting.settingId}' was changed (admin setting).`);
   const publicSettings = await getPublicSettings(request);
   response.json(publicSettings);
+});
+
+// Get apis' data
+settingsRouter.get('/apis', async (request, response) => {
+  const formId = 'route-settings-api-settings';
+  const error = await getAndValidateForm(formId, 'GET', request);
+  if (error) {
+    return response.status(error.code).json(error.obj);
+  }
+
+  const sortBy = request.query.sortBy || 'formId',
+    sortOrder = request.query.sortOr === 'asc' ? -1 : 1,
+    itemsPerPage = request.query.itemsPerPage ? parseInt(request.query.itemsPerPage) : 25,
+    page = request.query.page || 1,
+    search = request.query.search || '',
+    searchCaseSensitive = request.query.caseSensitive === 'true',
+    searchFields = request.query.searchFields?.length
+      ? request.query.searchFields.split(',')
+      : ['formId', 'path', 'method'];
+
+  const searchRegex = new RegExp(search, searchCaseSensitive ? '' : 'i');
+  const findConditions = {
+    $and: [
+      apiSettingsQuery(request),
+      {
+        $or: [
+          ...searchFields.map((field) => {
+            field = field.trim();
+            if (field.includes('.date')) {
+              // TODO: implement search by a date,
+              // send also the date format from the frontend,
+              // then check if the format of the search string is a valid date,
+              // then convert the date to a date object (or timestamp, test this)
+              // and then compare the date with the $gte on the date and $lt on the next day.
+              logger.error('Trying to search by a date. Not supported yet.');
+              return { nonExistingField: searchRegex }; // Temp
+            }
+            return {
+              [field]: searchRegex,
+            };
+          }),
+        ],
+      },
+    ],
+  };
+
+  const totalCount = await Form.find(findConditions).countDocuments();
+  const result = await Form.find(findConditions)
+    .sort([
+      [sortBy, sortOrder],
+      ['formId', sortOrder],
+    ])
+    .skip((page - 1) * itemsPerPage)
+    .limit(itemsPerPage);
+
+  response.json({
+    totalCount,
+    result,
+  });
+});
+
+// Get one API data:
+settingsRouter.get('/apis/:formId', async (request, response) => {
+  const oneApiFormId = readOneApiFormData.formId;
+  const error = await getAndValidateForm(oneApiFormId, 'GET', request);
+  if (error) {
+    return response.status(error.code).json(error.obj);
+  }
+
+  const formId = request.params.formId;
+
+  let apiToView = await Form.findOne({ formId })
+    .populate('edited.by', { username: 1 })
+    .populate('created.by', { username: 1 })
+    .populate('owner', { username: 1 });
+
+  console.log('TADAA', formId, apiToView);
+
+  const apiNotFoundResponse = {
+    msg: 'API was not found',
+    apiNotFoundError: true,
+  };
+
+  if (!apiToView) {
+    logger.log('Could not find the API with this id: ' + formId);
+    return response.status(404).json(apiNotFoundResponse);
+  }
+
+  // Check rights to edit
+  const editRightsError = validateEditRights(apiToView, request);
+  if (editRightsError) {
+    return response.status(editRightsError.status).json(editRightsError);
+  }
+
+  return response.json(apiToView);
 });
 
 export default settingsRouter;

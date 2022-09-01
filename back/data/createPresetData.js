@@ -34,7 +34,7 @@ const createPresetData = async (quiet) => {
         autoCreated: true,
         date: new Date(),
       };
-      routeAccess[i].type = 'view';
+      routeAccess[i].type = 'sys-view';
       newForm = new Form(routeAccess[i]);
       await newForm.save();
       if (!quiet) logger.log(`Preset form (route access) '${routeAccess[i].formId}' created.`);

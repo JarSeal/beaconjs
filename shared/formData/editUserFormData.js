@@ -4,7 +4,7 @@ const editUserFormData = {
   formId: 'edit-user-form',
   path: '/users',
   method: 'PUT',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 8,
   useRightsUsers: [],
   useRightsGroups: [],

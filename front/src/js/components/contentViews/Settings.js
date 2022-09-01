@@ -5,6 +5,7 @@ import TabSystem from '../buttons/TabSystem';
 import ViewTitle from '../widgets/ViewTitle';
 import FourOOne from './FourOOne';
 import AdminSettings from './settingsTabs/settings_Admin';
+import ApiSettings from './settingsTabs/settings_Apis';
 import MyProfile from './settingsTabs/settings_MyProfile';
 import MySettings from './settingsTabs/settings_MySettings';
 import UsersList from './settingsTabs/settings_Users';
@@ -80,6 +81,12 @@ class Settings extends Component {
         label: getText('my_settings'),
         show: isVerified,
         component: MySettings,
+      },
+      {
+        id: 'api-settings',
+        label: getText('api_settings'),
+        show: isVerified && this.appState.get('serviceSettings.showApiSettingsLink'),
+        component: ApiSettings,
       },
       {
         id: 'users',

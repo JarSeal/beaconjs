@@ -2,7 +2,7 @@ const deleteProfileFormData = {
   formId: 'delete-profile-form',
   path: '/users/own/delete',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 1,
   useRightsUsers: [],
   useRightsGroups: [],

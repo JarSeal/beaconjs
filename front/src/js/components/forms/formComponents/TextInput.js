@@ -8,6 +8,8 @@ import Component from '../../../LIGHTER/Component';
 // - name = input name property [String]
 // - hideMsg = if field's error message should not be shown [Booolean]
 // - changeFn = function that is ran after each change [Function]
+// - onFocus = function that is ran when the input gets focus [Function(e)]
+// - onBlur = function that is ran when the input is out of focus (blur) [Function(e)]
 // - disabled = whether the field is disabled or not [Boolean]
 // - error = an error boolean or object to tell if the field has errors {hasError:Boolean, errorMsg:String} [Boolean/Object]
 // - maxlength = html max length attribute value for input elem [Number/String]
@@ -40,6 +42,8 @@ class TextInput extends Component {
       class: 'form-elem__error-msg',
     });
     if (data.error) data.class = 'form-elem--error';
+    this.onFocus = data.onFocus ? data.onFocus : null;
+    this.onBlur = data.onBlur ? data.onBlur : null;
   }
 
   erase = () => {
@@ -58,6 +62,26 @@ class TextInput extends Component {
         if (data.changeFn) data.changeFn(e);
       },
     });
+    if (this.onFocus) {
+      this.addListener({
+        id: this.inputId + '-focus',
+        target: inputElem,
+        type: 'focus',
+        fn: (e) => {
+          this.onFocus(e);
+        },
+      });
+    }
+    if (this.onBlur) {
+      this.addListener({
+        id: this.inputId + '-blur',
+        target: inputElem,
+        type: 'blur',
+        fn: (e) => {
+          this.onBlur(e);
+        },
+      });
+    }
   };
 
   paint(data) {

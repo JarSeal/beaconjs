@@ -2,7 +2,7 @@ const newPassRequestFormData = {
   formId: 'new-pass-request-form',
   path: '/users/newpassrequest',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 0,
   useRightsUsers: [],
   useRightsGroups: [],

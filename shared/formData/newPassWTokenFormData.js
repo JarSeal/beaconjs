@@ -4,7 +4,7 @@ const newPassWTokenFormData = {
   formId: 'reset-password-w-token-form',
   path: '/users/newpass',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 0,
   useRightsUsers: [],
   useRightsGroups: [],

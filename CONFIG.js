@@ -37,8 +37,8 @@ export const ROUTE_ACCESS = [
     editorRightsLevel: 8,
   },
   {
-    path: '/uni/:universeId',
-    formId: 'route-universe',
+    path: '/settings',
+    formId: 'route-settings',
     useRightsLevel: 2,
     editorRightsLevel: 8,
   },
@@ -88,6 +88,18 @@ export const ROUTE_ACCESS = [
     path: '/settings/admin-settings',
     formId: 'route-settings-admin-settings',
     useRightsLevel: 8,
+    editorRightsLevel: 9,
+  },
+  {
+    path: '/settings/api-settings',
+    formId: 'route-settings-api-settings',
+    useRightsLevel: 2,
+    editorRightsLevel: 9,
+  },
+  {
+    path: '/oneapi/:user',
+    formId: 'route-one-api-settings',
+    useRightsLevel: 2,
     editorRightsLevel: 9,
   },
   {

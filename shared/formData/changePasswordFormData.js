@@ -4,7 +4,7 @@ const changePasswordFormData = {
   formId: 'change-password-form',
   path: '/users/own/changepass',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 1,
   useRightsUsers: [],
   useRightsGroups: [],

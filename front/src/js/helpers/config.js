@@ -7,5 +7,5 @@ export const getApiBaseUrl = () => {
 export const getClientBaseUrl = () => {
   const ENV = import.meta.env;
   const PORT = ENV.VITE_CLIENT_PORT === '80' ? '' : ':' + ENV.VITE_CLIENT_PORT;
-  return `${ENV.VITE_CLIENT_URL}${PORT}`;
+  return `${ENV.VITE_CLIENT_URL}${PORT}${ENV.VITE_CLIENT_PATH}`;
 };

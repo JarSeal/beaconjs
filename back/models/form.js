@@ -9,9 +9,16 @@ const formSchema = mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
-  path: String,
-  method: String,
+  path: {
+    type: String,
+    index: true,
+  },
+  method: {
+    type: String,
+    default: 'GET',
+  },
   type: {
     type: String,
     required: true,
@@ -20,37 +27,30 @@ const formSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-  admin: Boolean,
-  useRightsUsers: [{ type: String }],
-  useRightsGroups: [{ type: String }],
+  useRightsUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', _id: false }],
+  useRightsGroups: [{ type: String, _id: false }], // TODO: change to object ID when Groups are implemented
   editorRightsLevel: {
     type: Number,
     required: true,
   },
-  editorRightsUsers: [{ type: String }],
-  editorRightsGroups: [{ type: String }],
+  editorRightsUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', _id: false }],
+  editorRightsGroups: [{ type: String, _id: false }], // TODO: change to object ID when Groups are implemented
   editorOptions: {
     type: Object,
   },
   form: {
     type: Object,
   },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   created: {
-    by: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
+    by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     autoCreated: Boolean,
     date: Date,
   },
   edited: [
     {
       _id: false,
-      by: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-      autoEdited: Boolean,
+      by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       date: Date,
     },
   ],

@@ -139,6 +139,10 @@ export const assetsObj = {
     en: 'User',
     fi: 'Käyttäjä',
   },
+  route_title_api: {
+    en: 'API',
+    fi: 'API',
+  },
   route_test_form_data: {
     en: 'All form data examples',
     fi: 'Kaikki lomake-datan esimerkit',
@@ -985,5 +989,49 @@ export const assetsObj = {
   email_sent: {
     en: 'E-mail sent',
     fi: 'Sähköposti lähetetty',
+  },
+  api_settings: {
+    en: 'API settings',
+    fi: 'API-asetukset',
+  },
+  form_id: {
+    en: 'Form ID',
+    fi: 'Form ID',
+  },
+  path: {
+    en: 'Path',
+    fi: 'Polku',
+  },
+  method: {
+    en: 'Method',
+    fi: 'Metodi',
+  },
+  type: {
+    en: 'Type',
+    fi: 'Tyyppi',
+  },
+  items_per_page: {
+    en: 'Items per page',
+    fi: 'Rivejä per sivu',
+  },
+  search: {
+    en: 'Search',
+    fi: 'Etsi',
+  },
+  search_settings: {
+    en: 'Search settings',
+    fin: 'Haun asetukset',
+  },
+  columns_to_search: {
+    en: 'Columns to search',
+    fi: 'Etsittävät sarakkeet',
+  },
+  clear_search: {
+    en: 'Clear search',
+    fi: 'Tyhjennä haku',
+  },
+  api: {
+    en: 'API',
+    fi: 'API',
   },
 };

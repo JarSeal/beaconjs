@@ -2,7 +2,7 @@ const loginBeaconFormData = {
   formId: 'beacon-main-login',
   path: '/login',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 0,
   useRightsUsers: [],
   useRightsGroups: [],

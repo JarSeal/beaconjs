@@ -2,7 +2,7 @@ import AdminSetting from '../models/adminSetting.js';
 import Form from '../models/form.js';
 import UserSetting from '../models/userSetting.js';
 import userSettingsFormData from '../../shared/formData/userSettingsFormData.js';
-import { checkIfLoggedIn } from './checkAccess.js';
+import { apiSettingsQuery, checkIfLoggedIn } from './checkAccess.js';
 
 let all = {},
   onceLoaded = false;
@@ -123,6 +123,7 @@ const getPublicSettings = async (request, noReload) => {
     );
   }
   publicSettings['_routeAccess'] = await _createPublicRouteAccesses(request);
+  publicSettings['showApiSettingsLink'] = await _checkApisAccess(request);
   return publicSettings;
 };
 
@@ -204,6 +205,11 @@ const checkIfAdminSettingEnabled = (settingValue, settingId) => {
       return false;
   }
   return true;
+};
+
+const _checkApisAccess = async (request) => {
+  const totalCount = await Form.find(apiSettingsQuery(request)).countDocuments();
+  return Boolean(totalCount);
 };
 
 export {

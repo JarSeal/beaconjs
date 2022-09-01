@@ -2,7 +2,7 @@ const newUniverseFormData = {
   formId: 'new-universe-form',
   path: '/universes',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 2,
   useRightsUsers: [],
   useRightsGroups: [],

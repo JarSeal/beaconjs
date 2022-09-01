@@ -2,7 +2,7 @@ const emailVerificationFormData = {
   formId: 'new-email-verification',
   path: '/users/newemailverification',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 1,
   useRightsUsers: [],
   useRightsGroups: [],

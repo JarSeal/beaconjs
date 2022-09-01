@@ -2,7 +2,7 @@ const adminSettingsFormData = {
   formId: 'admin-settings-form',
   path: '/settings/admin',
   method: 'PUT',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 8,
   useRightsUsers: [],
   useRightsGroups: [],

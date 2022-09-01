@@ -1,3 +1,4 @@
+import gsap from 'gsap';
 import { createDate } from '../../helpers/date';
 import { getText } from '../../helpers/lang';
 import { Component } from '../../LIGHTER';
@@ -8,15 +9,15 @@ import TextInput from '../forms/formComponents/TextInput';
 import styles from './Table.module.scss';
 
 // Attributes for data:
-// - tableData: Array[Object]
+// - tableData: Array[Object] [required]
 // - hideTableHeader: Boolean,
 // - fullWidth: Boolean,
 // - emptyStateMsg: String,
 // - rowClickFn: Function(e, rowData)
-// - tableParams: Object { sortColumn, sortOrder, filterString, filterMatchCase, filterSelectors, showRowsAmount }
-// - afterChange: Function({ id, sortColumn, sortOrder, filterString, filterMatchCase, filterSelectors, showRowsAmount })
-// - showGroupSize: Number,
+// - tableParams: Object { sortColumn, ,sortOrder }
+// - afterChange: Function({ id, sortColumn, sortOrder })
 // - showStats: Boolean,
+// - searchHotKey: String,
 // - unsortable: Boolean, (makes all of the columns unsortable)
 // - selectable: Boolean, (if true adds checkboxes column and maintains an array of selected data which can be retrieved by calling the getSelected method)
 // - tools: Array[Object], (array order is the order of the 'selected' tool buttons, if this is set, the selectable switch is not needed)
@@ -27,8 +28,6 @@ import styles from './Table.module.scss';
 //       clickFn: Function(e, selected(Array)), (when the selections have been made and button is clicked, this fn is fired)
 //     }
 // - showRowNumbers: Boolean/String ('hover' means that the row number is only shown on hover and 'small' is the small numbers all the time, true creates a new column)
-// - filter: Boolean, (enable table filtering input)
-// - filterHotkey: String, (single key to focus the filter input field)
 // - tableStructure: Array[Object], [required] (array order is the order of the columns)
 //     {
 //       key: String, [required] (The key in tableData item/object),
@@ -38,19 +37,20 @@ import styles from './Table.module.scss';
 //       width: String, (CSS width)
 //       class: Array[String]/String, (CSS class(es) for the column)
 //       unsortable: Boolean, (If the column should not be sortable, default false)
-//       doNotFilter: Boolean, (If the column data (cell) should be included in filter searches)
 //       sort: String, (Can be either 'desc' or 'asc')
 //       type: String, (Special parsing for a column data (eg. 'Date'), this is defined at _formatCellData)
-//       actionFn: Function(e, rowData), (Requires type: 'Action', this is the click fn on the action button. Automatic true for unsortable and doNotFilter)
+//       actionFn: Function(e, rowData), (Requires type: 'Action', this is the click fn on the action button. Automatic true for unsortable)
 //       actionText: String, (Action button text. If this is omitted, the heading will be used)
 //     }
 //
 // Different data types:
 // - 'Date': Parses the Date object string to a readable format. It uses the default Beaconjs format.
 // - 'Action': Adds an action button to the row. This should be used with the actionFn function, that gets the current row's data when the button is clicked.
-class Table extends Component {
+class TableWithSearch extends Component {
   constructor(data) {
     super(data);
+    this.data.style = { position: 'relative' };
+    this.data.class = styles.tableWithSearch;
     this.tableStructure = data.tableStructure;
     if (!this.tableStructure) {
       this.logger.error(
@@ -64,7 +64,6 @@ class Table extends Component {
           key: '_rowSelection',
           heading: ' ',
           unsortable: true,
-          doNotFilter: true,
         },
         ...this.tableStructure,
       ];
@@ -75,25 +74,16 @@ class Table extends Component {
           key: '_rowNumber',
           heading: '#',
           unsortable: true,
-          doNotFilter: true,
         },
         ...this.tableStructure,
       ];
     }
-    this.groupMax = 0;
-    if (data.showGroupSize) {
-      this.groupMax =
-        data.tableParams && data.tableParams.showRowsAmount
-          ? data.tableParams.showRowsAmount
-          : data.showGroupSize;
-    }
     for (let i = 0; i < this.tableStructure.length; i++) {
       if (this.tableStructure[i].actionFn) {
         this.tableStructure[i].unsortable = true;
-        this.tableStructure[i].doNotFilter = true;
-      } else if (data.tableParams && data.tableParams.sortColumn && data.tableParams.sortOrder) {
-        if (this.tableStructure[i].key === data.tableParams.sortColumn) {
-          this.tableStructure[i].sort = data.tableParams.sortOrder;
+      } else if (data.tableParams?.sortBy && data.tableParams?.sortOr) {
+        if (this.tableStructure[i].key === data.tableParams.sortBy) {
+          this.tableStructure[i].sort = data.tableParams.sortOr;
         } else {
           delete this.tableStructure[i].sort;
         }
@@ -103,65 +93,43 @@ class Table extends Component {
       }
     }
     this.tableData = data.tableData;
-    this.allData = [...data.tableData];
+    this.totalCount = data.totalCount;
     for (let i = 0; i < this.tableData.length; i++) {
       this.tableData[i]['_tableIndex'] = i;
-      this.allData[i]['_tableIndex'] = i;
     }
     this.template = '<div class="tableWrapper"></div>';
     this.selected = [];
     this.toolsComp;
     this.tableComp;
     this.tableParams = {
-      sortOrder: null,
-      sortColumn: null,
-      filterString: '',
-      filterMatchCase: false,
-      filterSelectors: [],
-      showRowsAmount: this.groupMax,
+      ...{
+        sortOr: null,
+        sortBy: null,
+        itemsPerPage: 25,
+        page: 1,
+        search: '',
+        searchFields: data.searchFields || '',
+        caseSensitive: false,
+      },
+      ...data.tableParams,
     };
+    this.previousSearch = '';
+    this.searchOptionsOpen = false;
+    this.searchOptionsId = 'table-search-options-' + this.id;
     this.statsComp;
-    this.filterComp;
-    this.filterString =
-      data.tableParams && data.tableParams.filterString ? data.tableParams.filterString : '';
-    this.filterCaretPos = null;
-    this.filterKeys = [];
-    this.filterSettingsOpen = false;
-    this.filterSettingsComp;
-    this.filterMatchCase =
-      data.tableParams && data.tableParams.filterMatchCase
-        ? data.tableParams.filterMatchCase
-        : false;
-    this.filterSelectors = this.tableStructure
-      .filter((struct) => !struct.doNotFilter)
-      .map((struct, index) => {
-        struct.label = struct.heading;
-        struct.selected =
-          data.tableParams &&
-          data.tableParams.filterSelectors &&
-          data.tableParams.filterSelectors.length >= index + 1
-            ? data.tableParams.filterSelectors[index]
-            : true;
-        if (struct.selected) this.filterKeys.push(struct.key);
-        return struct;
-      });
-    this.largeAmountLimit = 500; // If the data set is larger than this, than the filter will only start after enter key is pressedf
   }
 
   init = (data) => {
     this.tableData = data.tableData;
-    this.allData = [...data.tableData];
     for (let i = 0; i < this.tableData.length; i++) {
       this.tableData[i]['_tableIndex'] = i;
-      this.allData[i]['_tableIndex'] = i;
     }
   };
 
   paint = () => {
-    this._filterData(true);
-    this._drawFilter();
     this._drawStats();
     this._drawTools();
+    this._drawSearch();
 
     const table = this._createTable();
     this.tableComp = this.addChild({ id: this.id + '-elem', template: table });
@@ -170,26 +138,7 @@ class Table extends Component {
   };
 
   _showStatsText = () => {
-    let text = '';
-    if (this.groupMax && this.groupMax < this.tableData.length) {
-      if (this.tableData.length !== this.allData.length) {
-        text = `${getText('showing')} ${Math.min(this.groupMax, this.tableData.length)} / ${
-          this.tableData.length
-        } (${getText('total').toLowerCase()} ${this.allData.length})`;
-      } else {
-        text =
-          getText('showing') +
-          ' ' +
-          Math.min(this.groupMax, this.tableData.length) +
-          ' / ' +
-          this.allData.length;
-      }
-    } else {
-      text =
-        this.tableData.length === this.allData.length
-          ? getText('total') + ' ' + this.allData.length
-          : getText('showing') + ' ' + this.tableData.length + ' / ' + this.allData.length;
-    }
+    let text = getText('showing') + ' ' + this.tableData.length + ' / ' + this.totalCount;
     if (this.selected.length) {
       text += '\u00a0\u00a0\u00a0\u00a0';
       text += `(${getText('selected').toLowerCase()} ${this.selected.length})`;
@@ -208,7 +157,7 @@ class Table extends Component {
             id: this.tableStructure[i].key + '-sort-listener-acc-' + this.id,
             target: accSortElem,
             type: 'click',
-            fn: this._changeSortFN,
+            fn: this._changeSortFn,
           });
         }
         const headerSortElem = document.getElementById(
@@ -219,7 +168,7 @@ class Table extends Component {
             id: this.tableStructure[i].key + '-sort-listener-' + this.id,
             target: headerSortElem,
             type: 'click',
-            fn: this._changeSortFN,
+            fn: this._changeSortFn,
           });
         }
       }
@@ -297,15 +246,8 @@ class Table extends Component {
           if (e.target.id.includes('-header-inputSelectorBox-')) {
             if (e.target.checked) {
               this.selected = [];
-              if (this.groupMax) {
-                const count = Math.min(this.groupMax, this.tableData.length);
-                for (let i = 0; i < count; i++) {
-                  this.selected.push(this.tableData[i]._tableIndex);
-                }
-              } else {
-                for (let i = 0; i < this.tableData.length; i++) {
-                  this.selected.push(this.tableData[i]._tableIndex);
-                }
+              for (let i = 0; i < this.tableData.length; i++) {
+                this.selected.push(this.tableData[i]._tableIndex);
               }
             } else {
               this.selected = [];
@@ -344,10 +286,7 @@ class Table extends Component {
               thElem.classList.remove(styles.selectionBoxSome);
               thElem.querySelector('input').checked = false;
             } else if (this.groupMax) {
-              if (
-                this.selected.length === this.groupMax ||
-                this.selected.length === this.tableData.length
-              ) {
+              if (this.selected.length === this.tableData.length) {
                 thElem.classList.add(styles.selectionBoxAll);
                 thElem.classList.remove(styles.selectionBoxSome);
                 thElem.querySelector('input').checked = true;
@@ -373,30 +312,9 @@ class Table extends Component {
         },
       });
     }
-    if (this.groupMax && this.groupMax < this.tableData.length) {
-      this.tableComp.addListener({
-        id: this.id + '-show-more-click',
-        target: this.elem.querySelector('#' + this.id + '-show-more-button'),
-        type: 'click',
-        fn: () => {
-          this.groupMax += this.data.showGroupSize;
-          if (this.groupMax > this.allData.length) this.groupMax = this.allData.length;
-          this._refreshView();
-        },
-      });
-      this.tableComp.addListener({
-        id: this.id + '-show-all-click',
-        target: this.elem.querySelector('#' + this.id + '-show-all-button'),
-        type: 'click',
-        fn: () => {
-          this.groupMax = this.allData.length;
-          this._refreshView();
-        },
-      });
-    }
   };
 
-  _changeSortFN = (e) => {
+  _changeSortFn = (e) => {
     const id = e.target.id;
     const targetKey = id.split('-')[0];
     let curDir = 'desc',
@@ -423,15 +341,14 @@ class Table extends Component {
         }
       }
     }
-    this.filterCaretPos = null;
+    this.searchOptionsOpen = false;
     this._refreshView();
   };
 
-  _refreshView = (hard) => {
+  _refreshView = (hard, noAfterChange) => {
     const scrollPosX = window.pageXOffset;
     const scrollPosY = window.pageYOffset;
     if (this.data.showStats) this.statsComp.discard(true);
-    if (this.data.filter) this.filterComp.discard(true);
     this.tableComp.discard(true);
     if (this.toolsComp) this.toolsComp.discard(true);
     if (hard) {
@@ -441,7 +358,7 @@ class Table extends Component {
       this.rePaint();
     }
     window.scrollTo(scrollPosX, scrollPosY);
-    this.afterChange();
+    if (!noAfterChange) this.afterChange();
   };
 
   _createTable = () =>
@@ -450,18 +367,111 @@ class Table extends Component {
     '>' +
     this._createTableHeader() +
     this._createDataRows() +
-    this._createShowMore() +
+    this._createPagination() +
     '</table>';
 
-  _createShowMore = () => {
-    if (!this.groupMax || this.groupMax >= this.tableData.length) return '';
-    const showMoreAmount = Math.min(this.data.showGroupSize, this.tableData.length - this.groupMax);
+  _createPagination = () => {
+    const totalPages = Math.ceil(this.totalCount / this.tableParams.itemsPerPage) || 1;
+    let page = this.tableParams.page;
+    if (page > totalPages) page = totalPages;
+    let pageNumberButtons = `<li>
+      <button class="paginationButton ${styles.arrowButton}" page="first"${
+      page === 1 ? ' disabled' : ''
+    }>&#171;</button>
+    </li>
+    <li>
+      <button class="paginationButton ${styles.arrowButton}" page="prev"${
+      page === 1 ? ' disabled' : ''
+    }>&#8249;</button>
+    </li>`;
+    const shownPageNumbersCount = 5; // Must be an odd number
+    const maxShownPageNumbersPerSide = (shownPageNumbersCount - 1) / 2;
+    if (page > maxShownPageNumbersPerSide + 1) {
+      pageNumberButtons += '<li>...</li>';
+    }
+    for (let i = 0; i < totalPages; i++) {
+      const pageNumber = i + 1;
+      if (
+        pageNumber >= page - maxShownPageNumbersPerSide &&
+        pageNumber <= page + maxShownPageNumbersPerSide
+      ) {
+        pageNumberButtons += `<li>
+          <button class="paginationButton${
+            page === pageNumber ? ` ${styles.current}` : ''
+          }" page="${pageNumber}">${pageNumber}</button>
+        </li>`;
+      }
+    }
+    if (page + maxShownPageNumbersPerSide < totalPages) {
+      pageNumberButtons += '<li>...</li>';
+    }
+    pageNumberButtons += `<li>
+      <button class="paginationButton ${styles.arrowButton}" page="next"${
+      page === totalPages ? ' disabled' : ''
+    }>&#8250;</button>
+    </li>
+    <li>
+      <button class="paginationButton ${styles.arrowButton}" page="last"${
+      page === totalPages ? ' disabled' : ''
+    }>&#187;</button>
+    </li>`;
+    this.addListener({
+      id: 'pagination-button-listener-' + this.id,
+      type: 'click',
+      fn: (e) => {
+        if (e.target.classList.contains('paginationButton')) {
+          const pageNrClicked = e.target.getAttribute('page');
+          const parsedPageNr = parseInt(pageNrClicked);
+          if (parsedPageNr === page) return;
+          if (pageNrClicked === 'first') {
+            this.tableParams.page = 1;
+          } else if (pageNrClicked === 'prev') {
+            const prevPage = page - 1;
+            this.tableParams.page = prevPage > 0 ? prevPage : 1;
+          } else if (pageNrClicked === 'next') {
+            const nextPage = page + 1;
+            this.tableParams.page = nextPage <= totalPages ? nextPage : totalPages;
+          } else if (pageNrClicked === 'last') {
+            this.tableParams.page = totalPages;
+          } else {
+            this.tableParams.page =
+              parsedPageNr <= totalPages && parsedPageNr > 0 ? parsedPageNr : 1;
+          }
+          this._refreshView();
+        }
+      },
+    });
+    this.addListenerAfterDraw({
+      id: 'select-items-per-page-listener-' + this.id,
+      targetId: 'select-items-per-page-' + this.id,
+      type: 'change',
+      fn: (e) => {
+        const newValue = parseInt(e.target.value);
+        if (newValue !== this.tableParams.itemsPerPage) {
+          this.tableParams.itemsPerPage = newValue;
+          this.tableParams.page = 1;
+          this._refreshView();
+        }
+      },
+    });
     return `<tr class="${styles.tableShowMoreRow}">
-            <td colspan="${this.tableStructure.length}">
-                <button id="${this.id}-show-more-button" class="${styles.tableShowMore}">Show more (${showMoreAmount})</button>
-                <button id="${this.id}-show-all-button" class="${styles.tableShowAll}">Show all (${this.tableData.length})</button>
-            </td>
-        </tr>`;
+        <td colspan="${this.tableStructure.length}">
+          <div class="${styles.pagination}">
+            <span class="${styles.curPageNumber}">${page} / ${totalPages}</span>
+            <ul>${pageNumberButtons}</ul>
+            <div class="${styles.itemsPerPage}">
+              <span>${getText('items_per_page')}:</span><br />
+              <select id="select-items-per-page-${this.id}">
+                <option${this.tableParams.itemsPerPage === 10 ? ' selected' : ''}>10</option>
+                <option${this.tableParams.itemsPerPage === 25 ? ' selected' : ''}>25</option>
+                <option${this.tableParams.itemsPerPage === 50 ? ' selected' : ''}>50</option>
+                <option${this.tableParams.itemsPerPage === 100 ? ' selected' : ''}>100</option>
+                <option${this.tableParams.itemsPerPage === 200 ? ' selected' : ''}>200</option>
+              </select>
+            </div>
+          </div>
+        </td>
+    </tr>`;
   };
 
   _createDataRows = () => {
@@ -469,12 +479,10 @@ class Table extends Component {
       return this._emptyState();
     }
     let rows = '',
-      sortByKey = '',
-      asc = false;
+      sortByKey = '';
     for (let i = 0; i < this.tableStructure.length; i++) {
       if (this.tableStructure[i].sort) {
         sortByKey = this.tableStructure[i].key;
-        if (this.tableStructure[i].sort === 'asc') asc = true;
         break;
       }
     }
@@ -482,10 +490,7 @@ class Table extends Component {
       this.logger.error('Sorting key missing in table structure.', this.id);
       throw new Error('Call stack');
     }
-    this.tableData.sort(this._sortCompare(sortByKey, asc));
-    let selectionsFound = 0;
     for (let i = 0; i < this.tableData.length; i++) {
-      if (this.groupMax && i + 1 > this.groupMax) break;
       rows += `<tr${this._createDataRowClass(this.tableData[i]._tableIndex)} id="rowindex-${i}-${
         this.id
       }">`;
@@ -500,10 +505,6 @@ class Table extends Component {
         rows += '</td>';
       }
       rows += '</tr>';
-      if (this.selected.includes(this.tableData[i]._tableIndex)) selectionsFound++;
-      if (this.groupMax && i + 2 > this.groupMax && selectionsFound !== this.selected.length) {
-        this.groupMax++;
-      }
     }
     return `<tbody>${rows}</tbody>`;
   };
@@ -591,13 +592,13 @@ class Table extends Component {
         classString += ` ${styles.sortAvailable}`;
       }
       if (structure.sort) {
-        this.tableParams.sortColumn = structure.key;
+        this.tableParams.sortBy = structure.key;
         if (structure.sort === 'asc') {
           classString += ` ${styles.sortAsc}`;
-          this.tableParams.sortOrder = 'asc';
+          this.tableParams.sortOr = 'asc';
         } else {
           classString += ` ${styles.sortDesc}`;
-          this.tableParams.sortOrder = 'desc';
+          this.tableParams.sortOr = 'desc';
         }
       }
     }
@@ -706,7 +707,9 @@ class Table extends Component {
           text: this.data.tools[i].text,
           attributes: this.data.tools[i].disabled ? { disabled: '' } : {},
           click: (e) => {
-            const selected = this.allData.filter((row) => this.selected.includes(row._tableIndex));
+            const selected = this.tableData.filter((row) =>
+              this.selected.includes(row._tableIndex)
+            );
             this.data.tools[i].clickFn(e, selected);
           },
         })
@@ -726,260 +729,6 @@ class Table extends Component {
     });
     this.statsComp.draw();
     this.elem.classList.add(styles.tableHasStats);
-  };
-
-  _drawFilter = () => {
-    if (!this.data.filter) return;
-
-    this.filterComp = this.addChild({
-      id: this.id + '-filter-wrapper',
-      class: styles.tableFilterWrapper,
-    });
-    if (this.filterString.length || (this.groupMax && this.groupMax > this.data.showGroupSize)) {
-      this.filterComp.addChild(
-        new Button({
-          id: this.id + '-filter-clear',
-          class: styles.tableFilterClear,
-          click: () => {
-            this.filterString = '';
-            this.filterCaretPos = null;
-            this._closeFilterSettings();
-            this.groupMax = this.data.showGroupSize || 0;
-            this._filterData();
-          },
-        })
-      );
-    }
-    const input = new TextInput({
-      id: this.id + '-filter-input',
-      label: '',
-      hideMsg: true,
-      placeholder:
-        getText('filter') +
-        (this.data.filterHotkey ? ` [${this.data.filterHotkey.toUpperCase()}]` : ''),
-      value: this.filterString,
-      changeFn: (e) => {
-        const val = e.target.value;
-        if (this.filterString === val) return;
-        this.filterString = val;
-        this.filterCaretPos = e.target.selectionStart;
-        if (this.allData.length < this.largeAmountLimit) {
-          this._filterData();
-        }
-      },
-    });
-    this.filterComp.addChild(input);
-    if (this.allData.length > this.largeAmountLimit) {
-      this.filterComp.addChild({
-        id: this.id + '-filter-info',
-        class: styles.tableFilterInfo,
-        text: getText('press_enter_to_filter'),
-      });
-    }
-    this.filterComp.addChild(
-      new Button({
-        id: this.id + '-filter-settings-button',
-        class: styles.tableFilterSettingsButton,
-        text:
-          this.filterSelectors.length === this.filterKeys.length
-            ? getText('filtering_all_columns')
-            : getText('filtering_some_columns'),
-        click: () => {
-          this.filterSettingsOpen = !this.filterSettingsOpen;
-          if (this.filterSettingsOpen) {
-            this.elem.classList.add(styles.filterSettingsOpen);
-            window.addEventListener('click', this._closeFilterSettings);
-          } else {
-            this.elem.classList.remove(styles.filterSettingsOpen);
-            window.removeEventListener('click', this._closeFilterSettings);
-          }
-        },
-      })
-    );
-    this.filterSettingsComp = new Component({
-      id: this.id + '-filter-settings',
-      class: styles.tableFilterSettings,
-    });
-    this.filterSettingsComp.addChild(
-      new Checkbox({
-        id: this.id + '-filter-settings-case',
-        class: styles.filterCaseCheckbox,
-        label: getText('match_case'),
-        hideMsg: true,
-        value: this.filterMatchCase,
-        changeFn: (e) => {
-          this.filterMatchCase = e.target.checked;
-          this.filterCaretPos = null;
-          this._filterData();
-        },
-      })
-    );
-    this.filterSettingsComp.addChild(
-      new CheckboxList({
-        id: this.id + '-filter-settings-col-selector',
-        label: getText('columns_to_filter'),
-        selectors: this.filterSelectors,
-        minSelections: 1,
-        changeFn: (e, selectors) => {
-          this.filterSelectors = selectors;
-          this.filterKeys = [];
-          for (let i = 0; i < selectors.length; i++) {
-            if (selectors[i].selected) this.filterKeys.push(selectors[i].key);
-          }
-          this.filterCaretPos = null;
-          this._filterData();
-        },
-      })
-    );
-    this.filterComp.addChild(this.filterSettingsComp);
-    this.filterComp.draw();
-    this.filterComp.drawChildren(true);
-
-    if (this.filterSettingsOpen) this.elem.classList.add(styles.filterSettingsOpen);
-    if (this.filterCaretPos !== null) input.focus(this.filterCaretPos);
-    this.elem.style.minHeight =
-      (this.elem.querySelector('#' + this.id + '-filter-settings').offsetHeight + 62) / 10 + 'rem';
-    this.elem.classList.add(styles.tableHasFilter);
-    this.addListenerAfterDraw({
-      id: 'table-filter-keyup-listener-' + this.id,
-      target: window,
-      type: 'keyup',
-      fn: this.keyUp,
-    });
-  };
-
-  _closeFilterSettings = (e) => {
-    if (!e) {
-      this.filterSettingsOpen = false;
-      if (this.elem) this.elem.classList.remove(styles.filterSettingsOpen);
-      window.removeEventListener('click', this._closeFilterSettings);
-      return;
-    }
-    const targetId = e.target.id;
-    let node = e.target,
-      counter = 0,
-      whileSwitch = true;
-    while (whileSwitch) {
-      if (!node) node = document.getElementById(targetId);
-      if (!node) return;
-      const id = node.id;
-      if (id === this.id + '-filter-settings' || id === this.id + '-filter-settings-button') {
-        return;
-      }
-      if (node.localName.toLowerCase() === 'html') {
-        this.filterSettingsOpen = false;
-        if (this.elem) this.elem.classList.remove(styles.filterSettingsOpen);
-        window.removeEventListener('click', this._closeFilterSettings);
-        return;
-      }
-      node = node.parentElement;
-      counter++;
-      if (counter > 100) {
-        window.removeEventListener('click', this._closeFilterSettings);
-        return;
-      }
-    }
-  };
-
-  _filterData = (noRefresh) => {
-    if (this.filterString === '') {
-      this.tableData = [...this.allData];
-      // this.groupMax = this.data.showGroupSize || 0;
-      if (!noRefresh) this._refreshView();
-      return;
-    }
-
-    const newData = [];
-    let value;
-    for (let i = 0; i < this.allData.length; i++) {
-      const row = this.allData[i];
-      for (let j = 0; j < this.filterKeys.length; j++) {
-        const key = this.filterKeys[j];
-        if (key.includes('.')) {
-          const splitKey = key.split('.');
-          let pos = row;
-          for (let i = 0; i < splitKey.length; i++) {
-            if (!pos) break;
-            pos = pos[splitKey[i]];
-            if (!pos) value = '';
-          }
-          value = pos;
-        } else {
-          value = row[key];
-        }
-
-        if (!value) continue;
-
-        for (let k = 0; k < this.tableStructure.length; k++) {
-          if (key === this.tableStructure[k].key) {
-            value = this._formatCellData(value, k);
-            break;
-          }
-        }
-
-        // Filtering check
-        if (this.filterMatchCase) {
-          if (value && value.toString().includes(this.filterString)) {
-            newData.push(this.allData[i]);
-            break;
-          }
-        } else {
-          if (value && value.toString().toLowerCase().includes(this.filterString.toLowerCase())) {
-            newData.push(this.allData[i]);
-            break;
-          }
-        }
-      }
-    }
-
-    const addToNewData = [];
-    const selectedArr = this.selected.map((sel) => {
-      for (let i = 0; i < this.allData.length; i++) {
-        if (this.allData[i]._tableIndex === sel) return this.allData[i];
-      }
-    });
-    for (let i = 0; i < selectedArr.length; i++) {
-      let itemFound = false;
-      for (let j = 0; j < newData.length; j++) {
-        if (newData[j]._tableIndex === selectedArr[i]._tableIndex) {
-          itemFound = true;
-          break;
-        }
-      }
-      if (!itemFound) addToNewData.push(selectedArr[i]);
-    }
-
-    this.groupMax = this.data.showGroupSize || 0;
-    this.tableData = newData.concat(addToNewData);
-    if (!noRefresh) this._refreshView();
-  };
-
-  keyUp = (e) => {
-    const targetId = e.target.id;
-    const filterInputId = this.id + '-filter-input-input';
-    if (targetId === filterInputId && e.key === 'Enter') {
-      this._filterData();
-      if (this.allData.length < this.largeAmountLimit) {
-        this.elem.querySelector('#' + filterInputId).blur();
-      }
-    } else if (e.key === 'Escape') {
-      this._closeFilterSettings();
-      if (this.filterString === '' && this.filterCaretPos === null && e.target.id !== filterInputId)
-        return;
-      if (this.allData.length < this.largeAmountLimit) {
-        this.filterString = '';
-        this.filterCaretPos = null;
-        this._filterData();
-      }
-      this.elem.querySelector('#' + filterInputId).blur();
-    } else if (
-      this.data.filter &&
-      this.data.filterHotkey &&
-      e.target.localName.toLowerCase() === 'body' &&
-      e.key === this.data.filterHotkey
-    ) {
-      this.elem.querySelector('#' + filterInputId).focus();
-    }
   };
 
   _selectRowCheckbox = (index, isHeader) => {
@@ -1012,15 +761,15 @@ class Table extends Component {
     }
     return `<label for="selection-${index}-inputSelectorBox-${this.id}" class="${styles.selectionBox}${headerClass}">
             <input
-                type="checkbox"
-                name="selection-box-input-${index}-${this.id}"
-                id="selection-${index}-inputSelectorBox-${this.id}"
-                ${checked}
+              type="checkbox"
+              name="selection-box-input-${index}-${this.id}"
+              id="selection-${index}-inputSelectorBox-${this.id}"
+              ${checked}
             />
         </label>`;
   };
 
-  getSelected = () => this.allData.filter((item) => this.selected.includes(item._tableIndex));
+  getSelected = () => this.tableData.filter((item) => this.selected.includes(item._tableIndex));
 
   removeSelectedByTableIndex = (tableIndex) => {
     let removeIndex = null;
@@ -1033,26 +782,257 @@ class Table extends Component {
     this.selected.splice(removeIndex, 1);
   };
 
-  updateTable = (newData) => {
-    this.data.tableData = newData;
-    this.tableData = newData;
-    this.allData = [...newData];
+  updateTable = (newData, noAfterChange) => {
+    this.data.tableData = newData.tableData;
+    this.data.totalCount = newData.totalCount;
+    this.tableData = newData.tableData;
+    this.totalCount = newData.totalCount;
     for (let i = 0; i < newData.length; i++) {
       this.data.tableData[i]['_tableIndex'] = i;
-      this.allData[i]['_tableIndex'] = i;
     }
-    this._refreshView(true);
+    this._refreshView(true, noAfterChange);
   };
 
   afterChange = () => {
-    if (this.data.afterChange) {
-      this.tableParams.filterString = this.filterString;
-      this.tableParams.filterMatchCase = this.filterMatchCase;
-      this.tableParams.filterSelectors = this.filterSelectors.map((s) => s.selected);
-      this.tableParams.showRowsAmount = this.groupMax;
-      this.data.afterChange(this.tableParams, this.data.id);
+    if (this.data.afterChange) this.data.afterChange(this.tableParams, this.data.id);
+  };
+
+  keyUp = (e) => {
+    const targetId = e.target.id;
+    const searchInputId = 'table-search-input-' + this.id + '-input';
+    if (targetId === searchInputId && e.key === 'Enter') {
+      const inputElem = this.elem.querySelector('#' + searchInputId);
+      if (this.previousSearch !== inputElem.value) {
+        this.tableParams.page = 1;
+        this.tableParams.search = inputElem.value;
+        this.previousSearch = this.tableParams.search;
+        this.searchOptionsOpen = false;
+        this._refreshView();
+      }
+    } else if (e.key === 'Escape') {
+      const inputElem = this.elem.querySelector('#' + searchInputId);
+      if (inputElem) {
+        inputElem.blur();
+        if (this.tableParams.search !== '') {
+          this.tableParams.page = 1;
+          this.tableParams.search = '';
+          this.previousSearch = this.tableParams.search;
+          inputElem.value = '';
+          this.searchOptionsOpen = false;
+          this._refreshView();
+        }
+      }
+    } else if (
+      this.data.searchHotKey &&
+      e.target.localName.toLowerCase() === 'body' &&
+      e.key === this.data.searchHotKey
+    ) {
+      this.elem.querySelector('#' + searchInputId).focus();
     }
+  };
+
+  _drawSearch = () => {
+    const searchInputSectionId = 'table-search-input-section-' + this.id;
+    const searchInputId = 'table-search-input-' + this.id;
+    const searchInputButtonId = 'table-search-button-' + this.id;
+    this.addChildDraw({
+      id: 'table-search-container-' + this.id,
+      template: `<div class="${styles.tableSearchContainer}">
+        <div class="${styles.tableSearchInputSection}" id="${searchInputSectionId}"></div>
+      </div>`,
+    });
+    let clearSearchBtn;
+    this.addChildDraw(
+      new TextInput({
+        id: searchInputId,
+        attach: searchInputSectionId,
+        class: styles.tableSearchInput,
+        label: '',
+        hideMsg: true,
+        placeholder:
+          getText('search') +
+          (this.data.searchHotKey ? ` [${this.data.searchHotKey.toUpperCase()}]` : ''),
+        value: this.tableParams.search,
+        changeFn: (e) => {
+          const val = e.target.value;
+          this.tableParams.search = val;
+          if (clearSearchBtn) {
+            clearSearchBtn.data.style.display = val.length ? 'block' : 'none';
+            clearSearchBtn.draw();
+          }
+        },
+        onFocus: (e) => e.target.setSelectionRange(0, 9999),
+      })
+    );
+    clearSearchBtn = this.addChildDraw(
+      new Button({
+        id: 'clear-table-search-btn-' + this.id,
+        attach: searchInputId,
+        class: styles.clearTableSearchButton,
+        style: { display: this.tableParams.search.length ? 'block' : 'none' },
+        attributes: { title: `${getText('clear_search')} [esc]` },
+        click: () => {
+          if (this.tableParams.search !== '') {
+            this.tableParams.search = '';
+            this.previousSearch = '';
+            this._refreshView();
+          }
+        },
+      })
+    );
+    this.addChildDraw(
+      new Button({
+        id: searchInputButtonId,
+        attach: searchInputSectionId,
+        class: styles.tableSearchInputButton,
+        html: '<div>Go</div>', // TODO: change to an search icon
+        click: () => {
+          if (this.previousSearch !== this.tableParams.search) {
+            this.previousSearch = this.tableParams.search;
+            this.tableParams.page = 1;
+            this.searchOptionsOpen = false;
+            this._refreshView();
+          }
+        },
+      })
+    );
+
+    const animateOptionsConfig = {
+      from: {
+        overflow: 'hidden',
+        minHeight: 0,
+        height: 0,
+        paddingTop: '0',
+        paddingBottom: '0',
+        duration: 0.2,
+      },
+      to: {
+        overflow: 'hidden',
+        minHeight: '24rem',
+        paddingTop: '2rem',
+        paddingBottom: '2rem',
+        duration: 0.4,
+        ease: 'back',
+      },
+      end: {
+        overflow: 'visible',
+        minHeight: '24rem',
+        height: 'auto',
+        paddingTop: '2rem',
+        paddingBottom: '2rem',
+      },
+    };
+    const searchOptionsComp = this.addChildDraw({
+      id: this.searchOptionsId,
+      attach: searchInputSectionId,
+      class: styles.tableSearchOptions,
+      style: animateOptionsConfig.from,
+    });
+    this.addChildDraw(
+      new Button({
+        id: 'table-search-toggle-options-' + this.id,
+        attach: searchInputSectionId,
+        class: [styles.tableSearchToggleOptions, 'link'],
+        text: getText('search_settings'),
+        click: () => {
+          const outsideClickId = 'outside-options-click-listener-' + this.id;
+          if (this.searchOptionsOpen) {
+            this._closeSearchOptions(searchOptionsComp.elem, animateOptionsConfig, outsideClickId);
+          } else {
+            this._openSearchOptions(searchOptionsComp.elem, animateOptionsConfig, outsideClickId);
+          }
+        },
+      })
+    );
+    this.addChildDraw({
+      id: 'table-search-change-case-' + this.id,
+      attach: this.searchOptionsId,
+    });
+    this.addChildDraw(
+      new Checkbox({
+        id: 'table-search-change-case-' + this.id,
+        attach: this.searchOptionsId,
+        label: getText('match_case'),
+        name: 'match-case',
+        value: this.tableParams.caseSensitive,
+        changeFn: (e) => {
+          const checked = e.target.checked;
+          this.tableParams.caseSensitive = checked;
+          this.previousSearch = '';
+        },
+      })
+    );
+    const selectedFields = this.tableParams.searchFields.split(',');
+    this.addChildDraw(
+      new CheckboxList({
+        id: 'table-search-change-fields-' + this.id,
+        attach: this.searchOptionsId,
+        label: getText('columns_to_search'),
+        minSelections: 1,
+        selectors: [
+          { key: 'formId', label: getText('form_id'), selected: selectedFields.includes('formId') },
+          { key: 'path', label: getText('path'), selected: selectedFields.includes('path') },
+          { key: 'method', label: getText('method'), selected: selectedFields.includes('method') },
+          { key: 'type', label: getText('type'), selected: selectedFields.includes('type') },
+        ],
+        changeFn: (e, selectors) => {
+          this.previousSearch = '';
+          this.tableParams.searchFields = selectors
+            .filter((s) => s.selected)
+            .map((s) => s.key)
+            .join(',');
+        },
+      })
+    );
+    this.addListenerAfterDraw({
+      id: 'table-search-keyup-listener-' + this.id,
+      target: window,
+      type: 'keyup',
+      fn: this.keyUp,
+    });
+  };
+
+  _closeSearchOptions = (elem, animateOptionsConfig, outsideClickId) => {
+    gsap.to(elem, animateOptionsConfig.from);
+    this.removeListener(outsideClickId);
+    this.searchOptionsOpen = false;
+  };
+
+  _openSearchOptions = (elem, animateOptionsConfig, outsideClickId) => {
+    gsap.to(elem, {
+      ...animateOptionsConfig.to,
+      onComplete: () => gsap.set(elem, animateOptionsConfig.end),
+    });
+    this.addListener({
+      id: outsideClickId,
+      target: window,
+      type: 'click',
+      fn: (e) => {
+        let node = e.target,
+          counter = 0,
+          whileSwitch = true;
+        while (whileSwitch) {
+          if (!node) node = document.getElementById(this.searchOptionsId);
+          if (!node) return;
+          const id = node.id;
+          if (id === this.searchOptionsId || id === 'table-search-toggle-options-' + this.id) {
+            return;
+          }
+          if (node.localName.toLowerCase() === 'html') {
+            this.searchOptionsOpen = true;
+            this._closeSearchOptions(elem, animateOptionsConfig, outsideClickId);
+            return;
+          }
+          node = node.parentElement;
+          counter++;
+          if (counter > 100) {
+            return;
+          }
+        }
+      },
+    });
+    this.searchOptionsOpen = true;
   };
 }
 
-export default Table;
+export default TableWithSearch;

@@ -2,7 +2,7 @@ const readUsersFormData = {
   formId: 'delete-users',
   path: '/users/delete',
   method: 'POST',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 8,
   useRightsUsers: [],
   useRightsGroups: [],

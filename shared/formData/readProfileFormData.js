@@ -2,7 +2,7 @@ const readUsersFormData = {
   formId: 'read-profile',
   path: '/users/own/profile',
   method: 'GET',
-  type: 'readapi',
+  type: 'sys-readapi',
   useRightsLevel: 1,
   useRightsUsers: [],
   useRightsGroups: [],

@@ -4,7 +4,7 @@ const editProfileFormData = {
   formId: 'edit-profile-form',
   path: '/users/own/profile',
   method: 'PUT',
-  type: 'form',
+  type: 'sys-formapi',
   useRightsLevel: 1,
   useRightsUsers: [],
   useRightsGroups: [],
