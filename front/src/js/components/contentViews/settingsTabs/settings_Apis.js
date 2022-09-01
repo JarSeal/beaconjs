@@ -46,7 +46,6 @@ class ApiSettings extends Component {
         searchFields: 'formId,path,method',
         tableParams: params,
         rowClickFn: (e, rowData) => {
-          console.log('CLICK', rowData);
           this.Router.changeRoute('/oneapi/' + rowData.formId);
         },
         afterChange: async (queryParams) => {

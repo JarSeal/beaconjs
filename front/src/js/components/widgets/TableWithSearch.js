@@ -372,46 +372,47 @@ class TableWithSearch extends Component {
 
   _createPagination = () => {
     const totalPages = Math.ceil(this.totalCount / this.tableParams.itemsPerPage) || 1;
-    if (this.tableParams.page > totalPages) this.tableParams.page = totalPages;
+    let page = this.tableParams.page;
+    if (page > totalPages) page = totalPages;
     let pageNumberButtons = `<li>
       <button class="paginationButton ${styles.arrowButton}" page="first"${
-      this.tableParams.page === 1 ? ' disabled' : ''
+      page === 1 ? ' disabled' : ''
     }>&#171;</button>
     </li>
     <li>
       <button class="paginationButton ${styles.arrowButton}" page="prev"${
-      this.tableParams.page === 1 ? ' disabled' : ''
+      page === 1 ? ' disabled' : ''
     }>&#8249;</button>
     </li>`;
     const shownPageNumbersCount = 5; // Must be an odd number
     const maxShownPageNumbersPerSide = (shownPageNumbersCount - 1) / 2;
-    if (this.tableParams.page > maxShownPageNumbersPerSide + 1) {
+    if (page > maxShownPageNumbersPerSide + 1) {
       pageNumberButtons += '<li>...</li>';
     }
     for (let i = 0; i < totalPages; i++) {
       const pageNumber = i + 1;
       if (
-        pageNumber >= this.tableParams.page - maxShownPageNumbersPerSide &&
-        pageNumber <= this.tableParams.page + maxShownPageNumbersPerSide
+        pageNumber >= page - maxShownPageNumbersPerSide &&
+        pageNumber <= page + maxShownPageNumbersPerSide
       ) {
         pageNumberButtons += `<li>
           <button class="paginationButton${
-            this.tableParams.page === pageNumber ? ` ${styles.current}` : ''
+            page === pageNumber ? ` ${styles.current}` : ''
           }" page="${pageNumber}">${pageNumber}</button>
         </li>`;
       }
     }
-    if (this.tableParams.page + maxShownPageNumbersPerSide < totalPages) {
+    if (page + maxShownPageNumbersPerSide < totalPages) {
       pageNumberButtons += '<li>...</li>';
     }
     pageNumberButtons += `<li>
       <button class="paginationButton ${styles.arrowButton}" page="next"${
-      this.tableParams.page === totalPages ? ' disabled' : ''
+      page === totalPages ? ' disabled' : ''
     }>&#8250;</button>
     </li>
     <li>
       <button class="paginationButton ${styles.arrowButton}" page="last"${
-      this.tableParams.page === totalPages ? ' disabled' : ''
+      page === totalPages ? ' disabled' : ''
     }>&#187;</button>
     </li>`;
     this.addListener({
@@ -421,14 +422,14 @@ class TableWithSearch extends Component {
         if (e.target.classList.contains('paginationButton')) {
           const pageNrClicked = e.target.getAttribute('page');
           const parsedPageNr = parseInt(pageNrClicked);
-          if (parsedPageNr === this.tableParams.page) return;
+          if (parsedPageNr === page) return;
           if (pageNrClicked === 'first') {
             this.tableParams.page = 1;
           } else if (pageNrClicked === 'prev') {
-            const prevPage = this.tableParams.page - 1;
+            const prevPage = page - 1;
             this.tableParams.page = prevPage > 0 ? prevPage : 1;
           } else if (pageNrClicked === 'next') {
-            const nextPage = this.tableParams.page + 1;
+            const nextPage = page + 1;
             this.tableParams.page = nextPage <= totalPages ? nextPage : totalPages;
           } else if (pageNrClicked === 'last') {
             this.tableParams.page = totalPages;
@@ -456,7 +457,7 @@ class TableWithSearch extends Component {
     return `<tr class="${styles.tableShowMoreRow}">
         <td colspan="${this.tableStructure.length}">
           <div class="${styles.pagination}">
-            <span class="${styles.curPageNumber}">${this.tableParams.page} / ${totalPages}</span>
+            <span class="${styles.curPageNumber}">${page} / ${totalPages}</span>
             <ul>${pageNumberButtons}</ul>
             <div class="${styles.itemsPerPage}">
               <span>${getText('items_per_page')}:</span><br />

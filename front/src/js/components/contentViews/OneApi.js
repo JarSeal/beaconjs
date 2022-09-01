@@ -7,6 +7,7 @@ import FourOOne from './FourOOne';
 import FourOFour from './FourOFour';
 import ViewTitle from './../widgets/ViewTitle';
 import DialogForms from './../widgets/dialogs/dialog_Forms';
+import { getApiBaseUrl, getClientBaseUrl } from '../../helpers/config';
 
 class OneApi extends Component {
   constructor(data) {
@@ -77,13 +78,13 @@ class OneApi extends Component {
   _createElements = () => {
     const contentDefinition = [
       { id: 'formId', tag: 'h1', label: getText('form_id') },
-      { id: 'name', label: getText('name') },
-      { id: 'email', label: getText('email') },
+      { id: 'path', label: getText('path') },
+      { id: 'method', label: getText('method') },
+      { id: 'type', label: getText('type') },
       { id: 'id', label: 'ID' },
       { id: 'userLevel', label: getText('user_level') },
       { id: 'created', label: getText('created') },
       { id: 'edited', label: getText('last_edited') },
-      // { id: 'userGroups', label: getText('user_groups') },
     ];
     for (let i = 0; i < contentDefinition.length; i++) {
       const item = contentDefinition[i];
@@ -95,22 +96,18 @@ class OneApi extends Component {
 
       if (this.apiData[id] === undefined) {
         continue;
+      } else if (id === 'path') {
+        value = this.apiData[id];
+        let pathPrefix = '';
+        if (this.apiData.type === 'sys-formapi' || this.apiData.type === 'sys-readapi')
+          pathPrefix = getApiBaseUrl();
+        if (this.apiData.type === 'sys-view') pathPrefix = getClientBaseUrl();
+        value = `<span class="${styles.pathPrefix}">${pathPrefix}</span>${value}`;
       } else if (id === 'created') {
         value = createDate(this.apiData[id].date);
       } else if (id === 'edited' && this.apiData[id][0]) {
         const lastIndex = this.apiData[id].length - 1;
         value = createDate(this.apiData[id][lastIndex].date);
-      } else if (id === 'userLevel') {
-        if (id === 'userLevel') value = getText('user_level_' + this.apiData[id]);
-      } else if (id === 'email' && this.appState.get('serviceSettings.useEmailVerification')) {
-        value = this.apiData[id];
-        const isVerified =
-          this.apiData.security &&
-          this.apiData.security.verifyEmail &&
-          this.apiData.security.verifyEmail.verified;
-        verificationStatus = isVerified
-          ? `&nbsp;&nbsp;&nbsp;&nbsp;(${getText('verified')})`
-          : `&nbsp;&nbsp;&nbsp;&nbsp;(${getText('unverified')})`;
       } else {
         value = this.apiData[id];
       }
@@ -134,7 +131,7 @@ class OneApi extends Component {
     const updateMainMenu = this.appState.get('updateMainMenu');
     if (loggedIn && this.apiData.id) {
       // If the userData.id is present, then the current user has admin rights
-      const Dialog = this.Router.commonData.appState.get('Dialog');
+      // const Dialog = this.Router.commonData.appState.get('Dialog');
       tools = [
         // {
         //   id: 'edit-user-tool',
