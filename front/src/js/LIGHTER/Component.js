@@ -201,11 +201,11 @@ class Component {
       listener.id = id;
     }
     if (!target) {
+      target = this.elem;
       if (target === null) {
         logger.error('Could not add listener, target elem was given but is null.');
         throw new Error('Call stack');
       }
-      target = this.elem;
       listener.target = target;
     }
     if (this.listeners[id]) this.removeListener(id);
